@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -34,13 +33,6 @@ public class UserServiceTest {
 
     @Autowired
     public UserService userService;
-
-/*
-    @BeforeEach
-    void setup(){
-        userService = new UserServiceImpl(userRepository);
-    }
-*/
 
     @Test
     void whenServiceCalledWithValid_thenReturnsNewUser() throws Exception {

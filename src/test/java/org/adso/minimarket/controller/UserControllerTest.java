@@ -52,7 +52,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void whenPostRequestToUserInvalid_shouldFailWith400() throws Exception {
+    void whenPostRequestToUserInvalidInput_shouldFailWith400() throws Exception {
         CreateUserRequest user = new CreateUserRequest(null, "lastname", "emailvalid@gmail.com", "password123");
         this.mockMvc.perform(
                         post("/api/user")
