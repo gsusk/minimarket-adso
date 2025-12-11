@@ -49,4 +49,9 @@ public class UserServiceTest {
         assertEquals("contreras", got.getLastname());
         assertEquals("validemail@gmail.com", got.getEmail());
     }
+
+    @Test
+    void whenServiceFails() {
+
+    }
 }

@@ -10,6 +10,11 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_email", columnNames = "email")
+        }
+)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -21,7 +26,7 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)

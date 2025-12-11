@@ -39,6 +39,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+
         return new InMemoryUserDetailsManager(User.builder()
                 .username("dev")
                 .password(passwordEncoder.encode("contra123"))
