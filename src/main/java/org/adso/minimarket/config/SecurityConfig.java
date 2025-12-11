@@ -21,11 +21,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(csrf -> csrf.disable())
+        return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/user")
-                        .authenticated().anyRequest().permitAll()
-                )
+                        .authenticated()
+                        .anyRequest()
+                        .permitAll())
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
@@ -39,7 +39,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-
         return new InMemoryUserDetailsManager(User.builder()
                 .username("dev")
                 .password(passwordEncoder.encode("contra123"))

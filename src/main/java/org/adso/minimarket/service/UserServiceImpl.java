@@ -17,8 +17,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(CreateUserRequest body) {
         User usr = new User(body.name(), body.lastName(), body.email(), body.password());
-        User saved = userRepository.save(usr);
 
+        if (userRepository.existsByEmail(usr.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User saved = userRepository.save(usr);
         return new UserDto(
                 saved.getId(),
                 saved.getName(),

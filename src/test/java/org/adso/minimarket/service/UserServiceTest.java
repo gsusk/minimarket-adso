@@ -12,7 +12,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +41,7 @@ public class UserServiceTest {
     @Test
     void whenServiceCalledWithValid_thenReturnsNewUser() throws Exception {
         CreateUserRequest req = new CreateUserRequest("jorge", "contreras", "validemail@gmail.com", "password123");
-        User saved = new User( 1L, req.name(), req.lastName(), req.email(), req.password());
+        User saved = new User(1L, req.name(), req.lastName(), req.email(), req.password());
 
         when(userRepository.save(any(User.class))).thenReturn(saved);
 
@@ -51,7 +53,16 @@ public class UserServiceTest {
     }
 
     @Test
-    void whenServiceFails() {
+    void shouldThrowError_whenEmailAlreadyExists() {
+        CreateUserRequest req = new CreateUserRequest("mario", "rojas", "repeated@gmail.com", "password");
 
+        when(userRepository.existsByEmail(any(String.class))).thenReturn(true);
+
+        try {
+            userService.createUser(req);
+        } catch (Exception err) {
+            assertInstanceOf(RuntimeException.class, err);
+            assertEquals("Email already exists", err.getMessage());
+        }
     }
 }
