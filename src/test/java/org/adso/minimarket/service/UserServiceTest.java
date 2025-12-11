@@ -38,12 +38,12 @@ public class UserServiceTest {
 
     @Test
     void whenServiceCalledWithValid_thenReturnsNewUser() throws Exception {
-        CreateUserRequest user = new CreateUserRequest("jorge", "contreras", "validemail@gmail.com", "password123");
-        User saved = new User( 1L, "jorge", "contreras", "validemail@gmail.com", "password123");
+        CreateUserRequest req = new CreateUserRequest("jorge", "contreras", "validemail@gmail.com", "password123");
+        User saved = new User( 1L, req.name(), req.lastName(), req.email(), req.password());
 
         when(userRepository.save(any(User.class))).thenReturn(saved);
 
-        UserDto got = userService.createUser(user);
+        UserDto got = userService.createUser(req);
 
         assertEquals("jorge", got.getName());
         assertEquals("contreras", got.getLastname());

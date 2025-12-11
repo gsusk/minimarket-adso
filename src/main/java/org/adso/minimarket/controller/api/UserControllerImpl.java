@@ -2,7 +2,6 @@ package org.adso.minimarket.controller.api;
 
 import jakarta.validation.Valid;
 import org.adso.minimarket.controller.request.CreateUserRequest;
-import org.adso.minimarket.models.User;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.service.UserService;
 import org.jspecify.annotations.NonNull;
@@ -15,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 public class UserControllerImpl implements UserController {
+
 
     private final UserService userService;
 
@@ -25,7 +25,7 @@ public class UserControllerImpl implements UserController {
     }
 
 
-    @PostMapping(value = "/user")
+    @PostMapping
     public ResponseEntity<@NonNull UserDto> createUser(@Valid @RequestBody CreateUserRequest body) {
         UserDto user = userService.createUser(body);
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(user);

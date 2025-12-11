@@ -17,7 +17,6 @@ public record CreateUserRequest(
         String lastName,
 
         @Email
-        @NotBlank
         String email,
 
         @Size(min = 6)
