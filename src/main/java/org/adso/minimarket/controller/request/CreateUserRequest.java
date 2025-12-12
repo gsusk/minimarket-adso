@@ -8,19 +8,19 @@ import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record CreateUserRequest(
-        @NotBlank
-        @Size(max = 255)
+        @NotBlank(message = "required")
+        @Size(max = 255, message = "too long")
         String name,
 
-        @NotBlank
+        @NotBlank(message = "required")
         @JsonProperty("last_name")
         String lastName,
 
-        @Email
+        @Email(message = "Must be a valid email")
         String email,
 
-        @Size(min = 6)
-        @NotBlank
+        @Size(min = 6, message = "should have at least 6 characters")
+        @NotBlank(message = "required")
         String password
 ) {
     @Override

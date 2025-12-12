@@ -38,17 +38,17 @@ public class UserControllerTest {
     @Test
     void whenPostRequestToUserValid_thenSuccess201() throws Exception {
         CreateUserRequest user = new CreateUserRequest("testname", "mesa", "email@gmail.com", "password123");
-        UserDto saved = UserDto.builder().id(1L).name("testname").email("email@gmail.com").build();
+        UserDto saved = UserDto.builder()
+                .id(1L)
+                .name("testname")
+                .email("email@gmail.com")
+                .build();
 
         when(userService.createUser(any(CreateUserRequest.class))).thenReturn(saved);
 
-        this.mockMvc
-                .perform(
-                        post("/api/user")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(user))
-                )
-               .andDo(print())
+        this.mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name").value("testname"))
@@ -60,12 +60,14 @@ public class UserControllerTest {
     @Test
     void whenPostRequestToUserInvalidInput_shouldFailWith400() throws Exception {
         CreateUserRequest user = new CreateUserRequest(null, "lastname", "emailvalid@gmail.com", "password123");
-        this.mockMvc.perform(
-                        post("/api/user")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(user))
-                )
+
+        this.mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
                 //.andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").isString())
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors").isNotEmpty())
+                .andExpect(jsonPath("$.code").exists());
     }
 }
