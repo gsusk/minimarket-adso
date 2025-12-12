@@ -4,11 +4,16 @@ package org.adso.minimarket.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Getter
+
+@Data
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
@@ -30,15 +35,6 @@ public class UserDto {
 
     @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
-
-    public UserDto(long id, String name, String lastName, String email) {
-        this.id = id;
-        this.name = name;
-        this.lastname = lastName;
-        this.email = email;
-    }
-
-    public UserDto(){}
 
     @Override
     public String toString() {

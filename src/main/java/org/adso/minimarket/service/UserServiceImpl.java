@@ -18,16 +18,11 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(CreateUserRequest body) {
         User usr = new User(body.name(), body.lastName(), body.email(), body.password());
 
-        if (userRepository.existsByEmail(usr.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
-
         User saved = userRepository.save(usr);
-        return new UserDto(
-                saved.getId(),
-                saved.getName(),
-                saved.getLastName(),
-                saved.getEmail()
-        );
+        return UserDto.builder()
+                .name(saved.getName())
+                .email(saved.getEmail())
+                .id(saved.getId())
+                .build();
     }
 }

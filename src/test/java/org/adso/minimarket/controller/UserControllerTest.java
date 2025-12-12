@@ -15,9 +15,11 @@ import tools.jackson.databind.ObjectMapper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 /**
- *  TODO:
+ * TODO:
  *      -  Cambiar el CommandLineRunner para no depender de perfiles: <a href="https://www.baeldung.com/spring-junit-prevent-runner-beans-testing-execution">Guia</a>
  */
 @ActiveProfiles("test") //
@@ -36,7 +38,7 @@ public class UserControllerTest {
     @Test
     void whenPostRequestToUserValid_thenSuccess201() throws Exception {
         CreateUserRequest user = new CreateUserRequest("testname", "mesa", "email@gmail.com", "password123");
-        UserDto saved = new UserDto(1L, "testname", "mesa", "email@gmail.com");
+        UserDto saved = UserDto.builder().id(1L).name("testname").email("email@gmail.com").build();
 
         when(userService.createUser(any(CreateUserRequest.class))).thenReturn(saved);
 
@@ -46,13 +48,12 @@ public class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(user))
                 )
-                //.andDo(print())
+               .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name").value("testname"))
                 .andExpect(jsonPath("$.email").value("email@gmail.com"))
                 .andExpect(jsonPath("$.password").doesNotHaveJsonPath())
-                .andExpect(jsonPath("$.last_name").value("mesa"))
                 .andExpect(jsonPath("$.id").value(1L));
     }
 

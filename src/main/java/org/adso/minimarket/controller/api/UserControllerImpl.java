@@ -28,7 +28,6 @@ public class UserControllerImpl implements UserController {
     @PostMapping
     public ResponseEntity<@NonNull UserDto> createUser(@Valid @RequestBody CreateUserRequest body) {
         UserDto user = userService.createUser(body);
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON).body(user);
+        return new ResponseEntity<@NonNull UserDto>(user, HttpStatus.CREATED);
     }
 }
-

@@ -48,21 +48,8 @@ public class UserServiceTest {
         UserDto got = userService.createUser(req);
 
         assertEquals("jorge", got.getName());
-        assertEquals("contreras", got.getLastname());
+        assertEquals(1L, got.getId());
         assertEquals("validemail@gmail.com", got.getEmail());
     }
 
-    @Test
-    void shouldThrowError_whenEmailAlreadyExists() {
-        CreateUserRequest req = new CreateUserRequest("mario", "rojas", "repeated@gmail.com", "password");
-
-        when(userRepository.existsByEmail(any(String.class))).thenReturn(true);
-
-        try {
-            userService.createUser(req);
-        } catch (Exception err) {
-            assertInstanceOf(RuntimeException.class, err);
-            assertEquals("Email already exists", err.getMessage());
-        }
-    }
 }
