@@ -1,5 +1,6 @@
 package org.adso.minimarket.config;
 
+import org.adso.minimarket.constant.UserRoutes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,10 +23,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/user")
-                        .authenticated()
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers(UserRoutes.BASE + UserRoutes.REGISTER)
+                        .permitAll()
+                        .requestMatchers(UserRoutes.BASE + UserRoutes.LOGIN)
+                        .permitAll()
                         .anyRequest()
-                        .permitAll())
+                        .authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }

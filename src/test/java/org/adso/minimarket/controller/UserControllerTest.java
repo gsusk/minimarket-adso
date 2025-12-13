@@ -1,5 +1,6 @@
 package org.adso.minimarket.controller;
 
+import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.service.UserService;
@@ -46,7 +47,7 @@ public class UserControllerTest {
 
         when(userService.createUser(any(CreateUserRequest.class))).thenReturn(saved);
 
-        this.mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post(UserRoutes.BASE + UserRoutes.REGISTER).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -61,7 +62,7 @@ public class UserControllerTest {
     void whenPostRequestToUserInvalidInput_shouldFailWith400() throws Exception {
         CreateUserRequest user = new CreateUserRequest(null, "lastname", "emailvalid@gmail.com", "password123");
 
-        this.mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post(UserRoutes.BASE + UserRoutes.REGISTER).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 //.andDo(print())
                 .andExpect(status().isBadRequest())
@@ -69,4 +70,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.errors").isArray())
                 .andExpect(jsonPath("$.errors").isNotEmpty());
     }
+
+
 }
