@@ -13,7 +13,7 @@ import static tools.jackson.databind.type.LogicalType.Collection;
 @Getter
 public class ConstraintViolationResponse {
     @Setter
-    private String code;
+    private String message;
 
     private final List<ErrorDetail> errors = new ArrayList<>();
 

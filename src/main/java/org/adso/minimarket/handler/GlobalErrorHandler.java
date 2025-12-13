@@ -29,7 +29,7 @@ public class GlobalErrorHandler {
         ConstraintViolationResponse res = new ConstraintViolationResponse();
         String lower = message.toLowerCase();
 
-        res.setCode("CONSTRAINT_VIOLATION");
+        res.setMessage("CONSTRAINT_VIOLATION");
 
         for (String constraint : CONSTRAINT_MESSAGES.keySet()) {
             if (lower.contains(constraint)) {
@@ -45,7 +45,7 @@ public class GlobalErrorHandler {
             }
         }
 
-        res.setCode("UNKNOWN_CONFLICT");
+        res.setMessage("UNKNOWN_CONFLICT");
 
         return new ResponseEntity<>(res, HttpStatus.CONFLICT);
     }

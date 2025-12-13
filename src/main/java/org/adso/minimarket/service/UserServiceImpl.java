@@ -4,7 +4,6 @@ import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
