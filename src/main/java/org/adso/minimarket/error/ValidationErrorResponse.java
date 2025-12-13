@@ -10,6 +10,7 @@ import java.util.List;
 public class ValidationErrorResponse {
     @Setter
     private String message;
+
     private final List<FieldsError> errors = new ArrayList<>();
 
     public List<FieldsError> getErrors() {

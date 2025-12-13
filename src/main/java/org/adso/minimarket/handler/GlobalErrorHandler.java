@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalErrorHandler {
@@ -51,18 +52,29 @@ public class GlobalErrorHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<@NonNull ValidationErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        List<FieldError> fe = ex.getBindingResult().getFieldErrors();
-        ValidationErrorResponse res = new ValidationErrorResponse();
+    public ResponseEntity<ValidationErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex) {
 
-        for (FieldError field : fe) {
-            res.addError(field.getDefaultMessage(), field.getField());
-        }
+        Map<String, List<String>> groupedErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        FieldError::getField,
+                        Collectors.mapping(
+                                FieldError::getDefaultMessage,
+                                Collectors.toList())
+                ));
 
-        res.setMessage("VALIDATION-ERROR");
+        ValidationErrorResponse response = new ValidationErrorResponse();
 
-        System.out.println(ex.getFieldErrors());
-        return new ResponseEntity<@NonNull ValidationErrorResponse>(res, HttpStatus.BAD_REQUEST);
+        groupedErrors.forEach((field, messages) -> {
+            String combinedMessage = String.join(" | ", messages);
+            response.addError(combinedMessage, field);
+        });
+
+        response.setMessage("VALIDATION-ERROR");
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     private Throwable getRootCause(Throwable ex) {
