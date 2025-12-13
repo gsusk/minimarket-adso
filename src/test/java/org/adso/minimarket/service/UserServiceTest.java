@@ -2,6 +2,7 @@ package org.adso.minimarket.service;
 
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.dto.UserDto;
+import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,16 @@ public class UserServiceTest {
     static class UserServiceImplTestContextConfiguration {
 
         @Bean
-        public UserService userService(UserRepository userRepository, PasswordEncoder pe) {
-            return new UserServiceImpl(userRepository, pe);
+        public UserService userService(UserRepository userRepository, PasswordEncoder pe, UserMapper userMapper) {
+            return new UserServiceImpl(userRepository, pe, userMapper);
         }
 
         @Bean
         protected PasswordEncoder passwordEncoder() {
             return new BCryptPasswordEncoder(10);
         }
+
+
     }
 
     @MockitoBean
@@ -44,12 +47,21 @@ public class UserServiceTest {
     @Autowired
     public UserService userService;
 
+    @MockitoBean
+    public UserMapper userMapper;
+
     @Test
     void whenServiceCalledWithValid_thenReturnsNewUser() throws Exception {
         CreateUserRequest req = new CreateUserRequest("jorge", "contreras", "validemail@gmail.com", "password123");
         User saved = new User(1L, req.name(), req.lastName(), req.email(), req.password());
+        UserDto dto = UserDto.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .email(saved.getEmail())
+                .build();
 
         when(userRepository.save(any(User.class))).thenReturn(saved);
+        when(userMapper.toDto(any(User.class))).thenReturn(dto);
 
         UserDto got = userService.createUser(req);
 

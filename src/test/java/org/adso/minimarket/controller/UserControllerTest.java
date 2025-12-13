@@ -71,5 +71,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.errors").isNotEmpty());
     }
 
+    void whenPostRequestToUserLogin_shouldSuccessAndReturn200() throws Exception {
 
+    }
 }
