@@ -1,6 +1,7 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.LoginUserRequest;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
@@ -53,14 +54,14 @@ public class UserServiceTest {
     @Test
     void whenServiceCalledWithValid_thenReturnsNewUser() throws Exception {
         CreateUserRequest req = new CreateUserRequest("jorge", "contreras", "validemail@gmail.com", "password123");
-        User saved = new User(1L, req.name(), req.lastName(), req.email(), req.password());
+        User mockUsr = new User(1L, req.name(), req.lastName(), req.email(), req.password());
         UserDto dto = UserDto.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .email(saved.getEmail())
+                .id(mockUsr.getId())
+                .name(mockUsr.getName())
+                .email(mockUsr.getEmail())
                 .build();
 
-        when(userRepository.save(any(User.class))).thenReturn(saved);
+        when(userRepository.save(any(User.class))).thenReturn(mockUsr);
         when(userMapper.toDto(any(User.class))).thenReturn(dto);
 
         UserDto got = userService.createUser(req);
@@ -68,5 +69,26 @@ public class UserServiceTest {
         assertEquals("jorge", got.getName());
         assertEquals(1L, got.getId());
         assertEquals("validemail@gmail.com", got.getEmail());
+
+    }
+
+    @Test
+    void whenServiceFindByEmailCalled_thenReturnsFoundUser() throws Exception {
+        User mockUsr = new User(1L, "test", "testLastName", "test@gmail.com", "password123");
+        LoginUserRequest req = new LoginUserRequest(mockUsr.getEmail(), mockUsr.getPassword());
+        UserDto dto = UserDto.builder()
+                .name(mockUsr.getName())
+                .email(mockUsr.getEmail())
+                .id(mockUsr.getId())
+                .build();
+
+        when(userRepository.findByEmail(any(String.class))).thenReturn(mockUsr);
+        when(userMapper.toDto(any(User.class))).thenReturn(dto);
+
+        UserDto got = userService.findByEmail(req);
+
+        assertEquals("test", got.getName());
+        assertEquals("test@gmail.com", got.getEmail());
+        assertEquals(1L, got.getId());
     }
 }

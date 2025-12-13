@@ -2,6 +2,7 @@ package org.adso.minimarket.controller;
 
 import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.LoginUserRequest;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -71,7 +72,39 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.errors").isNotEmpty());
     }
 
+    @Test
     void whenPostRequestToUserLogin_shouldSuccessAndReturn200() throws Exception {
+        LoginUserRequest user = new LoginUserRequest("test@gmail.com", "test123");
+        UserDto mockUser = UserDto.builder()
+                .email(user.email())
+                .id(1L)
+                .name("jorge")
+                .build();
 
+        when(userService.findByEmail(any(LoginUserRequest.class))).thenReturn(mockUser);
+
+        this.mockMvc.perform(
+                        post(UserRoutes.BASE + UserRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(mockUser.getId()))
+                .andExpect(jsonPath("$.email").value(mockUser.getEmail()))
+                .andExpect(jsonPath("$.name").value(mockUser.getName()))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void whenPostRequestToLoginFails_shouldFailWith400() throws Exception {
+        LoginUserRequest user = new LoginUserRequest("test_gmail.com", "");
+
+        this.mockMvc.perform(
+                        post(UserRoutes.BASE + UserRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                .andExpect(jsonPath("$.errors[0].field").isNotEmpty())
+                .andExpect(jsonPath("$.errors[1].field").value("email"))
+                .andExpect(jsonPath("$.errors[1].field").isNotEmpty());
     }
 }

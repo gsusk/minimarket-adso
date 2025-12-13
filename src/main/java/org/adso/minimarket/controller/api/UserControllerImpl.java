@@ -3,6 +3,7 @@ package org.adso.minimarket.controller.api;
 import jakarta.validation.Valid;
 import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.LoginUserRequest;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.service.UserService;
 import org.jspecify.annotations.NonNull;
@@ -29,5 +30,12 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<@NonNull UserDto> createUser(@Valid @RequestBody CreateUserRequest body) {
         UserDto user = userService.createUser(body);
         return new ResponseEntity<@NonNull UserDto>(user, HttpStatus.CREATED);
+    }
+
+    @PostMapping(UserRoutes.LOGIN)
+    public ResponseEntity<@NonNull UserDto> loginUser(@Valid @RequestBody LoginUserRequest body) {
+        return new ResponseEntity<>(
+                userService.findByEmail(body), HttpStatus.OK
+        );
     }
 }
