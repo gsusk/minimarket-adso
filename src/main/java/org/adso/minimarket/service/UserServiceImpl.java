@@ -6,6 +6,7 @@ import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     private final UserMapper userMapper;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
