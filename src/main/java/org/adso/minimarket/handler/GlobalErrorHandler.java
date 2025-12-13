@@ -56,7 +56,7 @@ public class GlobalErrorHandler {
         ValidationErrorResponse res = new ValidationErrorResponse();
 
         for (FieldError field : fe) {
-            res.addError(field.getField(), field.getDefaultMessage());
+            res.addError(field.getDefaultMessage(), field.getField());
         }
 
         res.setMessage("VALIDATION-ERROR");

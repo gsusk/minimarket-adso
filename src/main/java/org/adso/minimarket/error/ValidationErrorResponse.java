@@ -16,7 +16,7 @@ public class ValidationErrorResponse {
         return List.copyOf(errors);
     }
 
-    public void addError(String message, String field){
+    public void addError(String message, String field) {
         this.errors.add(
                 new FieldsError(
                         field,
@@ -25,13 +25,9 @@ public class ValidationErrorResponse {
         );
     }
 
-    public static class FieldsError {
-        private String field;
-        private String message;
-
-        public FieldsError(String field, String message) {
-            this.field = field;
-            this.message = message;
-        }
-  }
+    public record FieldsError(
+            String field,
+            String message
+    ) {
+    }
 }

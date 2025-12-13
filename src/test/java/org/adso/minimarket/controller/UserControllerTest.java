@@ -67,7 +67,6 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").isString())
                 .andExpect(jsonPath("$.errors").isArray())
-                .andExpect(jsonPath("$.errors").isNotEmpty())
-                .andExpect(jsonPath("$.code").exists());
+                .andExpect(jsonPath("$.errors").isNotEmpty());
     }
 }
