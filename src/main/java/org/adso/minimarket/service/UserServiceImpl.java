@@ -4,20 +4,26 @@ import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.dto.UserDto;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+
     @Override
     public UserDto createUser(CreateUserRequest body) {
-        User usr = new User(body.name(), body.lastName(), body.email(), body.password());
-
+        User usr = new User(body.name(), body.lastName(), body.email(), this.passwordEncoder.encode(body.password()));
         User saved = userRepository.save(usr);
         return UserDto.builder()
                 .name(saved.getName())
