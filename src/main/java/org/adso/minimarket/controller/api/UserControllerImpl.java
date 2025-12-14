@@ -34,8 +34,7 @@ public class UserControllerImpl implements UserController {
 
     @PostMapping(UserRoutes.LOGIN)
     public ResponseEntity<@NonNull UserDto> loginUser(@Valid @RequestBody LoginUserRequest body) {
-        return new ResponseEntity<>(
-                userService.findByEmail(body), HttpStatus.OK
-        );
+        UserDto user = userService.loginUser(body);
+        return new ResponseEntity<UserDto>(user, HttpStatus.OK);
     }
 }

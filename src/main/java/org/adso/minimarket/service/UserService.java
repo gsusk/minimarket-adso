@@ -6,5 +6,5 @@ import org.adso.minimarket.dto.UserDto;
 
 public interface UserService {
     UserDto createUser(CreateUserRequest createUserRequest);
-    UserDto findByEmail(LoginUserRequest loginUserRequest);
+    UserDto loginUser(LoginUserRequest loginUserRequest);
 }

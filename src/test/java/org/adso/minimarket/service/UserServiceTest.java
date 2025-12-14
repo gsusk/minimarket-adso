@@ -3,11 +3,13 @@ package org.adso.minimarket.service;
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
 import org.adso.minimarket.dto.UserDto;
+import org.adso.minimarket.exception.BadAuthCredentialsException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -17,8 +19,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
@@ -73,7 +80,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void whenServiceFindByEmailCalled_thenReturnsFoundUser() throws Exception {
+    void whenLoginUserCalled_thenReturnsFoundUser() throws Exception {
         User mockUsr = new User(1L, "test", "testLastName", "test@gmail.com", "password123");
         LoginUserRequest req = new LoginUserRequest(mockUsr.getEmail(), mockUsr.getPassword());
         UserDto dto = UserDto.builder()
@@ -82,13 +89,26 @@ public class UserServiceTest {
                 .id(mockUsr.getId())
                 .build();
 
-        when(userRepository.findByEmail(any(String.class))).thenReturn(mockUsr);
+        when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(mockUsr));
         when(userMapper.toDto(any(User.class))).thenReturn(dto);
 
-        UserDto got = userService.findByEmail(req);
+        UserDto got = userService.loginUser(req);
 
         assertEquals("test", got.getName());
         assertEquals("test@gmail.com", got.getEmail());
         assertEquals(1L, got.getId());
+
+        verify(userRepository).findByEmail(any(String.class));
+    }
+
+    @Test
+    void throwsBadCredentialsException_whenEmailNotFound() throws Exception {
+        LoginUserRequest req = new LoginUserRequest("test", "test@gmail.com");
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadAuthCredentialsException.class, () -> userService.loginUser(req));
+
+        verify(userRepository).findByEmail(any(String.class));
     }
 }

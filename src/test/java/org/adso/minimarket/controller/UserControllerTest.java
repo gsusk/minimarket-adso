@@ -81,7 +81,7 @@ public class UserControllerTest {
                 .name("jorge")
                 .build();
 
-        when(userService.findByEmail(any(LoginUserRequest.class))).thenReturn(mockUser);
+        when(userService.loginUser(any(LoginUserRequest.class))).thenReturn(mockUser);
 
         this.mockMvc.perform(
                         post(UserRoutes.BASE + UserRoutes.LOGIN).contentType(MediaType.APPLICATION_JSON)

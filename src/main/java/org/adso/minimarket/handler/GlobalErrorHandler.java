@@ -1,8 +1,10 @@
 package org.adso.minimarket.handler;
 
 import lombok.NonNull;
+import org.adso.minimarket.error.BasicErrorResponse;
 import org.adso.minimarket.error.ConstraintViolationResponse;
 import org.adso.minimarket.error.ValidationErrorResponse;
+import org.adso.minimarket.exception.BadAuthCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +54,7 @@ public class GlobalErrorHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationException(
+    public ResponseEntity<@NonNull ValidationErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex) {
 
         Map<String, List<String>> groupedErrors = ex.getBindingResult()
@@ -75,6 +77,17 @@ public class GlobalErrorHandler {
         response.setMessage("VALIDATION-ERROR");
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(BadAuthCredentialsException.class)
+    public ResponseEntity<@NonNull BasicErrorResponse> handleBadRequestException(
+            BadAuthCredentialsException ex
+    ) {
+        BasicErrorResponse err = new BasicErrorResponse();
+        err.setMessage(ex.getMessage());
+        err.setCode("BAD_REQUEST");
+
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 
     private Throwable getRootCause(Throwable ex) {

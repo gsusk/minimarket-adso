@@ -1,14 +1,15 @@
 package org.adso.minimarket.repository;
 
-import jakarta.websocket.OnError;
 import org.adso.minimarket.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     @Override
     <S extends User> S save(S entity);
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 }

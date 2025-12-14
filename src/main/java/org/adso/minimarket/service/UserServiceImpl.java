@@ -3,6 +3,7 @@ package org.adso.minimarket.service;
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
 import org.adso.minimarket.dto.UserDto;
+import org.adso.minimarket.exception.BadAuthCredentialsException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
@@ -33,8 +34,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findByEmail(LoginUserRequest userRequest) {
-        User user = userRepository.findByEmail(userRequest.email());
+    public UserDto loginUser(LoginUserRequest userRequest) {
+        User user = userRepository.findByEmail(userRequest.email())
+                .orElseThrow(() -> new BadAuthCredentialsException("Incorrect email or password"));
+
+        if (passwordEncoder.matches(userRequest.password(), user.getPassword())) {
+            throw new BadAuthCredentialsException("Incorrect email or password");
+        }
+
         return userMapper.toDto(user);
     }
 }
