@@ -3,7 +3,7 @@ package org.adso.minimarket.service;
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
 import org.adso.minimarket.dto.UserResponseDto;
-import org.adso.minimarket.exception.BadAuthCredentialsException;
+import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {
 
@@ -84,6 +83,7 @@ public class UserServiceTest {
 
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.of(mockUsr));
         when(userMapper.toResponseDto(any(User.class))).thenReturn(dto);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
         UserResponseDto got = userService.loginUser(req);
 
@@ -92,6 +92,7 @@ public class UserServiceTest {
         assertEquals(1L, got.getId());
 
         verify(userRepository).findByEmail(any(String.class));
+        verify(passwordEncoder).matches(anyString(), anyString());
     }
 
     @Test
@@ -100,7 +101,7 @@ public class UserServiceTest {
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(BadAuthCredentialsException.class, () -> userService.loginUser(req));
+        assertThrows(WrongCredentialsException.class, () -> userService.loginUser(req));
 
         verify(userRepository).findByEmail(any(String.class));
     }
@@ -112,8 +113,9 @@ public class UserServiceTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(new User("test", "testLastName", "test@gmail.com", "password123")));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        assertThrows(BadAuthCredentialsException.class, () -> userService.loginUser(req));
+        assertThrows(WrongCredentialsException.class, () -> userService.loginUser(req));
 
         verify(userRepository).findByEmail(any(String.class));
+        verify(passwordEncoder).matches(anyString(), anyString());
     }
 }

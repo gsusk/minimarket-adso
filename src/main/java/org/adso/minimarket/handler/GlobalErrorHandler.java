@@ -4,7 +4,7 @@ import lombok.NonNull;
 import org.adso.minimarket.error.BasicErrorResponse;
 import org.adso.minimarket.error.ConstraintViolationResponse;
 import org.adso.minimarket.error.ValidationErrorResponse;
-import org.adso.minimarket.exception.BadAuthCredentialsException;
+import org.adso.minimarket.exception.WrongCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,9 +79,9 @@ public class GlobalErrorHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(BadAuthCredentialsException.class)
+    @ExceptionHandler(WrongCredentialsException.class)
     public ResponseEntity<@NonNull BasicErrorResponse> handleBadRequestException(
-            BadAuthCredentialsException ex
+            WrongCredentialsException ex
     ) {
         BasicErrorResponse err = new BasicErrorResponse();
         err.setMessage(ex.getMessage());
