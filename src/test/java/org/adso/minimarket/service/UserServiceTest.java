@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -39,14 +38,10 @@ public class UserServiceTest {
         public UserService userService(UserRepository userRepository, PasswordEncoder pe, UserMapper userMapper) {
             return new UserServiceImpl(userRepository, pe, userMapper);
         }
-
-        @Bean
-        protected PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder(10);
-        }
-
-
     }
+
+    @MockitoBean
+    private  PasswordEncoder passwordEncoder;
 
     @MockitoBean
     private UserRepository userRepository;
@@ -104,6 +99,18 @@ public class UserServiceTest {
         LoginUserRequest req = new LoginUserRequest("test", "test@gmail.com");
 
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadAuthCredentialsException.class, () -> userService.loginUser(req));
+
+        verify(userRepository).findByEmail(any(String.class));
+    }
+
+    @Test
+    void throwsBadCredentialsException_whenPasswordIsIncorrect() throws Exception {
+        LoginUserRequest req = new LoginUserRequest("test", "test@gmail.com");
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(new User("test", "testLastName", "test@gmail.com", "password123")));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         assertThrows(BadAuthCredentialsException.class, () -> userService.loginUser(req));
 

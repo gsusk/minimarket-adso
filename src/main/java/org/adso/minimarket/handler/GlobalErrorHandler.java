@@ -74,7 +74,7 @@ public class GlobalErrorHandler {
             response.addError(combinedMessage, field);
         });
 
-        response.setMessage("VALIDATION-ERROR");
+        response.setMessage("VALIDATION_ERROR");
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
