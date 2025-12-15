@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.UserDto;
+import org.adso.minimarket.dto.UserResponseDto;
 import org.adso.minimarket.service.UserService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
@@ -27,14 +27,14 @@ public class UserControllerImpl implements UserController {
 
 
     @PostMapping(UserRoutes.REGISTER)
-    public ResponseEntity<@NonNull UserDto> createUser(@Valid @RequestBody CreateUserRequest body) {
-        UserDto user = userService.createUser(body);
-        return new ResponseEntity<@NonNull UserDto>(user, HttpStatus.CREATED);
+    public ResponseEntity<@NonNull UserResponseDto> createUser(@Valid @RequestBody CreateUserRequest body) {
+        UserResponseDto user = userService.createUser(body);
+        return new ResponseEntity<@NonNull UserResponseDto>(user, HttpStatus.CREATED);
     }
 
     @PostMapping(UserRoutes.LOGIN)
-    public ResponseEntity<@NonNull UserDto> loginUser(@Valid @RequestBody LoginUserRequest body) {
-        UserDto user = userService.loginUser(body);
-        return new ResponseEntity<UserDto>(user, HttpStatus.OK);
+    public ResponseEntity<@NonNull UserResponseDto> loginUser(@Valid @RequestBody LoginUserRequest body) {
+        UserResponseDto user = userService.loginUser(body);
+        return new ResponseEntity<UserResponseDto>(user, HttpStatus.OK);
     }
 }

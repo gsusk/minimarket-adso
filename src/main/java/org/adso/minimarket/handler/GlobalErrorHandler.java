@@ -85,9 +85,9 @@ public class GlobalErrorHandler {
     ) {
         BasicErrorResponse err = new BasicErrorResponse();
         err.setMessage(ex.getMessage());
-        err.setCode("BAD_REQUEST");
+        err.setCode("UNAUTHORIZED");
 
-        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
     }
 
     private Throwable getRootCause(Throwable ex) {

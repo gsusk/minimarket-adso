@@ -3,7 +3,7 @@ package org.adso.minimarket.controller;
 import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.controller.request.CreateUserRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.UserDto;
+import org.adso.minimarket.dto.UserResponseDto;
 import org.adso.minimarket.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * TODO:
  *      -  Cambiar el CommandLineRunner para no depender de perfiles: <a href="https://www.baeldung.com/spring-junit-prevent-runner-beans-testing-execution">Guia</a>
  */
+
 @ActiveProfiles("test") //
 @WebMvcTest
 public class UserControllerTest {
@@ -40,7 +41,7 @@ public class UserControllerTest {
     @Test
     void whenPostRequestToUserValid_thenSuccess201() throws Exception {
         CreateUserRequest user = new CreateUserRequest("testname", "mesa", "email@gmail.com", "password123");
-        UserDto saved = UserDto.builder()
+        UserResponseDto saved = UserResponseDto.builder()
                 .id(1L)
                 .name("testname")
                 .email("email@gmail.com")
@@ -75,7 +76,7 @@ public class UserControllerTest {
     @Test
     void whenPostRequestToUserLogin_shouldSuccessAndReturn200() throws Exception {
         LoginUserRequest user = new LoginUserRequest("test@gmail.com", "test123");
-        UserDto mockUser = UserDto.builder()
+        UserResponseDto mockUser = UserResponseDto.builder()
                 .email(user.email())
                 .id(1L)
                 .name("jorge")
