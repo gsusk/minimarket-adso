@@ -1,9 +1,9 @@
 package org.adso.minimarket.controller;
 
 import org.adso.minimarket.constant.UserRoutes;
-import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.RegisterRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.UserResponseDto;
+import org.adso.minimarket.dto.auth.AuthResponse;
 import org.adso.minimarket.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,14 @@ public class UserControllerTest {
 
     @Test
     void whenPostRequestToUserValid_thenSuccess201() throws Exception {
-        CreateUserRequest user = new CreateUserRequest("testname", "mesa", "email@gmail.com", "password123");
-        UserResponseDto saved = UserResponseDto.builder()
+        RegisterRequest user = new RegisterRequest("testname", "mesa", "email@gmail.com", "password123");
+        AuthResponse saved = AuthResponse.builder()
                 .id(1L)
                 .name("testname")
                 .email("email@gmail.com")
                 .build();
 
-        when(userService.createUser(any(CreateUserRequest.class))).thenReturn(saved);
+        when(userService.createUser(any(RegisterRequest.class))).thenReturn(saved);
 
         this.mockMvc.perform(post(UserRoutes.BASE + UserRoutes.REGISTER).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
@@ -62,7 +62,7 @@ public class UserControllerTest {
 
     @Test
     void whenPostRequestToUserInvalidInput_shouldFailWith400() throws Exception {
-        CreateUserRequest user = new CreateUserRequest(null, "lastname", "emailvalid@gmail.com", "password123");
+        RegisterRequest user = new RegisterRequest(null, "lastname", "emailvalid@gmail.com", "password123");
 
         this.mockMvc.perform(post(UserRoutes.BASE + UserRoutes.REGISTER).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
@@ -76,7 +76,7 @@ public class UserControllerTest {
     @Test
     void whenPostRequestToUserLogin_shouldSuccessAndReturn200() throws Exception {
         LoginUserRequest user = new LoginUserRequest("test@gmail.com", "test123");
-        UserResponseDto mockUser = UserResponseDto.builder()
+        AuthResponse mockUser = AuthResponse.builder()
                 .email(user.email())
                 .id(1L)
                 .name("jorge")

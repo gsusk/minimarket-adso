@@ -1,13 +1,12 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.RegisterRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.UserResponseDto;
+import org.adso.minimarket.dto.auth.AuthResponse;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,13 +26,13 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public UserResponseDto createUser(CreateUserRequest body) {
+    public AuthResponse createUser(RegisterRequest body) {
         User usr = new User(body.name(), body.lastName(), body.email(), this.passwordEncoder.encode(body.password()));
         return userMapper.toResponseDto(userRepository.save(usr));
     }
 
     @Override
-    public UserResponseDto loginUser(LoginUserRequest userRequest) {
+    public AuthResponse loginUser(LoginUserRequest userRequest) {
         User user = userRepository.findByEmail(userRequest.email())
                 .orElseThrow(() -> new WrongCredentialsException("Incorrect email or password"));
 

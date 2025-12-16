@@ -1,6 +1,5 @@
-package org.adso.minimarket.dto;
+package org.adso.minimarket.dto.auth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +7,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class UserResponseDto {
+public class AuthResponse {
     private Long id;
 
     private String name;

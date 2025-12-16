@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record CreateUserRequest(
+public record RegisterRequest(
         @NotBlank(message = "required")
         @Size(max = 255, message = "too long")
         String name,

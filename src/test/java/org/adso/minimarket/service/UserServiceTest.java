@@ -1,8 +1,8 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.RegisterRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.UserResponseDto;
+import org.adso.minimarket.dto.auth.AuthResponse;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -53,9 +52,9 @@ public class UserServiceTest {
 
     @Test
     void whenServiceCalledWithValid_thenReturnsNewUser() throws Exception {
-        CreateUserRequest req = new CreateUserRequest("jorge", "contreras", "validemail@gmail.com", "password123");
+        RegisterRequest req = new RegisterRequest("jorge", "contreras", "validemail@gmail.com", "password123");
         User mockUsr = new User(1L, req.name(), req.lastName(), req.email(), req.password());
-        UserResponseDto dto = UserResponseDto.builder()
+        AuthResponse dto = AuthResponse.builder()
                 .id(mockUsr.getId())
                 .name(mockUsr.getName())
                 .email(mockUsr.getEmail())
@@ -64,7 +63,7 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(mockUsr);
         when(userMapper.toResponseDto(any(User.class))).thenReturn(dto);
 
-        UserResponseDto got = userService.createUser(req);
+        AuthResponse got = userService.createUser(req);
 
         assertEquals("jorge", got.getName());
         assertEquals(1L, got.getId());
@@ -75,7 +74,7 @@ public class UserServiceTest {
     void whenLoginUserCalled_thenReturnsFoundUser() throws Exception {
         User mockUsr = new User(1L, "test", "testLastName", "test@gmail.com", "password123");
         LoginUserRequest req = new LoginUserRequest(mockUsr.getEmail(), mockUsr.getPassword());
-        UserResponseDto dto = UserResponseDto.builder()
+        AuthResponse dto = AuthResponse.builder()
                 .name(mockUsr.getName())
                 .email(mockUsr.getEmail())
                 .id(mockUsr.getId())
@@ -85,7 +84,7 @@ public class UserServiceTest {
         when(userMapper.toResponseDto(any(User.class))).thenReturn(dto);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
-        UserResponseDto got = userService.loginUser(req);
+        AuthResponse got = userService.loginUser(req);
 
         assertEquals("test", got.getName());
         assertEquals("test@gmail.com", got.getEmail());

@@ -1,13 +1,13 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.controller.request.CreateUserRequest;
+import org.adso.minimarket.controller.request.RegisterRequest;
 import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.UserResponseDto;
+import org.adso.minimarket.dto.auth.AuthResponse;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 
 
 public interface UserController {
-    ResponseEntity<@NonNull UserResponseDto> createUser(CreateUserRequest body);
-    ResponseEntity<@NonNull UserResponseDto> loginUser(LoginUserRequest body);
+    ResponseEntity<@NonNull AuthResponse> createUser(RegisterRequest body);
+    ResponseEntity<@NonNull AuthResponse> loginUser(LoginUserRequest body);
 }
