@@ -1,6 +1,7 @@
-package org.adso.minimarket.dto;
+package org.adso.minimarket.dto.response;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,17 +17,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto {
+public class UserResponse {
     private Long id;
 
     private String name;
 
     @JsonProperty("last_name")
-    private String lastname;
+    private String lastName;
 
     private String email;
 
-    private String phone;
+    @JsonProperty("phone_number")
+    private String phoneNumber;
+
+    @JsonIgnore
+    private String password;
 
     private String status;
 
@@ -38,12 +43,12 @@ public class UserDto {
 
     @Override
     public String toString() {
-        return "UserDto{" +
+        return "UserResponse{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", lastname='" + lastname + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +

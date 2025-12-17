@@ -1,11 +1,13 @@
-package org.adso.minimarket.controller.request;
+package org.adso.minimarket.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
-public record LoginUserRequest(
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record LoginRequest(
         @Email(message = "Must be a valid email")
         String email,
         @NotBlank(message = "Must not be blank")

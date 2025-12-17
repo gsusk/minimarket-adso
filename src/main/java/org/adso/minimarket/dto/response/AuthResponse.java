@@ -1,4 +1,4 @@
-package org.adso.minimarket.dto.auth;
+package org.adso.minimarket.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,10 +1,12 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.controller.request.RegisterRequest;
-import org.adso.minimarket.controller.request.LoginUserRequest;
-import org.adso.minimarket.dto.auth.AuthResponse;
+import org.adso.minimarket.dto.request.LoginRequest;
+import org.adso.minimarket.dto.request.RegisterRequest;
+
+
+import org.adso.minimarket.dto.response.UserResponse;
 
 public interface UserService {
-    AuthResponse createUser(RegisterRequest registerRequest);
-    AuthResponse loginUser(LoginUserRequest loginUserRequest);
+    UserResponse createUser(RegisterRequest registerRequest);
+    UserResponse getUserByEmail(String email);
 }

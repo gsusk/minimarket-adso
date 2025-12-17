@@ -1,11 +1,13 @@
-package org.adso.minimarket.controller.request;
+package org.adso.minimarket.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record RegisterRequest(
         @NotBlank(message = "required")
