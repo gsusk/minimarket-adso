@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AuthControllerTest {
 
     @Test
-    void login() {
+    void login_when() {
     }
 
     @Test
