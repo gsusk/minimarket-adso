@@ -12,12 +12,13 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 
+
 @Data
 @Builder
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResponse {
+
     private Long id;
 
     private String name;
@@ -30,9 +31,6 @@ public class UserResponse {
     @JsonProperty("phone_number")
     private String phoneNumber;
 
-    @JsonIgnore
-    private String password;
-
     private String status;
 
     @JsonProperty("created_at")
@@ -40,18 +38,4 @@ public class UserResponse {
 
     @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
-
-    @Override
-    public String toString() {
-        return "UserResponse{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", status='" + status + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 }

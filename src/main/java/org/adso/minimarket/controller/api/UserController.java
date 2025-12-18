@@ -1,12 +1,10 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.dto.request.RegisterRequest;
-import org.adso.minimarket.dto.request.LoginRequest;
-import org.adso.minimarket.dto.response.AuthResponse;
-import org.jspecify.annotations.NonNull;
+import jakarta.websocket.server.PathParam;
+import org.adso.minimarket.dto.response.UserResponse;
 import org.springframework.http.ResponseEntity;
 
 
 public interface UserController {
-
+    ResponseEntity<UserResponse> getById(Long id);
 }

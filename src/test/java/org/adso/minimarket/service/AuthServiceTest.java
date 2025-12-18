@@ -1,14 +1,14 @@
 package org.adso.minimarket.service;
 
 
-import lombok.Setter;
 import org.adso.minimarket.dto.request.LoginRequest;
 import org.adso.minimarket.dto.request.RegisterRequest;
 import org.adso.minimarket.dto.response.AuthResponse;
 import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.AuthMapper;
-import org.junit.jupiter.api.BeforeEach;
+import org.adso.minimarket.models.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 public class AuthServiceTest {
@@ -49,7 +48,7 @@ public class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void whenRegisterCalledCorrectCredentials_itReturns201() throws Exception {
+    void register_withCorrectCredentials_itReturnsAuthUser() throws Exception {
         RegisterRequest req = new RegisterRequest("test", "lastname", "test@gmail.com", "password123");
         AuthResponse exp = AuthResponse.builder()
                 .id(1L)
@@ -61,11 +60,10 @@ public class AuthServiceTest {
                 .name(req.name())
                 .lastName(req.lastName())
                 .email(req.email())
-                .password(req.password())
                 .build();
 
         when(userService.createUser(any(RegisterRequest.class))).thenReturn(userResponse);
-        when(authMapper.toAuthResponseDto(any())).thenReturn(exp);
+        when(authMapper.toAuthResponseDto(any(UserResponse.class))).thenReturn(exp);
         when(passwordEncoder.encode(any(String.class))).thenReturn(any(String.class));
 
         AuthResponse registerResponse = authService.register(req);
@@ -80,13 +78,13 @@ public class AuthServiceTest {
     }
 
     @Test
-    void whenLoginCalled_thenReturnsFoundUser() throws Exception {
-        UserResponse exp = UserResponse.builder()
+    void loginUser_whenValid_thenReturnsFoundUser() throws Exception {
+        User exp = User.builder()
                 .id(1L)
                 .name("test")
                 .email("test@gmail.com")
-                .password("password123!")
                 .lastName("lastname")
+                .password("")
                 .build();
         LoginRequest req = new LoginRequest(exp.getEmail(), exp.getPassword());
         AuthResponse dto = AuthResponse.builder()
@@ -95,9 +93,9 @@ public class AuthServiceTest {
                 .id(exp.getId())
                 .build();
 
-        when(userService.getUserByEmail(any(String.class))).thenReturn(exp);
-        when(authMapper.toAuthResponseDto(any(UserResponse.class))).thenReturn(dto);
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(userService.getUserInternalByEmail(any(String.class))).thenReturn(exp);
+        when(authMapper.toAuthResponseDto(any(User.class))).thenReturn(dto);
+        when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
 
         AuthResponse got = authService.loginUser(req);
 
@@ -105,16 +103,16 @@ public class AuthServiceTest {
         assertEquals("test@gmail.com", got.getEmail());
         assertEquals(1L, got.getId());
 
-        verify(userService).getUserByEmail(any(String.class));
+        verify(userService).getUserInternalByEmail(any(String.class));
         verify(passwordEncoder).matches(anyString(), anyString());
-        verify(authMapper).toAuthResponseDto(any(UserResponse.class));
+        verify(authMapper).toAuthResponseDto(any(User.class));
     }
 
 
     @Test
-    void throwsWrongCredentialsException_whenLoginPasswordIsIncorrect() throws Exception {
+    void  loginUser_whenPasswordMismatch_throwsWrongCredentialsException() throws Exception {
         LoginRequest req = new LoginRequest("test@gmail.com", "password123");
-        UserResponse usr = UserResponse.builder()
+        User usr = User.builder()
                 .id(1L)
                 .name("test")
                 .email(req.email())
@@ -122,11 +120,25 @@ public class AuthServiceTest {
                 .build();
 
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
-        when(userService.getUserByEmail(any(String.class))).thenReturn(usr);
+        when(userService.getUserInternalByEmail(any(String.class))).thenReturn(usr);
 
         assertThrows(WrongCredentialsException.class, () -> authService.loginUser(req));
 
         verify(passwordEncoder).matches(anyString(), anyString());
-        verify(userService).getUserByEmail(any(String.class));
+        verify(userService).getUserInternalByEmail(any(String.class));
+    }
+
+    @Test
+    void loginUser_whenNotFound_thenThrowsWrongCredentials() {
+        when(userService.getUserInternalByEmail(anyString()))
+                .thenThrow(new NotFoundException("User not found"));
+
+        LoginRequest req = new LoginRequest("test@gmail.com", "pass");
+
+        assertThrows(WrongCredentialsException.class,
+                () -> authService.loginUser(req));
+
+        verify(userService).getUserInternalByEmail(anyString());
+        verifyNoInteractions(passwordEncoder, authMapper);
     }
 }

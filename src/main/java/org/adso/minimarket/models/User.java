@@ -1,6 +1,7 @@
 package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@Builder
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_user_email", columnNames = "email")

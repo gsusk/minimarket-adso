@@ -4,8 +4,10 @@ import org.adso.minimarket.dto.request.LoginRequest;
 import org.adso.minimarket.dto.request.RegisterRequest;
 import org.adso.minimarket.dto.response.AuthResponse;
 import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.AuthMapper;
+import org.adso.minimarket.models.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse loginUser(LoginRequest req) {
-        UserResponse user = this.userService.getUserByEmail(req.email());
+        User user;
+        try {
+            user = this.userService.getUserInternalByEmail(req.email());
+        } catch (NotFoundException e) {
+            throw new WrongCredentialsException("Invalid email or password");
+        }
 
         if (!this.passwordEncoder.matches(req.password(), user.getPassword())) {
             throw new WrongCredentialsException("Invalid email or password");

@@ -6,12 +6,14 @@ import org.adso.minimarket.error.ConstraintViolationResponse;
 import org.adso.minimarket.error.ValidationErrorResponse;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.Map;
@@ -54,7 +56,7 @@ public class GlobalErrorHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<@NonNull ValidationErrorResponse> handleValidationException(
+    public ResponseEntity<ValidationErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex) {
 
         Map<String, List<String>> groupedErrors = ex.getBindingResult()
@@ -80,7 +82,7 @@ public class GlobalErrorHandler {
     }
 
     @ExceptionHandler(WrongCredentialsException.class)
-    public ResponseEntity<@NonNull BasicErrorResponse> handleBadRequestException(
+    public ResponseEntity<BasicErrorResponse> handleBadRequestException(
             WrongCredentialsException ex
     ) {
         BasicErrorResponse err = new BasicErrorResponse();
@@ -88,6 +90,30 @@ public class GlobalErrorHandler {
         err.setCode("UNAUTHORIZED");
 
         return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ChangeSetPersister.NotFoundException.class)
+    public ResponseEntity<BasicErrorResponse> handleNotFoundException(
+            WrongCredentialsException ex
+    ) {
+        BasicErrorResponse err = new BasicErrorResponse();
+        err.setMessage(ex.getMessage());
+        err.setCode("NOT_FOUND");
+
+        return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
+    }
+
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = String.format(
+                "Invalid value '%s' for parameter '%s'",
+                ex.getValue(),
+                ex.getName()
+        );
+
+        return ResponseEntity.badRequest()
+                .body(message);
     }
 
     private Throwable getRootCause(Throwable ex) {

@@ -2,7 +2,7 @@ package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.request.RegisterRequest;
 import org.adso.minimarket.dto.response.UserResponse;
-import org.adso.minimarket.exception.WrongCredentialsException;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
@@ -24,7 +24,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {
 
-
     @TestConfiguration
     static class UserServiceImplTestContextConfiguration {
 
@@ -44,7 +43,7 @@ public class UserServiceTest {
     public UserMapper userMapper;
 
     @Test
-    void whenServiceCreateCalledWithValid_thenReturnsNewUser() throws Exception {
+    void create_withValid_thenReturnsNewUser() throws Exception {
         RegisterRequest req = new RegisterRequest("jorge", "contreras", "validemail@gmail.com", "password123");
         User mockUsr = new User(1L, req.name(), req.lastName(), req.email(), req.password());
         UserResponse dto = UserResponse.builder()
@@ -64,13 +63,12 @@ public class UserServiceTest {
     }
 
     @Test
-    void whenServiceGetByEmail_thenReturnsUser() throws Exception {
+    void getUserByEmail_withValid_thenReturnsUser() throws Exception {
         User usr = new User(1L, "test", "lastname", "test@gmail.com", "password123");
         UserResponse ur = UserResponse.builder()
                 .id(usr.getId())
                 .name(usr.getName())
                 .email(usr.getEmail())
-                .password(usr.getPassword())
                 .lastName(usr.getLastName())
                 .build();
 
@@ -90,14 +88,77 @@ public class UserServiceTest {
 
 
     @Test
-    void throwsBadCredentialsException_whenEmailNotFound() throws Exception {
+    void getUserByEmail_whenEmailNotFound_throwsBadCredentialsException() throws Exception {
         String email = "nonexistant@gmail.com";
 
         when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
-        assertThrows(WrongCredentialsException.class, () -> userService.getUserByEmail(email));
+        assertThrows(NotFoundException.class, () -> userService.getUserByEmail(email));
 
-        verify(userRepository).findByEmail(any(String.class));
+        verifyNoInteractions(userMapper);
+    }
+
+    @Test
+    void getUserById_withValidId_thenReturnsUser() throws Exception {
+        Long id = 1L;
+        User usr = new User();
+        UserResponse ur = UserResponse.builder()
+                .id(id)
+                .name("test")
+                .email("test@gmail.com")
+                .build();
+
+        when(userRepository.findById(id)).thenReturn(Optional.of(usr));
+        when(userMapper.toResponseDto(any(User.class))).thenReturn(ur);
+
+        UserResponse got = userService.getUserById(id);
+
+        assertEquals(ur.getId(), got.getId());
+        assertEquals(ur.getEmail(), got.getEmail());
+        assertEquals(ur.getLastName(), got.getLastName());
+        assertEquals(ur.getName(), got.getName());
+
+        verify(userRepository).findById(any(Long.class));
+        verify(userMapper).toResponseDto(usr);
+    }
+
+    @Test
+    void getUserById_UserNotFound_thenThrowException() {
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> userService.getUserById(1L));
+
+        verify(userRepository).findById(anyLong());
+        verifyNoInteractions(userMapper);
+    }
+
+    @Test
+    void getUserInternalByEmail_thenReturnUserEntity() {
+        String email = "test@gmail.com";
+
+        User user = new User("Test", "User", email, "pass");
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+
+        User result = userService.getUserInternalByEmail(email);
+
+        assertEquals(email, result.getEmail());
+
+        verify(userRepository).findByEmail(email);
+        verifyNoInteractions(userMapper);
+    }
+
+    @Test
+    void getUserInternalByEmail_UserNotFound_thenThrowException() {
+        when(userRepository.findByEmail(anyString()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+                () -> userService.getUserInternalByEmail("missing@gmail.com"));
+
+        verify(userRepository).findByEmail(anyString());
         verifyNoInteractions(userMapper);
     }
 }
