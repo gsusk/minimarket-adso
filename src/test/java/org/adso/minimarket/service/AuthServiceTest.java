@@ -12,9 +12,10 @@ import org.adso.minimarket.models.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -24,10 +25,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 public class AuthServiceTest {
 
-    @Configuration
+    @TestConfiguration
     static class CreateAuthContextConfiguration {
         @Bean
         public AuthService authService(UserService userService, AuthMapper authMapper, PasswordEncoder passwordEncoder) {
@@ -110,7 +112,7 @@ public class AuthServiceTest {
 
 
     @Test
-    void  loginUser_whenPasswordMismatch_throwsWrongCredentialsException() throws Exception {
+    void loginUser_whenPasswordMismatch_throwsWrongCredentialsException() throws Exception {
         LoginRequest req = new LoginRequest("test@gmail.com", "password123");
         User usr = User.builder()
                 .id(1L)

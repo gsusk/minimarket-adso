@@ -19,6 +19,7 @@ public record RegisterRequest(
         String lastName,
 
         @Email(message = "Must be a valid email")
+        @NotBlank(message = "required")
         String email,
 
         @Size(min = 6, message = "should have at least 6 characters")
