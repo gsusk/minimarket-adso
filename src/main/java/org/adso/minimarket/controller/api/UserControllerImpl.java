@@ -21,6 +21,6 @@ public class UserControllerImpl implements UserController {
     @GetMapping(UserRoutes.GET_USER)
     public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
         UserResponse user = userService.getUserById(id);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return ResponseEntity.ok(user);
     }
 }
