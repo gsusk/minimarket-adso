@@ -3,7 +3,6 @@ package org.adso.minimarket.service;
 import org.adso.minimarket.dto.request.RegisterRequest;
 import org.adso.minimarket.dto.response.UserResponse;
 import org.adso.minimarket.exception.NotFoundException;
-import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
@@ -38,7 +37,6 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserById(Long id) {
         User usr = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
-
         return userMapper.toResponseDto(usr);
     }
 

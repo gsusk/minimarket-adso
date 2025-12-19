@@ -1,12 +1,14 @@
 package org.adso.minimarket.handler;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.NonNull;
 import org.adso.minimarket.error.BasicErrorResponse;
-import org.adso.minimarket.error.ConstraintViolationResponse;
+import org.adso.minimarket.error.DataIntegrityViolationResponse;
 import org.adso.minimarket.error.ValidationErrorResponse;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -27,11 +29,11 @@ public class GlobalErrorHandler {
     );
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<@NonNull ConstraintViolationResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+    public ResponseEntity<@NonNull DataIntegrityViolationResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         Throwable root = getRootCause(ex);
         String message = root.getMessage() != null ? root.getMessage() : "";
 
-        ConstraintViolationResponse res = new ConstraintViolationResponse();
+        DataIntegrityViolationResponse res = new DataIntegrityViolationResponse();
         String lower = message.toLowerCase();
 
         res.setMessage("CONSTRAINT_VIOLATION");
@@ -41,7 +43,7 @@ public class GlobalErrorHandler {
 
                 String field = constraint.substring(constraint.lastIndexOf("_") + 1);
 
-                res.addError(new ConstraintViolationResponse.ErrorDetail(
+                res.addError(new DataIntegrityViolationResponse.ErrorDetail(
                         CONSTRAINT_MESSAGES.get(constraint),
                         field
                 ));
@@ -92,9 +94,28 @@ public class GlobalErrorHandler {
         return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(ChangeSetPersister.NotFoundException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ValidationErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException ex
+    ) {
+        ValidationErrorResponse err = new ValidationErrorResponse();
+        Map<String, String> groupedErrors = ex.getConstraintViolations().stream().collect(
+                Collectors.groupingBy(
+                        (violation -> {
+                            return violation.getPropertyPath().toString().split("\\.")[1];
+                        }),
+                        Collectors.mapping(ConstraintViolation::getMessage, Collectors.joining(", "))
+                )
+        );
+
+        groupedErrors.forEach(err::addError);
+
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<BasicErrorResponse> handleNotFoundException(
-            WrongCredentialsException ex
+            NotFoundException ex
     ) {
         BasicErrorResponse err = new BasicErrorResponse();
         err.setMessage(ex.getMessage());

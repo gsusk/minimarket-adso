@@ -30,7 +30,6 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping(AuthRoutes.REGISTER)
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
-
         return new ResponseEntity<>(this.authService.register(registerRequest), HttpStatus.CREATED);
     }
 

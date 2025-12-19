@@ -24,7 +24,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
-                authorize -> authorize.requestMatchers(
+                authorize -> authorize
+//                        .anyRequest()
+//                        .permitAll()
+                        .requestMatchers(
                                 AuthRoutes.REGISTER,
                                 AuthRoutes.LOGIN,
                                 UserRoutes.GET_USER

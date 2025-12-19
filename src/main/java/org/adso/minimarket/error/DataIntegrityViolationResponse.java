@@ -4,14 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static tools.jackson.databind.type.LogicalType.Collection;
-
 @Getter
-public class ConstraintViolationResponse {
+public class DataIntegrityViolationResponse {
     @Setter
     private String message;
 

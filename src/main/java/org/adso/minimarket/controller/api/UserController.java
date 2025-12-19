@@ -7,5 +7,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 public interface UserController {
-    ResponseEntity<UserResponse> getById(@PathVariable @Min(1L) Long id);
+    ResponseEntity<UserResponse> getById(@PathVariable @Min(1) Long id);
 }
