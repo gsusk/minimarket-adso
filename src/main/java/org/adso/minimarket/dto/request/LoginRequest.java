@@ -8,9 +8,10 @@ import org.hibernate.validator.constraints.Length;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record LoginRequest(
-        @Email(message = "Must be a valid email")
+        @NotBlank(message = "required")
+        @Email(message = "must be a valid email")
         String email,
-        @NotBlank(message = "Must not be blank")
+        @NotBlank(message = "must not be blank")
         @Length(min = 6, message = "should have at least 6 characters")
         String password
 ) {

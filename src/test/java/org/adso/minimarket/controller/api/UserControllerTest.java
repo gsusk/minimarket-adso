@@ -1,15 +1,12 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.config.SecurityConfig;
 import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.dto.response.UserResponse;
-import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * TODO:
- *      -  Cambiar el CommandLineRunner para no depender de perfiles: <a href="https://www.baeldung.com/spring-junit-prevent-runner-beans-testing-execution">Guia</a>
+ *      -  Cambiar el CommandLineRunner para no depender de perfiles:
+ *      <a href="https://www.baeldung.com/spring-junit-prevent-runner-beans-testing-execution">Guia</a>
  */
 
 @ActiveProfiles("test") //
@@ -70,7 +68,6 @@ public class UserControllerTest {
 
     @Test
     void getUserById_shouldReturn404_whenIdIsLessThan1() throws Exception {
-        when(userService.getUserById(any(Long.class))).thenThrow(new NotFoundException(""));
         mockMvc.perform(get(UserRoutes.GET_USER, -1))
                 .andExpect(status().isBadRequest());
     }

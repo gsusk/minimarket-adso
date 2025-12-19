@@ -4,7 +4,6 @@ import org.adso.minimarket.constant.AuthRoutes;
 import org.adso.minimarket.dto.request.LoginRequest;
 import org.adso.minimarket.dto.request.RegisterRequest;
 import org.adso.minimarket.dto.response.AuthResponse;
-import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.service.AuthService;
 import org.junit.jupiter.api.Test;

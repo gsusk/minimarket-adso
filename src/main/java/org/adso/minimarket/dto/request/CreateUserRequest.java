@@ -20,7 +20,8 @@ public class CreateUserRequest {
     @JsonProperty("last_name")
     String lastName;
 
-    @Email(message = "Must be a valid email")
+    @Email(message = "must be a valid email")
+    @NotBlank(message = "required")
     String email;
 
     @Size(min = 6, message = "should have at least 6 characters")
