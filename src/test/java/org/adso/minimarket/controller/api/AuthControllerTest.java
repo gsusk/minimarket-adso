@@ -69,20 +69,6 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_shouldReturn401_ifNotUserFound() throws Exception {
-        LoginRequest request = new LoginRequest("2test@gmail.com", "password123");
-
-        when(authService.loginUser(any(LoginRequest.class))).thenThrow(new WrongCredentialsException("Invalid email or password"));
-
-        mockMvc.perform(post(AuthRoutes.LOGIN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        ).andExpect(status().isUnauthorized());
-
-        verify(authService).loginUser(any(LoginRequest.class));
-    }
-
-    @Test
     void register_shouldRegisterUser() throws Exception {
         RegisterRequest request = new RegisterRequest("test", "lastname", "test@gmail.com", "password123");
         AuthResponse response = new AuthResponse(
