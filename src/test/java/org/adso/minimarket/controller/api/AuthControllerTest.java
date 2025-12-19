@@ -4,6 +4,7 @@ import org.adso.minimarket.constant.AuthRoutes;
 import org.adso.minimarket.dto.request.LoginRequest;
 import org.adso.minimarket.dto.request.RegisterRequest;
 import org.adso.minimarket.dto.response.AuthResponse;
+import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,6 +66,20 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(authService);
+    }
+
+    @Test
+    void login_shouldReturn401_ifNotUserFound() throws Exception {
+        LoginRequest request = new LoginRequest("2test@gmail.com", "password123");
+
+        when(authService.loginUser(any(LoginRequest.class))).thenThrow(new WrongCredentialsException("Invalid email or password"));
+
+        mockMvc.perform(post(AuthRoutes.LOGIN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpect(status().isUnauthorized());
+
+        verify(authService).loginUser(any(LoginRequest.class));
     }
 
     @Test

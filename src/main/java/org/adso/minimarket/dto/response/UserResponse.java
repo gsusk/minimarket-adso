@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResponse {
-
     private Long id;
 
     private String name;
@@ -27,15 +26,4 @@ public class UserResponse {
     private String lastName;
 
     private String email;
-
-    @JsonProperty("phone_number")
-    private String phoneNumber;
-
-    private String status;
-
-    @JsonProperty("created_at")
-    private LocalDateTime createdAt;
-
-    @JsonProperty("updated_at")
-    private LocalDateTime updatedAt;
 }
