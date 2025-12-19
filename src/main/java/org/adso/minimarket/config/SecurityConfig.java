@@ -23,19 +23,21 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
-        return security.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers(AuthRoutes.REGISTER)
-                        .permitAll()
-                        .requestMatchers(AuthRoutes.LOGIN)
+        return security.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
+                authorize -> authorize.requestMatchers(
+                                AuthRoutes.REGISTER,
+                                AuthRoutes.LOGIN,
+                                UserRoutes.GET_USER
+                        )
                         .permitAll()
                         .anyRequest()
-                        .authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .build();
+                        .authenticated()
+        ).httpBasic(Customizer.withDefaults()).build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
+                                                       PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder);
         return new ProviderManager(authenticationProvider);
@@ -43,11 +45,8 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        return new InMemoryUserDetailsManager(User.builder()
-                .username("dev")
-                .password(passwordEncoder.encode("contra123"))
-                .roles()
-                .build());
+        return new InMemoryUserDetailsManager(User.builder().username("dev").password(passwordEncoder.encode(
+                "contra123")).roles().build());
     }
 
     @Bean

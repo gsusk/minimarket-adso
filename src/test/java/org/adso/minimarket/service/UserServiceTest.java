@@ -126,11 +126,9 @@ public class UserServiceTest {
 
     @Test
     void getUserById_UserNotFound_thenThrowException() {
-        when(userRepository.findById(anyLong()))
-                .thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
-                () -> userService.getUserById(1L));
+        assertThrows(NotFoundException.class, () -> userService.getUserById(1L));
 
         verify(userRepository).findById(anyLong());
         verifyNoInteractions(userMapper);
@@ -154,11 +152,9 @@ public class UserServiceTest {
 
     @Test
     void getUserInternalByEmail_UserNotFound_thenThrowException() {
-        when(userRepository.findByEmail(anyString()))
-                .thenReturn(Optional.empty());
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class,
-                () -> userService.getUserInternalByEmail("missing@gmail.com"));
+        assertThrows(NotFoundException.class, () -> userService.getUserInternalByEmail("missing@gmail.com"));
 
         verify(userRepository).findByEmail(anyString());
         verifyNoInteractions(userMapper);
