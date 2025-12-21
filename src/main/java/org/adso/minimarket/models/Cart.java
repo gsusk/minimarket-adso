@@ -21,11 +21,11 @@ public class Cart {
 
     private String status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_cart_user"))
     private User user;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
     private Set<CartItem> cartItems;
 
     @CreationTimestamp

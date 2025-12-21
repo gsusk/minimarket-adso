@@ -31,7 +31,11 @@ public class Product {
 
     private List<String> images_url;
 
-    @OneToMany(mappedBy = "product")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_product_category"))
+    private Category category;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private Set<CartItem> cartItems;
 
     @CreationTimestamp(source = SourceType.DB)

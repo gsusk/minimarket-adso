@@ -25,12 +25,12 @@ public class CartItem {
     @EmbeddedId
     CartItemKey id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productId")
     @JoinColumn(name = "product_id", foreignKey = @ForeignKey(name = "fk_cart_item_product"))
     private Product product;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("cartId")
     @JoinColumn(name = "cart_id", foreignKey = @ForeignKey(name = "fk_cart_item_cart"))
     private Cart cart;
