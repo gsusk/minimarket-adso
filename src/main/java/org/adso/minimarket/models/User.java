@@ -1,6 +1,7 @@
 package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "uk_user_email", columnNames = "email")
         }
 )
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -34,6 +36,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private String address;
+
     private String phoneNumber;
     private String status;
 
@@ -42,19 +46,6 @@ public class User {
 
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
-
-    public User(Long id, String name, String lastName, String email, String password, String phoneNumber,
-                String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
 
     public User(Long id, String name, String lastName, String email, String password) {
         this.id = id;
