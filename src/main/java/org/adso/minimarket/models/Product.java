@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -29,6 +30,9 @@ public class Product {
     private BigDecimal price;
 
     private List<String> images_url;
+
+    @OneToMany(mappedBy = "product")
+    private Set<CartItem> cartItems;
 
     @CreationTimestamp(source = SourceType.DB)
     private LocalDateTime createdAt;

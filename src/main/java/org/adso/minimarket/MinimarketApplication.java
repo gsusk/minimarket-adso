@@ -18,10 +18,10 @@ public class MinimarketApplication {
     @Profile("!test")
     public CommandLineRunner initDb(UserRepository userRepository) {
         return args -> {
-          if(userRepository.count() == 0) {
-              userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
-              userRepository.save(new User("jorge", "pic", "pepe@gmail.com", "password123"));
-          }
+            if (userRepository.count() == 0) {
+                userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
+                userRepository.save(new User("jorge", "pic", "pepe@gmail.com", "password123"));
+            }
         };
     }
 }

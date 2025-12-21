@@ -43,7 +43,8 @@ public class User {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public User(Long id, String name, String lastName, String email, String password, String phoneNumber, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(Long id, String name, String lastName, String email, String password, String phoneNumber,
+                String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.lastName = lastName;

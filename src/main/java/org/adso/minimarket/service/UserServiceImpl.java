@@ -29,7 +29,6 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserByEmail(String email) {
         User usr = this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-
         return userMapper.toResponseDto(usr);
     }
 
