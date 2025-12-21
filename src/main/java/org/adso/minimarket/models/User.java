@@ -39,6 +39,7 @@ public class User {
     private String address;
 
     private String phoneNumber;
+
     private String status;
 
     @CreationTimestamp(source = SourceType.DB)

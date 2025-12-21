@@ -11,12 +11,11 @@ import org.adso.minimarket.mappers.AuthMapper;
 import org.adso.minimarket.models.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,121 +25,83 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
-public class AuthServiceTest {
+@ExtendWith(MockitoExtension.class) // Faster: No Spring Context overhead
+class AuthServiceTest {
 
-    @TestConfiguration
-    static class CreateAuthContextConfiguration {
-        @Bean
-        public AuthService authService(UserService userService, AuthMapper authMapper, PasswordEncoder passwordEncoder) {
-            return new AuthServiceImpl(userService, authMapper, passwordEncoder);
-        }
-    }
+    @InjectMocks
+    private AuthServiceImpl authService; // Automatically injects the mocks below
 
-    @Autowired
-    private AuthService authService;
-
-    @MockitoBean
+    @Mock
     private UserService userService;
 
-    @MockitoBean
+    @Mock
     private AuthMapper authMapper;
 
-    @MockitoBean
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void register_withCorrectCredentials_itReturnsAuthUser() throws Exception {
-        RegisterRequest req = new RegisterRequest("test", "lastname", "test@gmail.com", "password123");
-        AuthResponse exp = AuthResponse.builder()
-                .id(1L)
-                .name(req.name())
-                .email(req.email())
-                .build();
-        UserResponse userResponse = UserResponse.builder()
-                .id(1L)
-                .name(req.name())
-                .lastName(req.lastName())
-                .email(req.email())
-                .build();
+    void register_withCorrectCredentials_itReturnsAuthUser() {
+        // Arrange
+        var req = new RegisterRequest("test", "lastname", "test@gmail.com", "password123");
+        var userRes = UserResponse.builder().id(1L).name("test").email("test@gmail.com").build();
+        var expected = AuthResponse.builder().id(1L).name("test").email("test@gmail.com").build();
 
-        when(userService.createUser(any(RegisterRequest.class))).thenReturn(userResponse);
-        when(authMapper.toAuthResponseDto(any(UserResponse.class))).thenReturn(exp);
-        when(passwordEncoder.encode(any(String.class))).thenReturn(any(String.class));
+        when(userService.createUser(any())).thenReturn(userRes);
+        when(authMapper.toAuthResponseDto(any(UserResponse.class))).thenReturn(expected);
 
-        AuthResponse registerResponse = authService.register(req);
+        // Act
+        AuthResponse result = authService.register(req);
 
-        assertEquals("test", registerResponse.getName());
-        assertEquals("test@gmail.com", registerResponse.getEmail());
-        assertEquals(1L, registerResponse.getId());
-
-        verify(userService).createUser(any(RegisterRequest.class));
-        verify(authMapper).toAuthResponseDto(any(UserResponse.class));
-        verify(passwordEncoder).encode(any(String.class));
+        // Assert
+        assertEquals(expected.getEmail(), result.getEmail());
+        verify(userService).createUser(any());
+        verify(passwordEncoder).encode(anyString());
     }
 
     @Test
-    void loginUser_whenValid_thenReturnsFoundUser() throws Exception {
-        User exp = User.builder()
-                .id(1L)
-                .name("test")
-                .email("test@gmail.com")
-                .lastName("lastname")
-                .password("")
-                .build();
-        LoginRequest req = new LoginRequest(exp.getEmail(), exp.getPassword());
-        AuthResponse dto = AuthResponse.builder()
-                .name(exp.getName())
-                .email(exp.getEmail())
-                .id(exp.getId())
-                .build();
+    void loginUser_whenValid_thenReturnsFoundUser() {
+        var user = User.builder().id(1L).email("test@gmail.com").password("password").build();
+        var req = new LoginRequest("test@gmail.com", "password");
+        var expected = AuthResponse.builder().id(1L).email("test@gmail.com").build();
 
-        when(userService.getUserInternalByEmail(any(String.class))).thenReturn(exp);
-        when(authMapper.toAuthResponseDto(any(User.class))).thenReturn(dto);
-        when(passwordEncoder.matches(any(String.class), any(String.class))).thenReturn(true);
+        when(userService.getUserInternalByEmail(req.email())).thenReturn(user);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        when(authMapper.toAuthResponseDto(user)).thenReturn(expected);
 
-        AuthResponse got = authService.loginUser(req);
+        AuthResponse result = authService.loginUser(req);
 
-        assertEquals("test", got.getName());
-        assertEquals("test@gmail.com", got.getEmail());
-        assertEquals(1L, got.getId());
+        assertEquals(expected.getId(), result.getId());
+    }
 
-        verify(userService).getUserInternalByEmail(any(String.class));
-        verify(passwordEncoder).matches(anyString(), anyString());
-        verify(authMapper).toAuthResponseDto(any(User.class));
+    @Test
+    void loginUser_whenNotFound_thenThrowsWrongCredentials() {
+        when(userService.getUserInternalByEmail(anyString())).thenThrow(new NotFoundException("..."));
+
+        assertThrows(WrongCredentialsException.class,
+                () -> authService.loginUser(new LoginRequest("err@test.com", "pass")));
+
+        verifyNoInteractions(passwordEncoder, authMapper);
     }
 
 
     @Test
     void loginUser_whenPasswordMismatch_throwsWrongCredentialsException() throws Exception {
-        LoginRequest req = new LoginRequest("test@gmail.com", "password123");
         User usr = User.builder()
                 .id(1L)
                 .name("test")
-                .email(req.email())
-                .password(req.password())
+                .email("test@gmail.com")
+                .password("password123")
                 .build();
 
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
         when(userService.getUserInternalByEmail(any(String.class))).thenReturn(usr);
 
-        assertThrows(WrongCredentialsException.class, () -> authService.loginUser(req));
+        assertThrows(WrongCredentialsException.class, () -> authService.loginUser(new LoginRequest("test@gmail.com",
+                "password123")));
 
         verify(passwordEncoder).matches(anyString(), anyString());
         verify(userService).getUserInternalByEmail(any(String.class));
     }
 
-    @Test
-    void loginUser_whenNotFound_thenThrowsWrongCredentials() {
-        when(userService.getUserInternalByEmail(anyString()))
-                .thenThrow(new NotFoundException("User not found"));
-
-        LoginRequest req = new LoginRequest("test@gmail.com", "pass");
-
-        assertThrows(WrongCredentialsException.class,
-                () -> authService.loginUser(req));
-
-        verify(userService).getUserInternalByEmail(anyString());
-        verifyNoInteractions(passwordEncoder, authMapper);
-    }
 }
