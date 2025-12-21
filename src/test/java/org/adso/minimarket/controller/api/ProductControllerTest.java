@@ -17,7 +17,9 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -42,10 +44,12 @@ public class ProductControllerTest {
         ProductRequest request =
                 ProductRequest.builder().name("Camiseta").price(new BigDecimal(1000)).categoryId(1L).build();
 
+        when(productService.createProduct(any(ProductRequest.class))).thenReturn(1L);
+
         mockMvc.perform(
                         post("/product").content(objectMapper.writeValueAsString(request))
                 )
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated()).andExpect(header().exists("Location"));
 
         verify(productService).createProduct(any(ProductRequest.class));
     }

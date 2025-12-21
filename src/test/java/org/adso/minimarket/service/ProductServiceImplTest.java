@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.request.ProductRequest;
-import org.adso.minimarket.dto.request.RegisterRequest;
+import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.Product;
 import org.adso.minimarket.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,10 +28,17 @@ public class ProductServiceImplTest {
     private ProductRepository productRepository;
 
     @Test
-    void createProduct_shouldSaveUser(){
-        ProductRequest request = ProductRequest.builder().name("Camiseta").description("").price(new BigDecimal(1000)).categoryId(1L).build();
+    void createProduct_shouldSaveUser() {
+        ProductRequest request =
+                ProductRequest.builder().name("Camiseta").description("").price(new BigDecimal(1000)).categoryId(1L).build();
+        Product res =
+                Product.builder().id(1L).name("Camiseta").description("").price(request.getPrice()).category(new Category()).build();
 
-        productService.createProduct(request);
+        when(productRepository.save(any(Product.class))).thenReturn(res);
+
+        Long id = productService.createProduct(request);
+
+        assertEquals(1L, id);
 
         verify(productRepository).save(any(Product.class));
     }
