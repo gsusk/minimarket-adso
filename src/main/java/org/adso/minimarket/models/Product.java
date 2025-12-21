@@ -35,7 +35,7 @@ public class Product {
     private List<String> images_url;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_product_category"))
+    @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_product_category"), nullable = false)
     private Category category;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)

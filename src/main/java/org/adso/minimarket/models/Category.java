@@ -16,6 +16,7 @@ import java.util.List;
                 @UniqueConstraint(name = "uk_category_name", columnNames = "name")
         }
 )
+
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

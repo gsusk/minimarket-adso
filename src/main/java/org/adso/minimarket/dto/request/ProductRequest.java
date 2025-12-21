@@ -1,0 +1,38 @@
+package org.adso.minimarket.dto.request;
+
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductRequest {
+
+    @NotBlank(message = "Product name is required")
+    @Size(max = 255, message = "Product name must be at most 255 characters")
+    private String name;
+
+    @Size(max = 1000, message = "Description must be at most 1000 characters")
+    private String description;
+
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    @Digits(integer = 15, fraction = 4, message = "Price format is invalid")
+    private BigDecimal price;
+
+    @Size(max = 10, message = "A product can have at most 10 images")
+    private List<
+            @NotBlank(message = "Image URL cannot be blank")
+            @Size(max = 500, message = "Image URL is too long")
+                    String
+            > imagesUrl;
+
+    @NotNull(message = "Category is required")
+    private Long categoryId;
+}
