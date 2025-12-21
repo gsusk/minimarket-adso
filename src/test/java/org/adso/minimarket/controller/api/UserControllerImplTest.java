@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test") //
 @WebMvcTest(UserControllerImpl.class)
 @ExtendWith(SpringExtension.class)
-public class UserControllerTest {
+public class UserControllerImplTest {
 
     @Autowired
     private MockMvc mockMvc;

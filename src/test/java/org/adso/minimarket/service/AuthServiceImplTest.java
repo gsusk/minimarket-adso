@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,11 +24,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
-@ExtendWith(MockitoExtension.class) // Faster: No Spring Context overhead
-class AuthServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AuthServiceImplTest {
 
     @InjectMocks
-    private AuthServiceImpl authService; // Automatically injects the mocks below
+    private AuthServiceImpl authService;
 
     @Mock
     private UserService userService;
@@ -42,7 +41,6 @@ class AuthServiceTest {
 
     @Test
     void register_withCorrectCredentials_itReturnsAuthUser() {
-        // Arrange
         var req = new RegisterRequest("test", "lastname", "test@gmail.com", "password123");
         var userRes = UserResponse.builder().id(1L).name("test").email("test@gmail.com").build();
         var expected = AuthResponse.builder().id(1L).name("test").email("test@gmail.com").build();
@@ -50,10 +48,8 @@ class AuthServiceTest {
         when(userService.createUser(any())).thenReturn(userRes);
         when(authMapper.toAuthResponseDto(any(UserResponse.class))).thenReturn(expected);
 
-        // Act
         AuthResponse result = authService.register(req);
 
-        // Assert
         assertEquals(expected.getEmail(), result.getEmail());
         verify(userService).createUser(any());
         verify(passwordEncoder).encode(anyString());

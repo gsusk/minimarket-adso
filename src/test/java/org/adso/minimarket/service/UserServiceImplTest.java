@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-public class UserServiceTest {
+public class UserServiceImplTest {
 
     @TestConfiguration
     static class UserServiceImplTestContextConfiguration {
