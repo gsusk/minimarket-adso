@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.request.CreateProductRequest;
-import org.adso.minimarket.models.Category;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.models.Product;
 import org.adso.minimarket.repository.CategoryRepository;
 import org.adso.minimarket.repository.ProductRepository;
@@ -20,8 +20,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long createProduct(CreateProductRequest productRequest) {
-        Category category = categoryRepository.getReferenceById(productRequest.getCategoryId());
-        Product product = new Product(productRequest.getName(), productRequest.getDescription(), productRequest.getPrice(), category);
+        if (!categoryRepository.existsById(productRequest.getCategoryId())) {
+            throw new NotFoundException("Category not found");
+        }
+
+        Product product = new Product(
+                productRequest.getName(),
+                productRequest.getDescription(),
+                productRequest.getPrice(),
+                categoryRepository.getReferenceById(productRequest.getCategoryId())
+        );
         return productRepository.save(product).getId();
     }
 }

@@ -57,7 +57,7 @@ public class ProductControllerTest {
     @Test
     void create_withInvalidRequest_returns400() throws Exception {
         CreateProductRequest request =
-                CreateProductRequest.builder().name("Camiseta").categoryId(null).build();
+                CreateProductRequest.builder().name("Camiseta").categoryId(-1L).build();
 
         mockMvc.perform(
                         post("/product").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
@@ -66,5 +66,4 @@ public class ProductControllerTest {
 
         verifyNoInteractions(productService);
     }
-
 }

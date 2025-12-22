@@ -29,5 +29,6 @@ public class CreateProductRequest {
 
     @JsonProperty("category_id")
     @NotNull(message = "Category is required")
+    @Min(1)
     private Long categoryId;
 }

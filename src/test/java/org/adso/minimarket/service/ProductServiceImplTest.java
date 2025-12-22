@@ -1,6 +1,7 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.request.CreateProductRequest;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.Product;
 import org.adso.minimarket.repository.CategoryRepository;
@@ -15,13 +16,13 @@ import org.springframework.test.context.ActiveProfiles;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceImplTest  {
+public class ProductServiceImplTest {
     @InjectMocks
     private ProductServiceImpl productService;
 
@@ -48,5 +49,18 @@ public class ProductServiceImplTest  {
 
         verify(productRepository).save(any(Product.class));
         verify(categoryRepository).getReferenceById(any(Long.class));
+    }
+
+    @Test
+    void createProduct_failsIfCategoryNotFound() {
+        CreateProductRequest request =
+                CreateProductRequest.builder().name("Camiseta").description("").price(new BigDecimal(1000)).categoryId(1L).build();
+
+        when(categoryRepository.existsById(any(Long.class))).thenReturn(false);
+
+        assertThrows(NotFoundException.class, () -> productService.createProduct(request));
+
+        verifyNoInteractions(productRepository);
+        verify(categoryRepository).existsById(any(Long.class));
     }
 }
