@@ -12,8 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,34 +35,31 @@ public class ProductServiceImplTest {
     private CategoryRepository categoryRepository;
 
     @Test
-    void createProduct_shouldSaveUser() {
-        CreateProductRequest request =
-                CreateProductRequest.builder().name("Camiseta").description("").price(new BigDecimal(1000)).categoryId(1L).build();
-        Product res =
-                new Product(1L, "Camiseta", "", request.getPrice(), new Category());
-        Category category = new Category(1L, "Ropa");
+    void createProduct_Success() {
+        var req = new CreateProductRequest("Camiseta", "blanca", new BigDecimal("1500.0"), 1L);
+        var category = new Category(); // Assume ID 1
+        var savedProduct = new Product("Camiseta", "blanca", new BigDecimal("1500.0"), category);
 
-        when(productRepository.save(any(Product.class))).thenReturn(res);
-        when(categoryRepository.getReferenceById(any(Long.class))).thenReturn(category);
+        ReflectionTestUtils.setField(savedProduct, "id", 99L);
 
-        Long id = productService.createProduct(request);
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
-        assertEquals(1L, id);
+        Long resultId = productService.createProduct(req);
 
+        assertEquals(99L, resultId);
+        verify(categoryRepository).findById(1L);
         verify(productRepository).save(any(Product.class));
-        verify(categoryRepository).getReferenceById(any(Long.class));
     }
 
     @Test
-    void createProduct_failsIfCategoryNotFound() {
-        CreateProductRequest request =
-                CreateProductRequest.builder().name("Camiseta").description("").price(new BigDecimal(1000)).categoryId(1L).build();
+    void createProduct_ThrowsWhenCategoryMissing() {
+        var req = new CreateProductRequest("Laptop", "Gaming", new BigDecimal("1500.0"), 1L);
 
-        when(categoryRepository.existsById(any(Long.class))).thenReturn(false);
+        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> productService.createProduct(request));
+        assertThrows(NotFoundException.class, () -> productService.createProduct(req));
 
         verifyNoInteractions(productRepository);
-        verify(categoryRepository).existsById(any(Long.class));
     }
 }

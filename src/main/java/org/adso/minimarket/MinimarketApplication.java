@@ -1,6 +1,8 @@
 package org.adso.minimarket;
 
+import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.User;
+import org.adso.minimarket.repository.CategoryRepository;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -16,11 +18,16 @@ public class MinimarketApplication {
 
     @Bean
     @Profile("!test")
-    public CommandLineRunner initDb(UserRepository userRepository) {
+    public CommandLineRunner initDb(UserRepository userRepository, CategoryRepository categoryRepository) {
         return args -> {
             if (userRepository.count() == 0) {
                 userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
                 userRepository.save(new User("jorge", "pic", "pepe@gmail.com", "password123"));
+            }
+
+            if (categoryRepository.count() == 0) {
+                categoryRepository.save(new Category("Ropa"));
+                categoryRepository.save(new Category("Electrodomesticos"));
             }
         };
     }
