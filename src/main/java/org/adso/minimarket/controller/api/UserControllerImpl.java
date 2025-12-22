@@ -22,7 +22,6 @@ public class UserControllerImpl implements UserController {
 
     @GetMapping(UserRoutes.GET_USER)
     public ResponseEntity<UserResponse> getById(@PathVariable @Min(1) Long id) {
-        System.out.println(id);
         UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }

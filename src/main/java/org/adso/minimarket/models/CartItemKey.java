@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-@Data
 @Embeddable
 public class CartItemKey implements Serializable {
     @Column(name = "cart_id")

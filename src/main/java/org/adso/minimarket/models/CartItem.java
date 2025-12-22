@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(

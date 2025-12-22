@@ -1,14 +1,14 @@
 package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+@Getter
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
@@ -16,7 +16,6 @@ import java.util.List;
                 @UniqueConstraint(name = "uk_category_name", columnNames = "name")
         }
 )
-
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -26,5 +25,5 @@ public class Category {
     private String name;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-    private List<Product> products;
+    private List<Product> products = new ArrayList<>();
 }

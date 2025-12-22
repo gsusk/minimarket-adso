@@ -32,7 +32,7 @@ public class ProductServiceImplTest {
         ProductRequest request =
                 ProductRequest.builder().name("Camiseta").description("").price(new BigDecimal(1000)).categoryId(1L).build();
         Product res =
-                Product.builder().id(1L).name("Camiseta").description("").price(request.getPrice()).category(new Category()).build();
+                new Product(1L, "Camiseta", "", request.getPrice(), new Category());
 
         when(productRepository.save(any(Product.class))).thenReturn(res);
 

@@ -25,16 +25,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
                 authorize -> authorize
-//                        .anyRequest()
-//                        .permitAll()
-                        .requestMatchers(
-                                AuthRoutes.REGISTER,
-                                AuthRoutes.LOGIN,
-                                UserRoutes.GET_USER
-                        )
-                        .permitAll()
                         .anyRequest()
-                        .authenticated()
+                        .permitAll()
+//                        .requestMatchers(
+//                                AuthRoutes.REGISTER,
+//                                AuthRoutes.LOGIN,
+//                                UserRoutes.GET_USER
+//                        )
+//                        .permitAll()
+//                        .anyRequest()
+//                        .authenticated()
         ).httpBasic(Customizer.withDefaults()).build();
     }
 

@@ -57,7 +57,7 @@ class AuthServiceImplTest {
 
     @Test
     void loginUser_whenValid_thenReturnsFoundUser() {
-        var user = User.builder().id(1L).email("test@gmail.com").password("password").build();
+        var user = new User(1L, "test@gmail.com", "password");
         var req = new LoginRequest("test@gmail.com", "password");
         var expected = AuthResponse.builder().id(1L).email("test@gmail.com").build();
 
@@ -83,12 +83,7 @@ class AuthServiceImplTest {
 
     @Test
     void loginUser_whenPasswordMismatch_throwsWrongCredentialsException() throws Exception {
-        User usr = User.builder()
-                .id(1L)
-                .name("test")
-                .email("test@gmail.com")
-                .password("password123")
-                .build();
+        User usr = new User(1L, "test", "lastname", "test@gmail.com","password123");
 
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
         when(userService.getUserInternalByEmail(any(String.class))).thenReturn(usr);

@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Builder
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_user_email", columnNames = "email")
@@ -64,5 +63,12 @@ public class User {
     }
 
     public User() {
+    }
+
+
+    public User(Long id, String name, String password) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
     }
 }
