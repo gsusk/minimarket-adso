@@ -1,6 +1,6 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.dto.request.ProductRequest;
+import org.adso.minimarket.dto.request.CreateProductRequest;
 import org.adso.minimarket.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,17 +41,17 @@ public class ProductControllerTest {
 
     @Test
     void create_withValidRequest_returns201() throws Exception {
-        ProductRequest request =
-                ProductRequest.builder().name("Camiseta").price(new BigDecimal(1000)).categoryId(1L).build();
+        CreateProductRequest request =
+                CreateProductRequest.builder().name("Camiseta").price(new BigDecimal(1000)).categoryId(1L).build();
 
-        when(productService.createProduct(any(ProductRequest.class))).thenReturn(1L);
+        when(productService.createProduct(any(CreateProductRequest.class))).thenReturn(1L);
 
         mockMvc.perform(
                         post("/product").content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isCreated()).andExpect(header().exists("Location"));
 
-        verify(productService).createProduct(any(ProductRequest.class));
+        verify(productService).createProduct(any(CreateProductRequest.class));
     }
 
 }

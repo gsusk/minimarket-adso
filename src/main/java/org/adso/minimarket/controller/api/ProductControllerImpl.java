@@ -1,6 +1,6 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.dto.request.ProductRequest;
+import org.adso.minimarket.dto.request.CreateProductRequest;
 import org.adso.minimarket.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +19,7 @@ public class ProductControllerImpl implements ProductController {
 
     @Override
     @PostMapping("/product")
-    public ResponseEntity<?> create(ProductRequest productRequest) {
+    public ResponseEntity<?> create(CreateProductRequest productRequest) {
         return ResponseEntity.created(URI.create("/product/" + productService.createProduct(productRequest))).build();
     }
 }

@@ -1,11 +1,11 @@
 package org.adso.minimarket.repository;
 
-import org.adso.minimarket.models.Product;
+import org.adso.minimarket.models.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Override
-    <S extends Product> S save(S entity);
+    Category getReferenceById(Long id);
 }

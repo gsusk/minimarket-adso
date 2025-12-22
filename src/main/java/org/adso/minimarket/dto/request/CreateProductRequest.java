@@ -1,5 +1,6 @@
 package org.adso.minimarket.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductRequest {
+public class CreateProductRequest {
 
     @NotBlank(message = "Product name is required")
     @Size(max = 255, message = "Product name must be at most 255 characters")
@@ -26,13 +27,7 @@ public class ProductRequest {
     @Digits(integer = 15, fraction = 4, message = "Price format is invalid")
     private BigDecimal price;
 
-    @Size(max = 10, message = "A product can have at most 10 images")
-    private List<
-            @NotBlank(message = "Image URL cannot be blank")
-            @Size(max = 500, message = "Image URL is too long")
-                    String
-            > imagesUrl;
-
+    @JsonProperty("category_id")
     @NotNull(message = "Category is required")
     private Long categoryId;
 }
