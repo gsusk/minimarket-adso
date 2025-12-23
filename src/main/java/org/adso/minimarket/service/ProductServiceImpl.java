@@ -1,28 +1,27 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.request.CreateProductRequest;
-import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.Product;
-import org.adso.minimarket.repository.CategoryRepository;
 import org.adso.minimarket.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
+    private final CategoryService categoryService;
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
 
-    ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    ProductServiceImpl(CategoryService categoryService, ProductRepository productRepository) {
+        this.categoryService = categoryService;
         this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
     }
 
     @Override
+    @Transactional
     public Long createProduct(CreateProductRequest productRequest) {
-        Category category = categoryRepository.findById(productRequest.getCategoryId())
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+        Category category = categoryService.getById(productRequest.getCategoryId());
 
         Product product = new Product(
                 productRequest.getName(),

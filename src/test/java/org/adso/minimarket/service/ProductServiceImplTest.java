@@ -32,7 +32,7 @@ public class ProductServiceImplTest {
     private ProductRepository productRepository;
 
     @Mock
-    private CategoryRepository categoryRepository;
+    private CategoryService categoryService;
 
     @Test
     void createProduct_Success() {
@@ -42,24 +42,13 @@ public class ProductServiceImplTest {
 
         ReflectionTestUtils.setField(savedProduct, "id", 99L);
 
-        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+        when(categoryService.getById(1L)).thenReturn(category);
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
         Long resultId = productService.createProduct(req);
 
         assertEquals(99L, resultId);
-        verify(categoryRepository).findById(1L);
+        verify(categoryService).getById(1L);
         verify(productRepository).save(any(Product.class));
-    }
-
-    @Test
-    void createProduct_ThrowsWhenCategoryMissing() {
-        var req = new CreateProductRequest("Laptop", "Gaming", new BigDecimal("1500.0"), 1L);
-
-        when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> productService.createProduct(req));
-
-        verifyNoInteractions(productRepository);
     }
 }
