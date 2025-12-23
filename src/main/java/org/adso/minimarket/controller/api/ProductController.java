@@ -1,8 +1,12 @@
 package org.adso.minimarket.controller.api;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.adso.minimarket.dto.request.CreateProductRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 public interface ProductController {
-    ResponseEntity<?> create(CreateProductRequest productRequest);
+    ResponseEntity<?> create(@Valid CreateProductRequest productRequest);
+    ResponseEntity<?> getById(@PathVariable @Min(1) @Valid Long id);
 }

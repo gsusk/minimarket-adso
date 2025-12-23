@@ -41,7 +41,6 @@ public class ProductServiceImplTest {
         var savedProduct = new Product("Camiseta", "blanca", new BigDecimal("1500.0"), category);
 
         ReflectionTestUtils.setField(savedProduct, "id", 99L);
-
         when(categoryService.getById(1L)).thenReturn(category);
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
@@ -50,5 +49,31 @@ public class ProductServiceImplTest {
         assertEquals(99L, resultId);
         verify(categoryService).getById(1L);
         verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    void getProduct_Success() {
+        var productId = 1L;
+        var product = new Product(1L, "Camiseta", "blanca", new BigDecimal("1000"), new Category());
+
+        when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
+
+        Product result = productService.getProductById(productId);
+
+        assertEquals(1L, result.getId());
+
+        verify(productRepository).findById(any(Long.class));
+    }
+
+
+    @Test
+    void getProduct_ifNotFound_failsThrows() {
+        var productId = 1L;
+
+        when(productRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> productService.getProductById(productId));
+
+        verify(productRepository).findById(any(Long.class));
     }
 }
