@@ -11,6 +11,7 @@ import org.adso.minimarket.exception.WrongCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -135,6 +136,17 @@ public class GlobalErrorHandler {
 
         return ResponseEntity.badRequest()
                 .body(message);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<BasicErrorResponse> handleMessageNotReadableException(
+            HttpMessageNotReadableException ex
+    ) {
+        BasicErrorResponse err = new BasicErrorResponse();
+        err.setMessage(ex.getMessage());
+        err.setCode("BAD_REQUEST");
+
+        return new ResponseEntity<>(err, HttpStatus.UNAUTHORIZED);
     }
 
     private Throwable getRootCause(Throwable ex) {
