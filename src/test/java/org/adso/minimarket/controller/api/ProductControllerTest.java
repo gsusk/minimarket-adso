@@ -52,7 +52,7 @@ public class ProductControllerTest {
         when(productService.createProduct(any(CreateProductRequest.class))).thenReturn(1L);
 
         mockMvc.perform(
-                        post("/product").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+                        post("/products").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isCreated()).andExpect(header().exists("Location"));
 
@@ -65,7 +65,7 @@ public class ProductControllerTest {
                 CreateProductRequest.builder().name("Camiseta").categoryId(-1L).build();
 
         mockMvc.perform(
-                        post("/product").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+                        post("/products").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isBadRequest());
 
@@ -81,7 +81,7 @@ public class ProductControllerTest {
         when(productService.getProductById(any(Long.class))).thenReturn(pr);
 
         mockMvc.perform(
-                        get("/product/" + request)
+                        get("/products/" + request)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("test"))
@@ -94,12 +94,12 @@ public class ProductControllerTest {
         long request = -1L;
         String request2 = "abc";
         mockMvc.perform(
-                        get("/product/" + request)
+                        get("/products/" + request)
                 )
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(
-                        get("/product/" + request2)
+                        get("/products/" + request2)
                 )
                 .andExpect(status().isBadRequest());
 

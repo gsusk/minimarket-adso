@@ -19,13 +19,13 @@ public class ProductControllerImpl implements ProductController {
     }
 
     @Override
-    @PostMapping("/product")
+    @PostMapping("/products")
     public ResponseEntity<?> create(@RequestBody @Valid CreateProductRequest productRequest) {
-        return ResponseEntity.created(URI.create("/product/" + productService.createProduct(productRequest))).build();
+        return ResponseEntity.created(URI.create("/products/" + productService.createProduct(productRequest))).build();
     }
 
     @Override
-    @GetMapping("/product/{id}")
+    @GetMapping("/products/{id}")
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
