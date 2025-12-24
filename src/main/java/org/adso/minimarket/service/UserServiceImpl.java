@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.dto.request.RegisterRequest;
-import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.dto.RegisterRequest;
+import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.User;

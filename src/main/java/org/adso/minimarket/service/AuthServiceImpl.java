@@ -1,9 +1,9 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.dto.request.LoginRequest;
-import org.adso.minimarket.dto.request.RegisterRequest;
-import org.adso.minimarket.dto.response.AuthResponse;
-import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.dto.LoginRequest;
+import org.adso.minimarket.dto.RegisterRequest;
+import org.adso.minimarket.dto.AuthResponse;
+import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.AuthMapper;

@@ -1,6 +1,7 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.dto.request.CreateProductRequest;
+import org.adso.minimarket.dto.CreateProductRequest;
+import org.adso.minimarket.dto.ProductResponse;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.Product;
 import org.adso.minimarket.service.ProductService;
@@ -11,13 +12,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.parameters.P;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -45,7 +47,7 @@ public class ProductControllerTest {
     @Test
     void create_withValidRequest_returns201() throws Exception {
         CreateProductRequest request =
-                CreateProductRequest.builder().name("Camiseta").price(new BigDecimal(1000)).categoryId(1L).build();
+                CreateProductRequest.builder().name("Camiseta").price("1000").categoryId(1L).build();
 
         when(productService.createProduct(any(CreateProductRequest.class))).thenReturn(1L);
 
@@ -74,8 +76,9 @@ public class ProductControllerTest {
     void getById_succeeds_return200() throws Exception {
         long request = 1L;
         Product p = new Product(1L, "test", "desc", new BigDecimal("1000"), new Category());
+        ProductResponse pr = new ProductResponse(1L, "test", "desc","1000", List.of(), null, LocalDateTime.now());
 
-        when(productService.getProductById(any(Long.class))).thenReturn(p);
+        when(productService.getProductById(any(Long.class))).thenReturn(pr);
 
         mockMvc.perform(
                         get("/product/" + request)

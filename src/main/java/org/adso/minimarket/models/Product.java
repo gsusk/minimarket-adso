@@ -1,17 +1,18 @@
 package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Entity
@@ -27,7 +28,7 @@ public class Product {
 
     private String description;
 
-    @Column(precision = 19, scale = 4, nullable = false)
+    @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
     private List<String> images_url = new ArrayList<>();
@@ -50,15 +51,36 @@ public class Product {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.price = normalizePrice(price);
         this.category = category;
     }
-
 
     public Product(String name, String description, BigDecimal price, Category category) {
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.price = normalizePrice(price);
         this.category = category;
+    }
+
+    BigDecimal normalizePrice(BigDecimal price) {
+        if (price == null) {
+            throw new IllegalArgumentException("Price cannot be null");
+        }
+        if (price.signum() < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
+        }
+        return price.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(description, product.description) && Objects.equals(price, product.price) && Objects.equals(images_url, product.images_url) && Objects.equals(category, product.category) && Objects.equals(cartItems, product.cartItems) && Objects.equals(createdAt, product.createdAt) && Objects.equals(updatedAt, product.updatedAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, price, images_url, category, cartItems, createdAt, updatedAt);
     }
 }

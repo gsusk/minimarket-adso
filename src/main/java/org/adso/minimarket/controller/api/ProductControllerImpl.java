@@ -1,8 +1,8 @@
 package org.adso.minimarket.controller.api;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import org.adso.minimarket.dto.request.CreateProductRequest;
+import org.adso.minimarket.dto.CreateProductRequest;
+import org.adso.minimarket.dto.ProductResponse;
 import org.adso.minimarket.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +26,7 @@ public class ProductControllerImpl implements ProductController {
 
     @Override
     @GetMapping("/product/{id}")
-    public ResponseEntity<?> getById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 }

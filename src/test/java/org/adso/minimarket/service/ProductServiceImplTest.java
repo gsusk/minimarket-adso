@@ -1,10 +1,11 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.dto.request.CreateProductRequest;
+import org.adso.minimarket.dto.CreateProductRequest;
+import org.adso.minimarket.dto.ProductResponse;
 import org.adso.minimarket.exception.NotFoundException;
+import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.Product;
-import org.adso.minimarket.repository.CategoryRepository;
 import org.adso.minimarket.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,12 +16,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -34,9 +38,12 @@ public class ProductServiceImplTest {
     @Mock
     private CategoryService categoryService;
 
+    @Mock
+    private ProductMapper productMapper;
+
     @Test
     void createProduct_Success() {
-        var req = new CreateProductRequest("Camiseta", "blanca", new BigDecimal("1500.0"), 1L);
+        var req = new CreateProductRequest("Camiseta", "blanca", "1500.0", 1L);
         var category = new Category(); // Assume ID 1
         var savedProduct = new Product("Camiseta", "blanca", new BigDecimal("1500.0"), category);
 
@@ -55,14 +62,18 @@ public class ProductServiceImplTest {
     void getProduct_Success() {
         var productId = 1L;
         var product = new Product(1L, "Camiseta", "blanca", new BigDecimal("1000"), new Category());
+        var productResponse = new ProductResponse(1L, "Camiseta", "blanca", "1000", List.of(),
+                null, LocalDateTime.now());
 
         when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
+        when(productMapper.toDto(any(Product.class))).thenReturn(productResponse);
 
-        Product result = productService.getProductById(productId);
+        ProductResponse result = productService.getProductById(productId);
 
         assertEquals(1L, result.getId());
 
         verify(productRepository).findById(any(Long.class));
+        verify(productMapper).toDto(any(Product.class));
     }
 
 

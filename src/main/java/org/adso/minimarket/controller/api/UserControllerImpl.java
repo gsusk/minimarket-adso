@@ -2,7 +2,7 @@ package org.adso.minimarket.controller.api;
 
 import jakarta.validation.constraints.Min;
 import org.adso.minimarket.constant.UserRoutes;
-import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

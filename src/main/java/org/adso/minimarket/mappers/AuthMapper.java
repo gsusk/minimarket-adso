@@ -1,7 +1,7 @@
 package org.adso.minimarket.mappers;
 
-import org.adso.minimarket.dto.response.AuthResponse;
-import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.dto.AuthResponse;
+import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.models.User;
 import org.mapstruct.Mapper;
 

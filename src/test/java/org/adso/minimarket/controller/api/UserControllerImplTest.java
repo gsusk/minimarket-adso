@@ -1,7 +1,7 @@
 package org.adso.minimarket.controller.api;
 
 import org.adso.minimarket.constant.UserRoutes;
-import org.adso.minimarket.dto.response.UserResponse;
+import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

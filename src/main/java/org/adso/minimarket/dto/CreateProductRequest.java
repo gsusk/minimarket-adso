@@ -1,11 +1,8 @@
-package org.adso.minimarket.dto.request;
+package org.adso.minimarket.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 
 @Getter
@@ -24,8 +21,8 @@ public class CreateProductRequest {
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-    @Digits(integer = 15, fraction = 4, message = "Price format is invalid")
-    private BigDecimal price;
+    @Digits(integer = 15, fraction = 2, message = "Price format is invalid")
+    private String price;
 
     @JsonProperty("category_id")
     @NotNull(message = "Category is required")

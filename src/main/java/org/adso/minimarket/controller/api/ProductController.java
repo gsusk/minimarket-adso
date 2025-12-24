@@ -2,7 +2,7 @@ package org.adso.minimarket.controller.api;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.adso.minimarket.dto.request.CreateProductRequest;
+import org.adso.minimarket.dto.CreateProductRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
