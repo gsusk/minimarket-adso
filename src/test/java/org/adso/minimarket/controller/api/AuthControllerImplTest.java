@@ -1,9 +1,9 @@
 package org.adso.minimarket.controller.api;
 
 import org.adso.minimarket.constant.AuthRoutes;
+import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
-import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.service.AuthService;
 import org.junit.jupiter.api.Test;
@@ -78,7 +78,7 @@ class AuthControllerImplTest {
         mockMvc.perform(post(AuthRoutes.LOGIN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-        ).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.message").value("unauthorized"));
+        ).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.detail").value("unauthorized"));
 
         verify(authService).loginUser(any(LoginRequest.class));
     }
