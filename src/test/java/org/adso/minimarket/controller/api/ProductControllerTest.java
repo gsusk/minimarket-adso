@@ -75,8 +75,8 @@ public class ProductControllerTest {
     @Test
     void getById_succeeds_return200() throws Exception {
         long request = 1L;
-        Product p = new Product(1L, "test", "desc", new BigDecimal("1000"), new Category());
-        ProductResponse pr = new ProductResponse(1L, "test", "desc","1000", List.of(), null, LocalDateTime.now());
+        Product p = new Product(1L, "test", "desc", new BigDecimal("1000"), 1, new Category());
+        ProductResponse pr = new ProductResponse(1L, "test", "desc","1000", List.of(), null, 1, LocalDateTime.now());
 
         when(productService.getProductById(any(Long.class))).thenReturn(pr);
 

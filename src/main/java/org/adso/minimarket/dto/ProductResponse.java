@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -19,8 +20,9 @@ public class ProductResponse {
     private String name;
     private String description;
     private String price;
-    private List<String> images;
+    private List<String> images = new ArrayList<>();
     private CategorySummary category;
+    private int stock;
 
     @JsonProperty(value = "listed_at")
     private LocalDateTime createdAt;

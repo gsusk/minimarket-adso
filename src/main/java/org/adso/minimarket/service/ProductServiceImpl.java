@@ -8,7 +8,6 @@ import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.Product;
 import org.adso.minimarket.repository.ProductRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -27,9 +26,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
     public Long createProduct(CreateProductRequest productRequest) {
-        Category category = categoryService.getById(productRequest.getCategoryId());
+        Category category = categoryService.getInternalById(productRequest.getCategoryId());
 
         Product product = new Product(
                 productRequest.getName(),

@@ -48,22 +48,22 @@ public class ProductServiceImplTest {
         var savedProduct = new Product("Camiseta", "blanca", new BigDecimal("1500.0"), category);
 
         ReflectionTestUtils.setField(savedProduct, "id", 99L);
-        when(categoryService.getById(1L)).thenReturn(category);
+        when(categoryService.getInternalById(1L)).thenReturn(category);
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
         Long resultId = productService.createProduct(req);
 
         assertEquals(99L, resultId);
-        verify(categoryService).getById(1L);
+        verify(categoryService).getInternalById(1L);
         verify(productRepository).save(any(Product.class));
     }
 
     @Test
     void getProduct_Success() {
         var productId = 1L;
-        var product = new Product(1L, "Camiseta", "blanca", new BigDecimal("1000"), new Category());
+        var product = new Product(1L, "Camiseta", "blanca", new BigDecimal("1000"), 1, new Category());
         var productResponse = new ProductResponse(1L, "Camiseta", "blanca", "1000", List.of(),
-                null, LocalDateTime.now());
+                null, 1, LocalDateTime.now());
 
         when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(product));
         when(productMapper.toDto(any(Product.class))).thenReturn(productResponse);

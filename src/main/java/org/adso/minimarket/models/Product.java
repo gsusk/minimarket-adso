@@ -1,6 +1,7 @@
 package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,9 @@ public class Product {
     @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
+    @Min(value = 0, message = "stock cant be less than 0")
+    private Integer stock;
+
     private List<String> images_url = new ArrayList<>();
 
     @Setter
@@ -47,7 +51,7 @@ public class Product {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public Product(Long id, String name, String description, BigDecimal price, Category category) {
+    public Product(Long id, String name, String description, BigDecimal price, Integer stock, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -76,7 +80,11 @@ public class Product {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(description, product.description) && Objects.equals(price, product.price) && Objects.equals(images_url, product.images_url) && Objects.equals(category, product.category) && Objects.equals(cartItems, product.cartItems) && Objects.equals(createdAt, product.createdAt) && Objects.equals(updatedAt, product.updatedAt);
+        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(description,
+                product.description) && Objects.equals(price, product.price) && Objects.equals(images_url,
+                product.images_url) && Objects.equals(category, product.category) && Objects.equals(cartItems,
+                product.cartItems) && Objects.equals(createdAt, product.createdAt) && Objects.equals(updatedAt,
+                product.updatedAt);
     }
 
     @Override

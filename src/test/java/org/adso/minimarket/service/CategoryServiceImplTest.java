@@ -36,7 +36,7 @@ public class CategoryServiceImplTest {
 
         when(categoryRepository.findById(any(Long.class))).thenReturn(Optional.of(category));
 
-        Category result = categoryService.getById(category.getId());
+        Category result = categoryService.getInternalById(category.getId());
 
         assertEquals(1L, result.getId());
         assertEquals("Ropa", result.getName());
