@@ -1,5 +1,6 @@
 package org.adso.minimarket.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -10,6 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateProductRequest {
 
     @NotBlank(message = "Product name is required")
@@ -26,6 +28,9 @@ public class CreateProductRequest {
 
     @JsonProperty("category_id")
     @NotNull(message = "Category is required")
-    @Min(1)
+    @Min(value = 1, message = "Invalid category")
     private Long categoryId;
+
+    @Min(value = 1, message = "Stock has to be greater than 0")
+    private Integer stock;
 }
