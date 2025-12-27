@@ -4,7 +4,6 @@ import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.CategoryRepository;
 import org.adso.minimarket.repository.UserRepository;
-import org.adso.minimarket.service.JwtService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
