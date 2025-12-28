@@ -1,15 +1,18 @@
 package org.adso.minimarket.service;
 
+import org.adso.minimarket.config.UserPrincipal;
+import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
-import org.adso.minimarket.dto.AuthResponse;
-import org.adso.minimarket.dto.UserResponse;
-import org.adso.minimarket.exception.NotFoundException;
-import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.mappers.AuthMapper;
 import org.adso.minimarket.models.User;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -17,38 +20,42 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final AuthMapper authMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authManager;
+    private final JwtService jwtService;
 
-    AuthServiceImpl(UserService userService, AuthMapper authMapper, PasswordEncoder passwordEncoder) {
+    AuthServiceImpl(UserService userService, AuthMapper authMapper, PasswordEncoder passwordEncoder,
+                    AuthenticationManager authManager, JwtService jwtService) {
         this.userService = userService;
         this.authMapper = authMapper;
         this.passwordEncoder = passwordEncoder;
+        this.authManager = authManager;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public AuthResponse register(RegisterRequest rr) {
-        UserResponse user = this.userService.createUser(RegisterRequest.builder()
-                .name(rr.name())
-                .lastName(rr.lastName())
-                .email(rr.email())
-                .password(this.passwordEncoder.encode(rr.password()))
+    public AuthResponse register(RegisterRequest req) {
+        User user = this.userService.createUser(RegisterRequest.builder()
+                .name(req.name())
+                .lastName(req.lastName())
+                .email(req.email())
+                .password(this.passwordEncoder.encode(req.password()))
                 .build());
 
-        return authMapper.toAuthResponseDto(user);
+        String token = jwtService.generateToken(new UserPrincipal(user));
+
+        return authMapper.toAuthResponseDto(user, token);
     }
 
     @Override
-    public AuthResponse loginUser(LoginRequest req) {
-        User user;
-        try {
-            user = this.userService.getUserInternalByEmail(req.email());
-        } catch (NotFoundException e) {
-            throw new WrongCredentialsException("Invalid email or password");
-        }
+    public AuthResponse loginUser(LoginRequest req) throws NullPointerException {
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.email(), req.password())
+        );
 
-        if (!this.passwordEncoder.matches(req.password(), user.getPassword())) {
-            throw new WrongCredentialsException("Invalid email or password");
-        }
+        UserPrincipal user = (UserPrincipal) Objects.requireNonNull(authentication.getPrincipal());
 
-        return authMapper.toAuthResponseDto(user);
+        String token = jwtService.generateToken(user);
+
+        return authMapper.toAuthResponseDto(user.getUser(), token);
     }
 }

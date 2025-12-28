@@ -2,13 +2,14 @@ package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+
 
 @Getter
 @Entity
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
                 @UniqueConstraint(name = "uk_user_email", columnNames = "email")
         }
 )
+@NoArgsConstructor
 @AllArgsConstructor
 public class User {
     @Id
@@ -41,34 +43,24 @@ public class User {
 
     private String status;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
     @CreationTimestamp(source = SourceType.DB)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public User(Long id, String name, String lastName, String email, String password) {
-        this.id = id;
-        this.name = name;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public User(String name, String lastName, String email, String password) {
         this.name = name;
         this.lastName = lastName;
         this.email = email;
-        this.password = password;
-    }
-
-    public User() {
-    }
-
-
-    public User(Long id, String name, String password) {
-        this.id = id;
-        this.name = name;
         this.password = password;
     }
 }

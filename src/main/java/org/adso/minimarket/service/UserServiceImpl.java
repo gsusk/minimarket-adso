@@ -4,6 +4,7 @@ import org.adso.minimarket.dto.RegisterRequest;
 import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
+import org.adso.minimarket.models.Role;
 import org.adso.minimarket.models.User;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse createUser(RegisterRequest body) {
+    public User createUser(RegisterRequest body) {
         User usr = new User(body.name(), body.lastName(), body.email(), body.password());
-        return userMapper.toResponseDto(userRepository.save(usr));
+        usr.setRole(Role.USER);
+        return userRepository.save(usr);
     }
 
     @Override
