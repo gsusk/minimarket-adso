@@ -2,7 +2,6 @@ package org.adso.minimarket.repository;
 
 import org.adso.minimarket.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,5 +12,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     <S extends User> S save(S entity);
 
     Optional<User> findByEmail(String email);
+
     Optional<User> findById(Long id);
 }
