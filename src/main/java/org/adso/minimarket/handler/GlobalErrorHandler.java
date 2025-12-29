@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.adso.minimarket.exception.NotFoundException;
+import org.adso.minimarket.exception.TokenInvalidException;
 import org.adso.minimarket.exception.WrongCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
@@ -15,6 +16,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,6 +93,17 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
         problem.setProperty("errors", errors);
 
         return ResponseEntity.status(status).body(problem);
+    }
+
+    @ExceptionHandler(TokenInvalidException.class)
+    public ResponseEntity<Object> handleUnauthenticatedException(
+            TokenInvalidException ex,
+            WebRequest webRequest
+    ) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problem.setTitle("Unauthorized");
+        problem.setInstance(URI.create(webRequest.getContextPath()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 
     @ExceptionHandler(WrongCredentialsException.class)

@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         AuthRoutes.REGISTER,
                                         AuthRoutes.LOGIN,
-                                        "/products/{id}"
+                                        "/products/{id}",
+                                        "/refresh"
                                 )
                                 .permitAll()
                                 .anyRequest()

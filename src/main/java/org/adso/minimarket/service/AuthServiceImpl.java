@@ -4,6 +4,7 @@ import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
+import org.adso.minimarket.exception.TokenInvalidException;
 import org.adso.minimarket.models.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -59,5 +60,25 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return new AuthResponse(accessToken, refreshToken);
+    }
+
+    @Override
+    public AuthResponse refresh(String refreshToken) {
+        String email = jwtService.extractRefreshUsername(refreshToken);
+
+        if (email == null) {
+            throw new TokenInvalidException("Unauthorized");
+        }
+
+        User user = userService.getUserInternalByEmail(email);
+        UserDetails userDetails = new UserPrincipal(user);
+
+        if (!jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
+            throw new TokenInvalidException("Unauthorized");
+        }
+
+        final String newAccessToken = jwtService.generateAccessToken(userDetails);
+
+        return new AuthResponse(newAccessToken, null);
     }
 }
