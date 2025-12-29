@@ -4,11 +4,11 @@ import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
-import org.adso.minimarket.mappers.AuthMapper;
 import org.adso.minimarket.models.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +18,13 @@ import java.util.Objects;
 public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
-    private final AuthMapper authMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
 
-    AuthServiceImpl(UserService userService, AuthMapper authMapper, PasswordEncoder passwordEncoder,
+    AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder,
                     AuthenticationManager authManager, JwtService jwtService) {
         this.userService = userService;
-        this.authMapper = authMapper;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtService = jwtService;
@@ -41,9 +39,12 @@ public class AuthServiceImpl implements AuthService {
                 .password(this.passwordEncoder.encode(req.password()))
                 .build());
 
-        String token = jwtService.generateToken(new UserPrincipal(user));
+        UserDetails userDetails = new UserPrincipal(user);
 
-        return authMapper.toAuthResponseDto(user, token);
+        String accessToken = jwtService.generateAccessToken(userDetails);
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
+
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     @Override
@@ -54,8 +55,9 @@ public class AuthServiceImpl implements AuthService {
 
         UserPrincipal user = (UserPrincipal) Objects.requireNonNull(authentication.getPrincipal());
 
-        String token = jwtService.generateToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
-        return authMapper.toAuthResponseDto(user.getUser(), token);
+        return new AuthResponse(accessToken, refreshToken);
     }
 }

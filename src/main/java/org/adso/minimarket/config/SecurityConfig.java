@@ -1,7 +1,7 @@
 package org.adso.minimarket.config;
 
 import org.adso.minimarket.constant.AuthRoutes;
-import org.adso.minimarket.service.AppUserDetailsService;
+import org.adso.minimarket.service.AppUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +23,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    private AppUserDetailsService userDetailsService;
+    private AppUserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private JwtFilter jwtFilter;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
@@ -50,6 +53,7 @@ public class SecurityConfig {
         return security.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .exceptionHandling((ex) -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(
                         authorize -> authorize
                                 .requestMatchers(
