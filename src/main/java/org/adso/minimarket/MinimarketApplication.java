@@ -18,7 +18,7 @@ public class MinimarketApplication {
 
     @Bean
     @Profile("!test")
-    public CommandLineRunner initDb(UserRepository userRepository, CategoryRepository categoryRepository) {
+    public CommandLineRunner seedDb(UserRepository userRepository, CategoryRepository categoryRepository) {
         return args -> {
             if (userRepository.count() == 0) {
                 userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
