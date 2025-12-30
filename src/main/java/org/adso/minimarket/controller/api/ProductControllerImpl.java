@@ -1,6 +1,7 @@
 package org.adso.minimarket.controller.api;
 
 import jakarta.validation.Valid;
+import org.adso.minimarket.constant.ProductRoutes;
 import org.adso.minimarket.dto.CreateProductRequest;
 import org.adso.minimarket.dto.ProductResponse;
 import org.adso.minimarket.service.ProductService;
@@ -19,13 +20,13 @@ public class ProductControllerImpl implements ProductController {
     }
 
     @Override
-    @PostMapping("/products")
+    @PostMapping(ProductRoutes.CREATE_PRODUCT)
     public ResponseEntity<?> create(@RequestBody @Valid CreateProductRequest productRequest) {
         return ResponseEntity.created(URI.create("/products/" + productService.createProduct(productRequest))).build();
     }
 
     @Override
-    @GetMapping("/products/{id}")
+    @GetMapping(ProductRoutes.GET_PRODUCT)
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }

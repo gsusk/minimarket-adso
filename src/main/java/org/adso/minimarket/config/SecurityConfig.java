@@ -1,6 +1,7 @@
 package org.adso.minimarket.config;
 
 import org.adso.minimarket.constant.AuthRoutes;
+import org.adso.minimarket.constant.ProductRoutes;
 import org.adso.minimarket.service.AppUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -59,8 +60,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         AuthRoutes.REGISTER,
                                         AuthRoutes.LOGIN,
-                                        "/products/{id}",
-                                        "/refresh"
+                                        AuthRoutes.REFRESH_TOKEN,
+                                        ProductRoutes.GET_PRODUCT
                                 )
                                 .permitAll()
                                 .anyRequest()
