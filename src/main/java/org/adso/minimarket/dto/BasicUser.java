@@ -12,7 +12,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserResponse {
+public class BasicUser {
     private Long id;
 
     private String name;

@@ -61,8 +61,11 @@ public class SecurityConfig {
                                         AuthRoutes.REGISTER,
                                         AuthRoutes.LOGIN,
                                         AuthRoutes.REFRESH_TOKEN,
+                                        ProductRoutes.CREATE_PRODUCT,
                                         ProductRoutes.GET_PRODUCT
                                 )
+                                .permitAll()
+                                .requestMatchers("/error")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

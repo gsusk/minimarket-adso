@@ -3,7 +3,7 @@ package org.adso.minimarket.controller.api;
 import jakarta.validation.Valid;
 import org.adso.minimarket.constant.ProductRoutes;
 import org.adso.minimarket.dto.CreateProductRequest;
-import org.adso.minimarket.dto.ProductResponse;
+import org.adso.minimarket.dto.DetailedProduct;
 import org.adso.minimarket.service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +27,7 @@ public class ProductControllerImpl implements ProductController {
 
     @Override
     @GetMapping(ProductRoutes.GET_PRODUCT)
-    public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<DetailedProduct> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 }

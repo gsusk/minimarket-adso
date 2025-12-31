@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
+import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.dto.RegisterRequest;
-import org.adso.minimarket.dto.UserResponse;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.Role;
@@ -28,14 +28,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getUserByEmail(String email) {
+    public BasicUser getUserByEmail(String email) {
         User usr = this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         return userMapper.toResponseDto(usr);
     }
 
     @Override
-    public UserResponse getUserById(Long id) {
+    public BasicUser getUserById(Long id) {
         User usr = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
         return userMapper.toResponseDto(usr);

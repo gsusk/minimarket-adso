@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.CreateProductRequest;
-import org.adso.minimarket.dto.ProductResponse;
+import org.adso.minimarket.dto.DetailedProduct;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
@@ -40,8 +40,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponse getProductById(Long id) {
-        return productMapper.toDto(productRepository.findById(id).orElseThrow(
+    public DetailedProduct getProductById(Long id) {
+        return productMapper.toDto(productRepository.findDetailedById(id).orElseThrow(
                 () -> new NotFoundException("Product not found")
         ));
     }

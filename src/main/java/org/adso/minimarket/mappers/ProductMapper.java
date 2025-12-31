@@ -1,6 +1,7 @@
 package org.adso.minimarket.mappers;
 
-import org.adso.minimarket.dto.ProductResponse;
+import org.adso.minimarket.dto.DetailedProduct;
+import org.adso.minimarket.models.Image;
 import org.adso.minimarket.models.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,5 +13,9 @@ public interface ProductMapper {
             expression = "java(product.getPrice().toPlainString())"
     )
     @Mapping(target = "category", source = "category")
-    ProductResponse toDto(Product product);
+    DetailedProduct toDto(Product product);
+
+    default String map(Image image) {
+        return image == null ? null : image.getUrl();
+    }
 }

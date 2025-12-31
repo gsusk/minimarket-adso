@@ -2,7 +2,7 @@ package org.adso.minimarket.controller.api;
 
 import jakarta.validation.constraints.Min;
 import org.adso.minimarket.constant.UserRoutes;
-import org.adso.minimarket.dto.UserResponse;
+import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,8 +21,8 @@ public class UserControllerImpl implements UserController {
     }
 
     @GetMapping(UserRoutes.GET_USER)
-    public ResponseEntity<UserResponse> getById(@PathVariable @Min(1) Long id) {
-        UserResponse user = userService.getUserById(id);
+    public ResponseEntity<BasicUser> getById(@PathVariable @Min(1) Long id) {
+        BasicUser user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 }

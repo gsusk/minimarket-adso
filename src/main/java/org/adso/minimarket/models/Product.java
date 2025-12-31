@@ -13,7 +13,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Entity
@@ -35,12 +38,17 @@ public class Product {
     @Min(value = 0, message = "stock cant be less than 0")
     private Integer stock;
 
-    private List<String> images_url = new ArrayList<>();
-
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_product_category"), nullable = false)
     private Category category;
+
+    @OneToMany(
+            mappedBy = "product",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Image> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private Set<CartItem> cartItems = new HashSet<>();
@@ -50,14 +58,6 @@ public class Product {
 
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
-
-    public Product(Long id, String name, String description, BigDecimal price, Integer stock, Category category) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = normalizePrice(price);
-        this.category = category;
-    }
 
     public Product(String name, String description, BigDecimal price, Category category) {
         this.name = name;
@@ -78,17 +78,13 @@ public class Product {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Product product = (Product) o;
-        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(description,
-                product.description) && Objects.equals(price, product.price) && Objects.equals(images_url,
-                product.images_url) && Objects.equals(category, product.category) && Objects.equals(cartItems,
-                product.cartItems) && Objects.equals(createdAt, product.createdAt) && Objects.equals(updatedAt,
-                product.updatedAt);
+        if (this == o) return true;
+        if (!(o instanceof Product other)) return false;
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, price, images_url, category, cartItems, createdAt, updatedAt);
+        return getClass().hashCode();
     }
 }

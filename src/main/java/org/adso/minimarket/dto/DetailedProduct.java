@@ -15,15 +15,14 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductResponse {
+public class DetailedProduct {
     private Long id;
     private String name;
     private String description;
     private String price;
-    private List<String> images = new ArrayList<>();
     private CategorySummary category;
     private int stock;
-
+    private List<String> images = new ArrayList<>();
     @JsonProperty(value = "listed_at")
     private LocalDateTime createdAt;
 }
