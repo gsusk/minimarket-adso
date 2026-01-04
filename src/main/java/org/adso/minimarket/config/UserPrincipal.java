@@ -33,6 +33,10 @@ public class UserPrincipal implements UserDetails {
         return user.getEmail();
     }
 
+    public Long getId() {
+        return user.getId();
+    }
+
     public User getUser() {
         return user;
     }

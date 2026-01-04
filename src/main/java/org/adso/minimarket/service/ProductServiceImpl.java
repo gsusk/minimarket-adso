@@ -27,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long createProduct(CreateProductRequest productRequest) {
-        Category category = categoryService.getInternalById(productRequest.getCategoryId());
+        Category category = categoryService.getById(productRequest.getCategoryId());
 
         Product product = new Product(
                 productRequest.getName(),
