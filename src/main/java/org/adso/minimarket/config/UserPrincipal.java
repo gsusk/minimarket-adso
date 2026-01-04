@@ -40,4 +40,15 @@ public class UserPrincipal implements UserDetails {
     public User getUser() {
         return user;
     }
+
+    @Override
+    public String toString() {
+        return "UserPrincipal{" +
+                "user=" + "{" +
+                "id: " + user.getId() +
+                "email: " + user.getEmail() +
+                "role: " + user.getRole() +
+                '}' +
+                '}';
+    }
 }
