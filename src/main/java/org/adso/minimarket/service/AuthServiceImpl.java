@@ -17,6 +17,11 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * TODO:
+ * - Anadir eventos para desacoplar?
+ */
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
