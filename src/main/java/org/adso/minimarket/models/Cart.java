@@ -42,14 +42,31 @@ public class Cart {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Cart(CartStatus cartStatus, User user, UUID guestId) {
+    //usuario
+    public Cart(CartStatus cartStatus, User user) {
         this.status = cartStatus;
         this.user = user;
+        this.guestId = null;
+        this.cartItems = new HashSet<>();
+    }
+
+    //invitado
+    public Cart(CartStatus cartStatus, UUID guestId) {
+        this.status = cartStatus;
+        this.user = null;
         this.guestId = guestId;
         this.cartItems = new HashSet<>();
     }
 
     public void setStatus(CartStatus cartStatus) {
         this.status = cartStatus;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public CartStatus getStatus() {
+        return status;
     }
 }

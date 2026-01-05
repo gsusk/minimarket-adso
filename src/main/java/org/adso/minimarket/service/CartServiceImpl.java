@@ -1,5 +1,6 @@
 package org.adso.minimarket.service;
 
+import jakarta.transaction.Transactional;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.CartMapper;
@@ -11,6 +12,8 @@ import org.adso.minimarket.repository.CartRepository;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,36 +57,51 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public void mergeCarts(Long userId, UUID guestId) {
         Cart guestCart = cartRepository.findCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElse(null);
         Cart userCart = cartRepository.findCartByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(
                 () -> this.createCart(userId)
         );
 
-        if (guestCart == null) return;
+        if (guestCart == null || guestCart.getCartItems().isEmpty()) return;
 
-        for (CartItem guestItem : guestCart.getCartItems()) {
+        List<CartItem> itemsToProcess = new ArrayList<>(guestCart.getCartItems());
+
+        for (CartItem guestItem : itemsToProcess) {
             Optional<CartItem> repeatedItem = userCart.getCartItems()
                     .stream()
-                    .filter((item) -> item.getId() == guestItem.getId())
+                    .filter((item) -> item.getProduct().getId().equals(guestItem.getProduct().getId()))
                     .findFirst();
 
             if (repeatedItem.isPresent()) {
-                repeatedItem.get().addToQuantity(repeatedItem.get().getQuantity());
+                repeatedItem.get().addToQuantity(guestItem.getQuantity());
             } else {
-                guestItem.setCart(userCart);
-                userCart.getCartItems().add(guestItem);
+                userCart.getCartItems().add(
+                        new CartItem(
+                                userCart,
+                                guestItem.getProduct(),
+                                guestItem.getQuantity()
+                        ));
             }
+
+            guestCart.getCartItems().remove(guestItem);
         }
 
-        cartRepository.delete(guestCart);
+        guestCart.setStatus(CartStatus.ABANDONED);
+        cartRepository.save(userCart);
     }
 
     @Override
+    @Transactional
     public Cart createCart(Long userId) {
-        cartRepository.findCartsByUserId(userId).forEach(cart -> cart.setStatus(CartStatus.ABANDONED));
+        cartRepository.findCartsByUserId(userId).forEach(cart -> {
+            if (cart.getStatus() == CartStatus.ACTIVE) cart.setStatus(CartStatus.ABANDONED);
+        });
+
         User user = userRepository.getReferenceById(userId);
-        Cart cart = new Cart(CartStatus.ACTIVE, user, null);
-        return cartRepository.save(cart);
+        Cart cart = new Cart(CartStatus.ACTIVE, user);
+
+        return cartRepository.saveAndFlush(cart);
     }
 }

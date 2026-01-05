@@ -2,7 +2,6 @@ package org.adso.minimarket.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -14,6 +13,14 @@ public class CartItemKey implements Serializable {
 
     @Column(name = "product_id")
     Long productId;
+
+    public CartItemKey(Long cartId, Long productId) {
+        this.cartId = cartId;
+        this.productId = productId;
+    }
+
+    public CartItemKey() {
+    }
 
     @Override
     public boolean equals(Object o) {

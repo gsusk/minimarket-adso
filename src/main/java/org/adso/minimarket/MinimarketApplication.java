@@ -1,14 +1,19 @@
 package org.adso.minimarket;
 
-import org.adso.minimarket.models.Category;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.*;
+import org.adso.minimarket.repository.CartRepository;
 import org.adso.minimarket.repository.CategoryRepository;
+import org.adso.minimarket.repository.ProductRepository;
 import org.adso.minimarket.repository.UserRepository;
+import org.adso.minimarket.service.CartService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @SpringBootApplication
 public class MinimarketApplication {
@@ -18,16 +23,39 @@ public class MinimarketApplication {
 
     @Bean
     @Profile("!test")
-    public CommandLineRunner seedDb(UserRepository userRepository, CategoryRepository categoryRepository) {
+    public CommandLineRunner seedDb(UserRepository userRepository, CategoryRepository categoryRepository,
+                                    CartRepository cartRepository, CartService cartService,
+                                    ProductRepository productRepository) {
         return args -> {
             if (userRepository.count() == 0) {
-                userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
-                userRepository.save(new User("jorge", "pic", "pepe@gmail.com", "password123"));
-            }
+                var catRopa = categoryRepository.save(new Category("Ropa"));
+                var catElectro = categoryRepository.save(new Category("Electrodomesticos"));
 
-            if (categoryRepository.count() == 0) {
-                categoryRepository.save(new Category("Ropa"));
-                categoryRepository.save(new Category("Electrodomesticos"));
+                var pCamiseta = productRepository.save(new Product("Camiseta blanca", "Grande y cómoda",
+                        new BigDecimal("2000"), catRopa));
+                var pMesa = productRepository.save(new Product("Mesa grande", "2 metros de madera", new BigDecimal(
+                        "1000"), catElectro));
+
+                User mario = userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
+
+                Cart marioCart = new Cart(CartStatus.ACTIVE, mario);
+                CartItem itemMario = new CartItem(marioCart, pCamiseta, 2);
+                marioCart.getCartItems().add(itemMario);
+                cartRepository.save(marioCart);
+
+                UUID gid = UUID.randomUUID();
+                Cart guestCart = new Cart(CartStatus.ACTIVE, gid);
+
+                CartItem guestItem1 = new CartItem(guestCart, pCamiseta, 5);
+                CartItem guestItem2 = new CartItem(guestCart, pMesa, 1);
+
+                guestCart.getCartItems().add(guestItem1);
+                guestCart.getCartItems().add(guestItem2);
+                cartRepository.save(guestCart);
+
+//                Thread.sleep(6000);
+//                cartService.mergeCarts(mario.getId(), gid);
+
             }
         };
     }

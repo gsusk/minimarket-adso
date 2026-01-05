@@ -8,6 +8,7 @@ import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Entity
@@ -63,5 +64,14 @@ public class CartItem {
 
     public void setCart(Cart cart) {
         this.cart = cart;
+    }
+
+    public CartItem(Cart cart, Product product, int quantity) {
+        this.cart = cart;
+        this.product = product;
+        this.quantity = quantity;
+        this.unitPrice = product.getPrice().setScale(2, RoundingMode.HALF_UP);
+
+        this.id = new CartItemKey(cart.getId(), product.getId());
     }
 }
