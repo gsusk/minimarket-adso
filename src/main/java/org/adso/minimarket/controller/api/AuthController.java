@@ -1,14 +1,18 @@
 package org.adso.minimarket.controller.api;
 
 import jakarta.validation.Valid;
+import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RefreshRequest;
 import org.adso.minimarket.dto.RegisterRequest;
-import org.adso.minimarket.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
 
+import java.util.UUID;
+
 public interface AuthController {
-    ResponseEntity<AuthResponse> login(@Valid LoginRequest loginRequest);
-    ResponseEntity<AuthResponse> register(@Valid RegisterRequest registerRequest);
+    ResponseEntity<AuthResponse> login(@Valid LoginRequest loginRequest, UUID guestId);
+
+    ResponseEntity<AuthResponse> register(@Valid RegisterRequest registerRequest, UUID guestId);
+
     ResponseEntity<AuthResponse> auth(@Valid RefreshRequest refreshRequest);
 }

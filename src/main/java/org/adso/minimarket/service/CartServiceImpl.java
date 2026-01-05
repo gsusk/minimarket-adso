@@ -77,12 +77,8 @@ public class CartServiceImpl implements CartService {
             if (repeatedItem.isPresent()) {
                 repeatedItem.get().addToQuantity(guestItem.getQuantity());
             } else {
-                userCart.getCartItems().add(
-                        new CartItem(
-                                userCart,
-                                guestItem.getProduct(),
-                                guestItem.getQuantity()
-                        ));
+                CartItem newItem = new CartItem(userCart, guestItem.getProduct(), guestItem.getQuantity());
+                userCart.getCartItems().add(newItem);
             }
 
             guestCart.getCartItems().remove(guestItem);

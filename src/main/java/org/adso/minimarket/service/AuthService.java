@@ -5,10 +5,12 @@ import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
 
-public interface AuthService {
-    AuthResponse register(RegisterRequest registerRequest);
+import java.util.UUID;
 
-    AuthResponse loginUser(LoginRequest req);
+public interface AuthService {
+    AuthResponse register(RegisterRequest registerRequest, UUID guestId);
+
+    AuthResponse loginUser(LoginRequest req, UUID guestId);
 
     AuthResponse refresh(String refreshToken);
 }

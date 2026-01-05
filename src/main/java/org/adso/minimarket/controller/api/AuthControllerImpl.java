@@ -11,7 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 public class AuthControllerImpl implements AuthController {
@@ -24,14 +27,16 @@ public class AuthControllerImpl implements AuthController {
 
     @Override
     @PostMapping(AuthRoutes.LOGIN)
-    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
-        return ResponseEntity.ok(this.authService.loginUser(loginRequest));
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest loginRequest,
+                                              @RequestHeader(name = "X-CGuest-Id", required = false) UUID guestId) {
+        return ResponseEntity.ok(this.authService.loginUser(loginRequest, guestId));
     }
 
     @Override
     @PostMapping(AuthRoutes.REGISTER)
-    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
-        return new ResponseEntity<>(this.authService.register(registerRequest), HttpStatus.CREATED);
+    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest,
+                                                 @RequestHeader(name = "X-CGuest-Id", required = false) UUID guestId) {
+        return new ResponseEntity<>(this.authService.register(registerRequest, guestId), HttpStatus.CREATED);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.adso.minimarket.service;
 
+import jakarta.transaction.Transactional;
 import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -21,18 +23,21 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authManager;
+    private final CartService cartService;
     private final JwtService jwtService;
 
     AuthServiceImpl(UserService userService, PasswordEncoder passwordEncoder,
-                    AuthenticationManager authManager, JwtService jwtService) {
+                    AuthenticationManager authManager, CartService cartService, JwtService jwtService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
+        this.cartService = cartService;
         this.jwtService = jwtService;
     }
 
     @Override
-    public AuthResponse register(RegisterRequest req) {
+    @Transactional
+    public AuthResponse register(RegisterRequest req, UUID guestId) {
         User user = this.userService.createUser(RegisterRequest.builder()
                 .name(req.name())
                 .lastName(req.lastName())
@@ -45,11 +50,16 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
+        if (guestId != null) {
+            cartService.mergeCarts(user.getId(), guestId);
+        }
+
         return new AuthResponse(accessToken, refreshToken);
     }
 
     @Override
-    public AuthResponse loginUser(LoginRequest req) throws NullPointerException {
+    @Transactional
+    public AuthResponse loginUser(LoginRequest req, UUID guestId) throws NullPointerException {
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.email(), req.password())
         );
@@ -58,6 +68,10 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+
+        if (guestId != null) {
+            cartService.mergeCarts(user.getId(), guestId);
+        }
 
         return new AuthResponse(accessToken, refreshToken);
     }
