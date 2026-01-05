@@ -2,6 +2,7 @@ package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -31,7 +32,8 @@ public class Cart {
 
     private UUID guestId;
 
-    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Getter
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CartItem> cartItems = new HashSet<>();
 
     @CreationTimestamp
@@ -39,4 +41,15 @@ public class Cart {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Cart(CartStatus cartStatus, User user, UUID guestId) {
+        this.status = cartStatus;
+        this.user = user;
+        this.guestId = guestId;
+        this.cartItems = new HashSet<>();
+    }
+
+    public void setStatus(CartStatus cartStatus) {
+        this.status = cartStatus;
+    }
 }

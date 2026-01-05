@@ -25,7 +25,7 @@ public class JwtService {
     ) {
         this.accessTokenSecret = Keys.hmacShaKeyFor(accessTokenSecret.getBytes());
         this.refreshTokenSecret = Keys.hmacShaKeyFor(refreshTokenSecret.getBytes());
-        this.expirationSeconds = 36000 * 2;
+        this.expirationSeconds = 3600 * 4;
     }
 
     public String generateAccessToken(UserDetails user) {

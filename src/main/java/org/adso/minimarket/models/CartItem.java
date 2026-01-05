@@ -2,7 +2,6 @@ package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
@@ -22,7 +21,7 @@ import java.time.LocalDateTime;
 public class CartItem {
 
     @EmbeddedId
-    CartItemKey id;
+    private CartItemKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productId")
@@ -45,4 +44,24 @@ public class CartItem {
 
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
+
+    public Product getProduct() {
+        return this.product;
+    }
+
+    public CartItemKey getId() {
+        return this.id;
+    }
+
+    public int getQuantity() {
+        return this.quantity;
+    }
+
+    public void addToQuantity(int q) {
+        this.quantity += q;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
 }
