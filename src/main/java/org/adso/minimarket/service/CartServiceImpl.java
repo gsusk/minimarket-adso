@@ -21,14 +21,12 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
-    private final CartService cartService;
 
-    public CartServiceImpl(CartRepository cartRepository, UserRepository userRepository, CartMapper cartMapper,
-                           CartService cartService) {
+    public CartServiceImpl(CartRepository cartRepository, UserRepository userRepository, CartMapper cartMapper
+    ) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.cartMapper = cartMapper;
-        this.cartService = cartService;
     }
 
     @Override
@@ -59,7 +57,7 @@ public class CartServiceImpl implements CartService {
     public void mergeCarts(Long userId, UUID guestId) {
         Cart guestCart = cartRepository.findCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElse(null);
         Cart userCart = cartRepository.findCartByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(
-                () -> cartService.createCart(userId)
+                () -> this.createCart(userId)
         );
 
         if (guestCart == null) return;
