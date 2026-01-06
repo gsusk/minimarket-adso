@@ -58,6 +58,10 @@ public class CartItem {
         return this.quantity;
     }
 
+    public BigDecimal getUnitPrice() {
+        return this.unitPrice.setScale(2, RoundingMode.HALF_UP);
+    }
+
     public void addToQuantity(int q) {
         this.quantity += q;
     }

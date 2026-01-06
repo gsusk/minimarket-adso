@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -66,5 +68,18 @@ public class Cart {
 
     public CartStatus getStatus() {
         return status;
+    }
+
+    public BigDecimal getTotal() {
+        return cartItems == null ? BigDecimal.ZERO :
+                cartItems.stream()
+                        .map((item) -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+                        )
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public int getSize() {
+        return cartItems.size();
     }
 }

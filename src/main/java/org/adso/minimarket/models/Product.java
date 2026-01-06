@@ -35,6 +35,7 @@ public class Product {
     @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false)
     @Min(value = 0, message = "stock cant be less than 0")
     private Integer stock;
 
@@ -59,11 +60,15 @@ public class Product {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public Product(String name, String description, BigDecimal price, Category category) {
+    public Product(String name, String description, BigDecimal price, Integer stock, Category category) {
         this.name = name;
         this.description = description;
         this.price = normalizePrice(price);
         this.category = category;
+        if (stock == null || stock < 0) {
+            throw new IllegalArgumentException("Invalid stock argument");
+        }
+        this.stock = stock;
     }
 
     BigDecimal normalizePrice(BigDecimal price) {
@@ -74,6 +79,10 @@ public class Product {
             throw new IllegalArgumentException("Price cannot be negative");
         }
         return price.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = normalizePrice(price);
     }
 
     @Override
