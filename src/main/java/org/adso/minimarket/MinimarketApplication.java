@@ -30,11 +30,17 @@ public class MinimarketApplication {
             if (userRepository.count() == 0) {
                 var catRopa = categoryRepository.save(new Category("Ropa"));
                 var catElectro = categoryRepository.save(new Category("Electrodomesticos"));
+                var furnit = categoryRepository.save(new Category("Muebles"));
 
                 var pCamiseta = productRepository.save(new Product("Camiseta blanca", "Grande y cómoda",
-                        new BigDecimal("2000"), catRopa));
+                        new BigDecimal("2000"), 2, catRopa));
                 var pMesa = productRepository.save(new Product("Mesa grande", "2 metros de madera", new BigDecimal(
-                        "1000"), catElectro));
+                        "1000"), 3, furnit));
+
+                productRepository.save(new Product("Pc gamer", "con luz led y ventana", new BigDecimal(
+                        "1025"), 3, catElectro));
+                productRepository.save(new Product("smartphone", "phone with nice camera", new BigDecimal(
+                        "1025"), 3, catElectro));
 
                 User mario = userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
 

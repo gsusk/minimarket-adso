@@ -7,7 +7,6 @@ import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.CartMapper;
 import org.adso.minimarket.models.*;
 import org.adso.minimarket.repository.CartRepository;
-import org.adso.minimarket.repository.ProductRepository;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,14 +22,14 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
     public CartServiceImpl(CartRepository cartRepository, UserRepository userRepository, CartMapper cartMapper,
-                           ProductRepository productRepository) {
+                           ProductService productService) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.cartMapper = cartMapper;
-        this.productRepository = productRepository;
+        this.productService = productService;
     }
 
     @Override
@@ -98,7 +97,7 @@ public class CartServiceImpl implements CartService {
 
         User user = userRepository.getReferenceById(userId);
         Cart cart = new Cart(user);
-        return cartRepository.saveAndFlush(cart);
+        return cartRepository.save(cart);
     }
 
 
@@ -106,34 +105,41 @@ public class CartServiceImpl implements CartService {
         return cartRepository.save(new Cart(UUID.randomUUID()));
     }
 
+    /**
+     * TODO:
+     *  - Anadir upsert para hacer mas eficiente la query
+     *
+     *
+     */
     @Override
     @Transactional
     public ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest item) {
         Cart cart;
-        ShoppingCart shoppingCart;
 
         if (userId != null) {
-            cart = cartRepository.findCartByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(() -> this.createCart(userId));
+            cart = cartRepository.findWithItemsByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(() -> this.createCart(userId));
         } else {
-            cart = cartRepository.findCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElseGet(this::createGuestCart);
+            cart = cartRepository.findWithItemsByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElseGet(this::createGuestCart);
         }
 
-        Optional<CartItem> repeated = cart.getCartItems()
-                .stream()
-                .filter((i) -> i.getProduct().getId() == item.getProductId())
-                .findFirst();
-
-        Product product = productRepository.getReferenceById(item.getProductId());
+        Product product = productService.getById(item.getProductId());
+        Optional<CartItem> repeated = this.findCartItemByProductId(cart, product.getId());
 
         if (repeated.isPresent()) {
-            repeated.get().addToQuantity(repeated.get().getQuantity());
-            cart = cartRepository.findShoppingCartByUserIdAndStatus(userId, CartStatus.ACTIVE).orElse(null);
+            repeated.get().addToQuantity(item.getQuantity());
         } else {
             CartItem newCartItem = new CartItem(cart, product, item.getQuantity());
             cart.getCartItems().add(newCartItem);
-            cart = cartRepository.findShoppingCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElse(null);
         }
 
-        return null;
+        cartRepository.save(cart);
+        return cartMapper.toDto(cart);
+    }
+
+    private Optional<CartItem> findCartItemByProductId(Cart cart, Long productId) {
+        return cart.getCartItems()
+                .stream()
+                .filter(i -> i.getProduct().getId().equals(productId))
+                .findFirst();
     }
 }

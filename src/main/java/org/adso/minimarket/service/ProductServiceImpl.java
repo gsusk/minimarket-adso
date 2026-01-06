@@ -33,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
                 productRequest.getName(),
                 productRequest.getDescription(),
                 new BigDecimal(productRequest.getPrice()),
+                productRequest.getStock(),
                 category
         );
 
@@ -40,7 +41,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public DetailedProduct getProductById(Long id) {
+    public Product getById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new NotFoundException("Product not found"));
+    }
+
+    @Override
+    public DetailedProduct getDetailedProductById(Long id) {
         return productMapper.toDto(productRepository.findDetailedById(id).orElseThrow(
                 () -> new NotFoundException("Product not found")
         ));
