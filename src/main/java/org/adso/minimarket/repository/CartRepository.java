@@ -16,9 +16,9 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     List<Cart> findCartsByUserId(Long userId);
 
-    @EntityGraph(attributePaths = {"cartItem", "product"})
-    Optional<Cart> findShoppingCartByUserIdAndStatus(Long userId, CartStatus cartStatus);
+    @EntityGraph(attributePaths = {"cartItems", "cartItems.product"})
+    Optional<Cart> findWithItemsByUserIdAndStatus(Long userId, CartStatus cartStatus);
 
-    @EntityGraph(attributePaths = {"cartItem", "product"})
-    Optional<Cart> findShoppingCartByGuestIdAndStatus(UUID guestId, CartStatus cartStatus);
+    @EntityGraph(attributePaths = {"cartItems", "cartItems.product"})
+    Optional<Cart> findWithItemsByGuestIdAndStatus(UUID guestId, CartStatus cartStatus);
 }
