@@ -13,5 +13,4 @@ public class Item {
     private String name;
     private String unitPrice;
     private int quantity;
-    private String total;
 }

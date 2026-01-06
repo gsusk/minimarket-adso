@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShoppingCart {
-    private List<Item> items;
+    private Set<Item> items;
     private String subTotal;
     private int size;
 }
