@@ -38,13 +38,13 @@ public class MinimarketApplication {
 
                 User mario = userRepository.save(new User("mario", "contreras", "marioc@gmail.com", "password123"));
 
-                Cart marioCart = new Cart(CartStatus.ACTIVE, mario);
+                Cart marioCart = new Cart(mario);
                 CartItem itemMario = new CartItem(marioCart, pCamiseta, 2);
                 marioCart.getCartItems().add(itemMario);
                 cartRepository.save(marioCart);
 
                 UUID gid = UUID.randomUUID();
-                Cart guestCart = new Cart(CartStatus.ACTIVE, gid);
+                Cart guestCart = new Cart(gid);
 
                 CartItem guestItem1 = new CartItem(guestCart, pCamiseta, 5);
                 CartItem guestItem2 = new CartItem(guestCart, pMesa, 1);

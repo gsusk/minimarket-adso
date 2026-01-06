@@ -1,5 +1,6 @@
 package org.adso.minimarket.service;
 
+import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.models.Cart;
 
@@ -11,4 +12,8 @@ public interface CartService {
     void mergeCarts(Long userId, UUID guestId);
 
     Cart createCart(Long userId);
+
+    ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest request);
+
+    Cart createGuestCart();
 }

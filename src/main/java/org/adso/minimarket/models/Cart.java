@@ -43,16 +43,14 @@ public class Cart {
     private LocalDateTime updatedAt;
 
     //usuario
-    public Cart(CartStatus cartStatus, User user) {
-        this.status = cartStatus;
+    public Cart(User user) {
         this.user = user;
         this.guestId = null;
         this.cartItems = new HashSet<>();
     }
 
     //invitado
-    public Cart(CartStatus cartStatus, UUID guestId) {
-        this.status = cartStatus;
+    public Cart(UUID guestId) {
         this.user = null;
         this.guestId = guestId;
         this.cartItems = new HashSet<>();

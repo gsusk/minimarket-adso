@@ -1,14 +1,13 @@
 package org.adso.minimarket.service;
 
 import jakarta.transaction.Transactional;
+import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.CartMapper;
-import org.adso.minimarket.models.Cart;
-import org.adso.minimarket.models.CartItem;
-import org.adso.minimarket.models.CartStatus;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.*;
 import org.adso.minimarket.repository.CartRepository;
+import org.adso.minimarket.repository.ProductRepository;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +23,14 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CartMapper cartMapper;
+    private final ProductRepository productRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, UserRepository userRepository, CartMapper cartMapper
-    ) {
+    public CartServiceImpl(CartRepository cartRepository, UserRepository userRepository, CartMapper cartMapper,
+                           ProductRepository productRepository) {
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
         this.cartMapper = cartMapper;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -96,8 +97,43 @@ public class CartServiceImpl implements CartService {
         });
 
         User user = userRepository.getReferenceById(userId);
-        Cart cart = new Cart(CartStatus.ACTIVE, user);
-
+        Cart cart = new Cart(user);
         return cartRepository.saveAndFlush(cart);
+    }
+
+
+    public Cart createGuestCart() {
+        return cartRepository.save(new Cart(UUID.randomUUID()));
+    }
+
+    @Override
+    @Transactional
+    public ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest item) {
+        Cart cart;
+        ShoppingCart shoppingCart;
+
+        if (userId != null) {
+            cart = cartRepository.findCartByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(() -> this.createCart(userId));
+        } else {
+            cart = cartRepository.findCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElseGet(this::createGuestCart);
+        }
+
+        Optional<CartItem> repeated = cart.getCartItems()
+                .stream()
+                .filter((i) -> i.getProduct().getId() == item.getProductId())
+                .findFirst();
+
+        Product product = productRepository.getReferenceById(item.getProductId());
+
+        if (repeated.isPresent()) {
+            repeated.get().addToQuantity(repeated.get().getQuantity());
+            cart = cartRepository.findShoppingCartByUserIdAndStatus(userId, CartStatus.ACTIVE).orElse(null);
+        } else {
+            CartItem newCartItem = new CartItem(cart, product, item.getQuantity());
+            cart.getCartItems().add(newCartItem);
+            cart = cartRepository.findShoppingCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElse(null);
+        }
+
+        return null;
     }
 }
