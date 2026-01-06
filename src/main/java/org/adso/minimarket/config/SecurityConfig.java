@@ -64,7 +64,7 @@ public class SecurityConfig {
                                         ProductRoutes.GET_PRODUCT
                                 )
                                 .permitAll()
-                                .requestMatchers("/error", "/cart")
+                                .requestMatchers("/error", "/cart", "/cart/items")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

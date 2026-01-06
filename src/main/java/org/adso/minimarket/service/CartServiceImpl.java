@@ -69,10 +69,7 @@ public class CartServiceImpl implements CartService {
         List<CartItem> itemsToProcess = new ArrayList<>(guestCart.getCartItems());
 
         for (CartItem guestItem : itemsToProcess) {
-            Optional<CartItem> repeatedItem = userCart.getCartItems()
-                    .stream()
-                    .filter((item) -> item.getProduct().getId().equals(guestItem.getProduct().getId()))
-                    .findFirst();
+            Optional<CartItem> repeatedItem = findCartItemByProductId(userCart, guestItem.getProduct().getId());
 
             if (repeatedItem.isPresent()) {
                 repeatedItem.get().addToQuantity(guestItem.getQuantity());
@@ -94,7 +91,6 @@ public class CartServiceImpl implements CartService {
         cartRepository.findCartsByUserId(userId).forEach(cart -> {
             if (cart.getStatus() == CartStatus.ACTIVE) cart.setStatus(CartStatus.ABANDONED);
         });
-
         User user = userRepository.getReferenceById(userId);
         Cart cart = new Cart(user);
         return cartRepository.save(cart);
@@ -118,8 +114,10 @@ public class CartServiceImpl implements CartService {
 
         if (userId != null) {
             cart = cartRepository.findWithItemsByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(() -> this.createCart(userId));
-        } else {
+        } else if (guestId != null) {
             cart = cartRepository.findWithItemsByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElseGet(this::createGuestCart);
+        } else {
+            cart = this.createGuestCart();
         }
 
         Product product = productService.getById(item.getProductId());
