@@ -7,10 +7,7 @@ import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -36,6 +33,7 @@ public class CartControllerImpl implements CartController {
     }
 
     @Override
+    @PostMapping("/cart/items")
     public ResponseEntity<ShoppingCart> addItem(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AddCartItemRequest body,
@@ -44,6 +42,6 @@ public class CartControllerImpl implements CartController {
 
         Long userId = userPrincipal == null ? null : userPrincipal.getId();
         ShoppingCart cart = cartService.addItemToCart(userId, guestId, body);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(cart);
     }
 }

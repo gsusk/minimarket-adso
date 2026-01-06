@@ -28,6 +28,6 @@ public class ProductControllerImpl implements ProductController {
     @Override
     @GetMapping(ProductRoutes.GET_PRODUCT)
     public ResponseEntity<DetailedProduct> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+        return ResponseEntity.ok(productService.getDetailedProductById(id));
     }
 }
