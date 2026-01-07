@@ -1,6 +1,6 @@
 package org.adso.minimarket.controller.api;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AddCartItemRequest;
@@ -16,7 +16,9 @@ public interface CartController {
     ResponseEntity<ShoppingCart> addItem(UserPrincipal userPrincipal,
                                          @Valid AddCartItemRequest body,
                                          UUID guestId,
-                                         HttpServletRequest request);
+                                         HttpServletResponse response);
 
-    ResponseEntity<ShoppingCart> deleteItem(UserPrincipal userPrincipal, UUID guestId, Long productId);
+    ResponseEntity<ShoppingCart> deleteItem(UserPrincipal userPrincipal,
+                                            UUID guestId,
+                                            Long productId);
 }
