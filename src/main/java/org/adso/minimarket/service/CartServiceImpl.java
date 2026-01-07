@@ -3,6 +3,7 @@ package org.adso.minimarket.service;
 import jakarta.transaction.Transactional;
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
+import org.adso.minimarket.exception.InternalErrorException;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.CartMapper;
 import org.adso.minimarket.models.*;
@@ -53,7 +54,6 @@ public class CartServiceImpl implements CartService {
             if (cart.isEmpty()) {
                 throw new NotFoundException("Cart not found");
             }
-
             return cart.get();
         }
 
@@ -97,9 +97,17 @@ public class CartServiceImpl implements CartService {
         return cartRepository.save(cart);
     }
 
-
+    @Override
     public Cart createGuestCart() {
         return cartRepository.save(new Cart(UUID.randomUUID()));
+    }
+
+    @Override
+    public Cart createGuestCart(UUID guestId) {
+        if (guestId == null) {
+            throw new InternalErrorException("Error on cart creation");
+        }
+        return cartRepository.save(new Cart(guestId));
     }
 
     /**
@@ -156,7 +164,7 @@ public class CartServiceImpl implements CartService {
 
         if (guestId != null) {
             return cartRepository.findWithItemsByGuestIdAndStatus(guestId, CartStatus.ACTIVE)
-                    .orElseGet(this::createGuestCart);
+                    .orElseGet(() -> createGuestCart(guestId));
         }
 
         return createGuestCart();

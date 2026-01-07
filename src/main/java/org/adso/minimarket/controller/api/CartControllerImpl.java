@@ -27,7 +27,7 @@ public class CartControllerImpl implements CartController {
     @GetMapping("/cart")
     public ResponseEntity<ShoppingCart> getCart(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestHeader(value = "CGUESTID", required = false) UUID guestId) {
+            @CookieValue(value = "CGUESTID", required = false) UUID guestId) {
 
         Long userId = getUserIdFromPrincipal(userPrincipal);
 
@@ -42,16 +42,17 @@ public class CartControllerImpl implements CartController {
     public ResponseEntity<ShoppingCart> addItem(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AddCartItemRequest body,
-            @RequestHeader(value = "CGUESTID", required = false) UUID guestId,
+            @CookieValue(value = "CGUESTID", required = false) UUID guestId,
             HttpServletResponse response) {
 
         Long userId = getUserIdFromPrincipal(userPrincipal);
+        if (userId == null && guestId == null) {
+            guestId = UUID.randomUUID();
+        }
         ShoppingCart cart = cartService.addItemToCart(userId, guestId, body);
-
         if (userId == null) {
             setGuestCookie(guestId, response);
         }
-
         return ResponseEntity.ok(cart);
     }
 
@@ -78,7 +79,7 @@ public class CartControllerImpl implements CartController {
 
     private void setGuestCookie(UUID guestId, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie
-                .from("guestId", guestId.toString())
+                .from("CGUESTID", guestId.toString())
                 .maxAge(Duration.ofDays(10))
                 .path("/")
                 .httpOnly(true)

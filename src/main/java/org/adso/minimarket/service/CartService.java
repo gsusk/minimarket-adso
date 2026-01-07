@@ -15,6 +15,8 @@ public interface CartService {
 
     Cart createCart(Long userId);
 
+    Cart createGuestCart(UUID guestId);
+
     ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest request);
 
     Cart createGuestCart();
