@@ -31,15 +31,22 @@ public class AuthControllerImpl implements AuthController {
     @Override
     @PostMapping(AuthRoutes.LOGIN)
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest loginRequest,
-                                              @CookieValue(name = "CGUESTID", required = false) UUID guestId) {
-        return ResponseEntity.ok(this.authService.loginUser(loginRequest, guestId));
+                                              @CookieValue(name = "CGUESTID", required = false) UUID guestId,
+                                              HttpServletResponse response) {
+        AuthResponse auth = this.authService.loginUser(loginRequest, guestId);
+        clearGuestCookie(response);
+        return ResponseEntity.ok(auth);
     }
 
     @Override
     @PostMapping(AuthRoutes.REGISTER)
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest,
-                                                 @CookieValue(name = "CGUESTID", required = false) UUID guestId) {
-        return new ResponseEntity<>(this.authService.register(registerRequest, guestId), HttpStatus.CREATED);
+                                                 @CookieValue(name = "CGUESTID", required = false) UUID guestId,
+                                                 HttpServletResponse response) {
+
+        AuthResponse auth = this.authService.register(registerRequest, guestId);
+        clearGuestCookie(response);
+        return new ResponseEntity<>(auth, HttpStatus.CREATED);
     }
 
     @Override
