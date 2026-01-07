@@ -68,7 +68,7 @@ public class CartServiceImpl implements CartService {
                 () -> this.createCart(userId)
         );
 
-        if (guestCart == null || guestCart.getCartItems().isEmpty()) return;
+        if (guestCart == null) return;
 
         for (CartItem guestItem : guestCart.getCartItems()) {
             Optional<CartItem> repeatedItem = findCartItemByProductId(userCart, guestItem.getProduct().getId());
@@ -82,7 +82,9 @@ public class CartServiceImpl implements CartService {
         }
 
         guestCart.getCartItems().clear();
-        guestCart.setStatus(CartStatus.ABANDONED);
+        guestCart.setStatus(CartStatus.MERGED);
+        guestCart.setUser(userCart.getUser());
+        guestCart.setGuestId(null);
         cartRepository.save(userCart);
     }
 

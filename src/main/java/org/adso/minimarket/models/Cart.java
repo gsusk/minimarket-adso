@@ -17,8 +17,10 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(check = @CheckConstraint(constraint = "user_id IS NULL AND guest_id IS NOT NULL" +
-        " OR user_id IS NOT NULL AND guest_id IS NULL"))
+@Table(check = @CheckConstraint(constraint =
+        "(user_id IS NULL AND guest_id IS NOT NULL)" +
+                " OR (user_id IS NOT NULL AND guest_id IS NULL)" +
+                " OR (user_id IS NOT NULL AND guest_id IS NULL AND status = 'MERGED')"))
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -70,6 +72,7 @@ public class Cart {
         return status;
     }
 
+
     public BigDecimal getTotal() {
         return cartItems == null ? BigDecimal.ZERO :
                 cartItems.stream()
@@ -81,5 +84,17 @@ public class Cart {
 
     public int getSize() {
         return cartItems.size();
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setGuestId(UUID id) {
+        this.guestId = id;
     }
 }

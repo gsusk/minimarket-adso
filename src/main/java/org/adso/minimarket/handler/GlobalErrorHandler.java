@@ -53,7 +53,7 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
             }
         });
 
-        if (!problem.getProperties().containsKey("errors")) {
+        if (problem.getProperties() == null || !problem.getProperties().containsKey("errors")) {
             problem.setDetail("Unknown conflict");
         }
 
