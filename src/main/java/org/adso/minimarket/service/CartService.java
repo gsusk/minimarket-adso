@@ -7,7 +7,9 @@ import org.adso.minimarket.models.Cart;
 import java.util.UUID;
 
 public interface CartService {
-    ShoppingCart getCart(Long userId, UUID guestId);
+    Cart getCart(Long userId, UUID guestId);
+
+    ShoppingCart getShoppingCart(Long userId, UUID guestId);
 
     void mergeCarts(Long userId, UUID guestId);
 
@@ -16,4 +18,6 @@ public interface CartService {
     ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest request);
 
     Cart createGuestCart();
+
+    ShoppingCart removeItemFromCart(Long userId, UUID guestId, Long itemId);
 }

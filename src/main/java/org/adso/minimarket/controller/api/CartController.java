@@ -17,4 +17,6 @@ public interface CartController {
                                          @Valid AddCartItemRequest body,
                                          UUID guestId,
                                          HttpServletRequest request);
+
+    ResponseEntity<ShoppingCart> deleteItem(UserPrincipal userPrincipal, UUID guestId, Long productId);
 }

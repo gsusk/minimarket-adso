@@ -1,6 +1,7 @@
 package org.adso.minimarket.controller.api;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
 import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
@@ -25,11 +26,12 @@ public class CartControllerImpl implements CartController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestHeader(value = "X-CGuest-Id", required = false) UUID guestId) {
 
-        Long userId = userPrincipal == null ? null : userPrincipal.getId();
+        Long userId = getUserIdFromPrincipal(userPrincipal);
+
         if (userId == null && guestId == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(cartService.getCart(userId, guestId));
+        return ResponseEntity.ok(cartService.getShoppingCart(userId, guestId));
     }
 
     @Override
@@ -40,8 +42,28 @@ public class CartControllerImpl implements CartController {
             @RequestHeader(value = "X-CGuest-Id", required = false) UUID guestId,
             HttpServletRequest request) {
 
-        Long userId = userPrincipal == null ? null : userPrincipal.getId();
+        Long userId = getUserIdFromPrincipal(userPrincipal);
         ShoppingCart cart = cartService.addItemToCart(userId, guestId, body);
         return ResponseEntity.ok(cart);
+    }
+
+    @Override
+    @DeleteMapping("/cart/items/{itemId}")
+    public ResponseEntity<ShoppingCart> deleteItem(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestHeader(value = "X-CGuest-Id", required = false) UUID guestId,
+            @PathVariable("itemId") @Min(1) Long productId) {
+
+        Long userId = getUserIdFromPrincipal(userPrincipal);
+        if (userId == null && guestId == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        ShoppingCart cart = cartService.removeItemFromCart(userId, guestId, productId);
+        return ResponseEntity.ok(null);
+    }
+
+    private Long getUserIdFromPrincipal(UserPrincipal userPrincipal) {
+        return userPrincipal == null ? null : userPrincipal.getId();
     }
 }

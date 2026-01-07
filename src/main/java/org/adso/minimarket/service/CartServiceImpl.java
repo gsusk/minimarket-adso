@@ -10,8 +10,6 @@ import org.adso.minimarket.repository.CartRepository;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,7 +31,13 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public ShoppingCart getCart(Long userId, UUID guestId) {
+    @Transactional
+    public ShoppingCart getShoppingCart(Long userId, UUID guestId) {
+        return cartMapper.toDto(getCart(userId, guestId));
+    }
+
+    @Override
+    public Cart getCart(Long userId, UUID guestId) {
         Optional<Cart> cart;
         if (userId != null) {
             cart = cartRepository.findCartByUserIdAndStatus(userId, CartStatus.ACTIVE);
@@ -41,7 +45,7 @@ public class CartServiceImpl implements CartService {
                 throw new NotFoundException("Cart not found");
             }
 
-            return cartMapper.toDto(cart.get());
+            return cart.get();
         }
 
         if (guestId != null) {
@@ -50,7 +54,7 @@ public class CartServiceImpl implements CartService {
                 throw new NotFoundException("Cart not found");
             }
 
-            return cartMapper.toDto(cart.get());
+            return cart.get();
         }
 
         throw new NotFoundException("Cart not found");
@@ -66,9 +70,7 @@ public class CartServiceImpl implements CartService {
 
         if (guestCart == null || guestCart.getCartItems().isEmpty()) return;
 
-        List<CartItem> itemsToProcess = new ArrayList<>(guestCart.getCartItems());
-
-        for (CartItem guestItem : itemsToProcess) {
+        for (CartItem guestItem : guestCart.getCartItems()) {
             Optional<CartItem> repeatedItem = findCartItemByProductId(userCart, guestItem.getProduct().getId());
 
             if (repeatedItem.isPresent()) {
@@ -77,10 +79,9 @@ public class CartServiceImpl implements CartService {
                 CartItem newItem = new CartItem(userCart, guestItem.getProduct(), guestItem.getQuantity());
                 userCart.getCartItems().add(newItem);
             }
-
-            guestCart.getCartItems().remove(guestItem);
         }
 
+        guestCart.getCartItems().clear();
         guestCart.setStatus(CartStatus.ABANDONED);
         cartRepository.save(userCart);
     }
@@ -110,15 +111,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest item) {
-        Cart cart;
-
-        if (userId != null) {
-            cart = cartRepository.findWithItemsByUserIdAndStatus(userId, CartStatus.ACTIVE).orElseGet(() -> this.createCart(userId));
-        } else if (guestId != null) {
-            cart = cartRepository.findWithItemsByGuestIdAndStatus(guestId, CartStatus.ACTIVE).orElseGet(this::createGuestCart);
-        } else {
-            cart = this.createGuestCart();
-        }
+        Cart cart = getOrCreateCart(userId, guestId);
 
         Product product = productService.getById(item.getProductId());
         Optional<CartItem> repeated = this.findCartItemByProductId(cart, product.getId());
@@ -134,10 +127,38 @@ public class CartServiceImpl implements CartService {
         return cartMapper.toDto(cart);
     }
 
+    @Override
+    @Transactional
+    public ShoppingCart removeItemFromCart(Long userId, UUID guestId, Long productId) {
+        Cart cart = getCart(userId, guestId);
+
+        Optional<CartItem> foundItem = cart.getCartItems()
+                .stream()
+                .filter((item) -> item.getProduct().getId().equals(productId)).findFirst();
+
+        foundItem.ifPresent(item -> cart.getCartItems().remove(item));
+
+        return cartMapper.toDto(cart);
+    }
+
     private Optional<CartItem> findCartItemByProductId(Cart cart, Long productId) {
         return cart.getCartItems()
                 .stream()
                 .filter(i -> i.getProduct().getId().equals(productId))
                 .findFirst();
+    }
+
+    private Cart getOrCreateCart(Long userId, UUID guestId) {
+        if (userId != null) {
+            return cartRepository.findWithItemsByUserIdAndStatus(userId, CartStatus.ACTIVE)
+                    .orElseGet(() -> createCart(userId));
+        }
+
+        if (guestId != null) {
+            return cartRepository.findWithItemsByGuestIdAndStatus(guestId, CartStatus.ACTIVE)
+                    .orElseGet(this::createGuestCart);
+        }
+
+        return createGuestCart();
     }
 }
