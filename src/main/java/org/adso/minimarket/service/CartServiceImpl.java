@@ -151,6 +151,24 @@ public class CartServiceImpl implements CartService {
         return cartMapper.toDto(cart);
     }
 
+    @Override
+    public ShoppingCart updateItemQuantity(Long userId, UUID guestId, Long productId, Integer quantity) {
+        Cart cart = getCart(userId, guestId);
+
+        CartItem cartItem = cart.getCartItems()
+                .stream()
+                .filter((ci) -> ci.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Cart item not found"));
+
+        if (quantity == 0) {
+            cart.getCartItems().remove(cartItem);
+        } else {
+            cartItem.setQuantity(Math.abs(quantity));
+        }
+        return null;
+    }
+
     private Optional<CartItem> findCartItemByProductId(Cart cart, Long productId) {
         return cart.getCartItems()
                 .stream()

@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
+import org.adso.minimarket.dto.UpdateQuantityRequest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
@@ -21,4 +22,9 @@ public interface CartController {
     ResponseEntity<ShoppingCart> deleteItem(UserPrincipal userPrincipal,
                                             UUID guestId,
                                             Long productId);
+
+    ResponseEntity<ShoppingCart> updateItemQuantity(UserPrincipal userPrincipal,
+                                                    UUID guestId,
+                                                    Long productId,
+                                                    UpdateQuantityRequest body);
 }

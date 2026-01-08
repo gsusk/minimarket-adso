@@ -3,6 +3,7 @@ package org.adso.minimarket.models;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.adso.minimarket.exception.InternalErrorException;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -68,6 +69,13 @@ public class CartItem {
 
     public void setCart(Cart cart) {
         this.cart = cart;
+    }
+
+    public void setQuantity(Integer quantity) {
+        if (quantity < 0) {
+            throw new InternalErrorException("Invalid quantity. Cannot be negative");
+        }
+        this.quantity = quantity;
     }
 
     public CartItem(Cart cart, Product product, int quantity) {

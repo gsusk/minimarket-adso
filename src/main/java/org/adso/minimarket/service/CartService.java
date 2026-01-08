@@ -22,4 +22,6 @@ public interface CartService {
     Cart createGuestCart();
 
     ShoppingCart removeItemFromCart(Long userId, UUID guestId, Long itemId);
+
+    ShoppingCart updateItemQuantity(Long userId, UUID guestId, Long productId, Integer quantity);
 }

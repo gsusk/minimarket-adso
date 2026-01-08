@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
+import org.adso.minimarket.dto.UpdateQuantityRequest;
 import org.adso.minimarket.service.CartService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -71,6 +72,19 @@ public class CartControllerImpl implements CartController {
         ShoppingCart cart = cartService.removeItemFromCart(userId, guestId, productId);
 
         return ResponseEntity.ok(cart);
+    }
+
+    @Override
+    public ResponseEntity<ShoppingCart> updateItemQuantity(UserPrincipal userPrincipal,
+                                                           UUID guestId,
+                                                           Long productId,
+                                                           UpdateQuantityRequest body) {
+        Long userId = getUserIdFromPrincipal(userPrincipal);
+        if (userId == null && guestId == null) {
+            return ResponseEntity.notFound().build();
+        }
+        ShoppingCart cart = cartService.updateItemQuantity(userId, guestId, productId, body.getQuantity());
+        return ResponseEntity.ok(null);
     }
 
     private Long getUserIdFromPrincipal(UserPrincipal userPrincipal) {
