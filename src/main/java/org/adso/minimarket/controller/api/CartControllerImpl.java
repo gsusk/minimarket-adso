@@ -85,7 +85,7 @@ public class CartControllerImpl implements CartController {
             return ResponseEntity.notFound().build();
         }
         ShoppingCart cart = cartService.updateItemQuantity(userId, guestId, productId, body.getQuantity());
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(cart);
     }
 
     private Long getUserIdFromPrincipal(UserPrincipal userPrincipal) {

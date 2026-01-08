@@ -152,6 +152,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public ShoppingCart updateItemQuantity(Long userId, UUID guestId, Long productId, Integer quantity) {
         Cart cart = getCart(userId, guestId);
 
@@ -166,7 +167,7 @@ public class CartServiceImpl implements CartService {
         } else {
             cartItem.setQuantity(Math.abs(quantity));
         }
-        return null;
+        return cartMapper.toDto(cart);
     }
 
     private Optional<CartItem> findCartItemByProductId(Cart cart, Long productId) {
