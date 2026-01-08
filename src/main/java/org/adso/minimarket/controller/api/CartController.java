@@ -24,7 +24,7 @@ public interface CartController {
                                             Long productId);
 
     ResponseEntity<ShoppingCart> updateItemQuantity(UserPrincipal userPrincipal,
+                                                    @Valid UpdateQuantityRequest body,
                                                     UUID guestId,
-                                                    Long productId,
-                                                    UpdateQuantityRequest body);
+                                                    Long productId);
 }

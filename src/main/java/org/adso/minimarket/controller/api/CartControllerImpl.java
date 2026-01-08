@@ -75,10 +75,11 @@ public class CartControllerImpl implements CartController {
     }
 
     @Override
-    public ResponseEntity<ShoppingCart> updateItemQuantity(UserPrincipal userPrincipal,
-                                                           UUID guestId,
-                                                           Long productId,
-                                                           UpdateQuantityRequest body) {
+    @PutMapping("/cart/items/{itemId}")
+    public ResponseEntity<ShoppingCart> updateItemQuantity(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                           @RequestBody UpdateQuantityRequest body,
+                                                           @CookieValue(value = "CGUESTID") UUID guestId,
+                                                           @PathVariable("itemId") Long productId) {
         Long userId = getUserIdFromPrincipal(userPrincipal);
         if (userId == null && guestId == null) {
             return ResponseEntity.notFound().build();
