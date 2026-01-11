@@ -142,11 +142,11 @@ public class CartServiceImpl implements CartService {
     public ShoppingCart removeItemFromCart(Long userId, UUID guestId, Long productId) {
         Cart cart = getCart(userId, guestId);
 
-        Optional<CartItem> foundItem = cart.getCartItems()
-                .stream()
-                .filter((item) -> item.getProduct().getId().equals(productId)).findFirst();
+        CartItem foundItem = findCartItemByProductId(cart, productId).orElseThrow(
+                () -> new NotFoundException("Cart item not found")
+        );
 
-        foundItem.ifPresent(item -> cart.getCartItems().remove(item));
+        cart.getCartItems().remove(foundItem);
 
         return cartMapper.toDto(cart);
     }
@@ -156,11 +156,8 @@ public class CartServiceImpl implements CartService {
     public ShoppingCart updateItemQuantity(Long userId, UUID guestId, Long productId, Integer quantity) {
         Cart cart = getCart(userId, guestId);
 
-        CartItem cartItem = cart.getCartItems()
-                .stream()
-                .filter((ci) -> ci.getProduct().getId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Cart item not found"));
+        CartItem cartItem = findCartItemByProductId(cart, productId).orElseThrow(
+                () -> new NotFoundException("Cart item not found"));
 
         if (quantity == 0) {
             cart.getCartItems().remove(cartItem);
