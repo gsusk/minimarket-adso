@@ -64,6 +64,9 @@ public class CartItem {
     }
 
     public void addToQuantity(int q) {
+        if (quantity < 0) {
+            throw new InternalErrorException("Invalid quantity. Cannot be negative");
+        }
         this.quantity += q;
     }
 

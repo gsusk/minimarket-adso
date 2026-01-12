@@ -1,6 +1,7 @@
 package org.adso.minimarket.service;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.exception.InternalErrorException;
