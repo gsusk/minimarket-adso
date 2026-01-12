@@ -6,9 +6,19 @@ import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+/**
+ * TODO:
+ *  - Anadir shipping y billing
+ *  - Anadir transaccion
+ *  - Descuento (?
+ *
+ */
 @Entity
+@Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -18,9 +28,8 @@ public class Order {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_order_user"))
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn()
-    private OrderItem orderItem;
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
     @CreationTimestamp(source = SourceType.DB)
     private LocalDateTime createdAt;
