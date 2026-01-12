@@ -1,7 +1,5 @@
 package org.adso.minimarket.service;
 
-import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.exception.InternalErrorException;
@@ -11,6 +9,7 @@ import org.adso.minimarket.models.*;
 import org.adso.minimarket.repository.CartRepository;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -33,32 +32,22 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public ShoppingCart getShoppingCart(Long userId, UUID guestId) {
         return cartMapper.toDto(getCart(userId, guestId));
     }
 
     @Override
     public Cart getCart(Long userId, UUID guestId) {
-        Optional<Cart> cart;
+        Optional<Cart> cart = Optional.empty();
+
         if (userId != null) {
             cart = cartRepository.findCartByUserIdAndStatus(userId, CartStatus.ACTIVE);
-            if (cart.isEmpty()) {
-                throw new NotFoundException("Cart not found");
-            }
-
-            return cart.get();
-        }
-
-        if (guestId != null) {
+        } else if (guestId != null) {
             cart = cartRepository.findCartByGuestIdAndStatus(guestId, CartStatus.ACTIVE);
-            if (cart.isEmpty()) {
-                throw new NotFoundException("Cart not found");
-            }
-            return cart.get();
         }
 
-        throw new NotFoundException("Cart not found");
+        return cart.orElseThrow(() -> new NotFoundException("Cart not found"));
     }
 
     @Override
@@ -163,7 +152,7 @@ public class CartServiceImpl implements CartService {
         if (quantity == 0) {
             cart.getCartItems().remove(cartItem);
         } else {
-            cartItem.setQuantity(Math.abs(quantity));
+            cartItem.setQuantity(quantity);
         }
         return cartMapper.toDto(cart);
     }
