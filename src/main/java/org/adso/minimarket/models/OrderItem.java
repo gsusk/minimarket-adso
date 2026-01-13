@@ -2,7 +2,10 @@ package org.adso.minimarket.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -10,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,8 +38,8 @@ public class OrderItem {
     @JoinColumn(name = "order_id", foreignKey = @ForeignKey(name = "fk_order_item_order"), nullable = false)
     private Order order;
 
-    @CreationTimestamp
+    @CreationTimestamp(source = SourceType.DB)
     private LocalDateTime createdAt;
-    @UpdateTimestamp
+    @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 }
