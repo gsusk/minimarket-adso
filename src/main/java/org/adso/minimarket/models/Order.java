@@ -31,6 +31,8 @@ public class Order {
     @Column(nullable = false)
     private String email;
 
+    private OrderStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_order_user"))
     private User user;
@@ -42,4 +44,28 @@ public class Order {
     private LocalDateTime createdAt;
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
 }
