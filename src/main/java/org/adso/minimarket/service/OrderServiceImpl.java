@@ -32,14 +32,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDetails placeOrder(User user) {
-        Cart cart = cartService.getCart(user.getId(), null);
-        if (cart.getCartItems().isEmpty()) {
-            throw new BadRequestException("Invalid order: Cart empty");
-        }
-
-        Order order = createOrder(user, cart);
-
-        cart.setStatus(CartStatus.COMPLETE);
+        Order order = createOrder(user);
 
         return new OrderDetails(order.getId(),
                 order.getEmail(),
@@ -49,7 +42,12 @@ public class OrderServiceImpl implements OrderService {
                 order.getCreatedAt());
     }
 
-    public Order createOrder(User user, Cart cart) {
+    public Order createOrder(User user) {
+        Cart cart = cartService.getCart(user.getId(), null);
+        if (cart.getCartItems().isEmpty()) {
+            throw new BadRequestException("Invalid order: Cart empty");
+        }
+
         Order order = new Order();
         order.setUser(user);
         order.setEmail(user.getEmail());
@@ -58,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(ci -> ci.getProduct().getId())
                 .collect(Collectors.toList());
 
-        Map<Long, Product> productMap = productRepository.findAllByIdIn(productIds).stream()
+        Map<Long, Product> productMap = productRepository.findForUpdateAllByIdIn(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
         BigDecimal total = BigDecimal.ZERO;
@@ -67,8 +65,7 @@ public class OrderServiceImpl implements OrderService {
             Product product = productMap.get(ci.getProduct().getId());
 
             if (product.getStock() < ci.getQuantity()) {
-                throw new OrderInsufficientStockException(String.format("Not enough stock for product: \"%s\"",
-                        product.getName()));
+                throw new OrderInsufficientStockException("Not enough stock for product: " + product.getName());
             }
 
             product.setStock(product.getStock() - ci.getQuantity());
@@ -76,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setOrder(order);
             orderItem.setProduct(product);
             orderItem.setQuantity(ci.getQuantity());
-            orderItem.setPrice(ci.getUnitPrice());
+            orderItem.setPrice(product.getPrice());
             orderItem.setSubTotal(ci.getUnitPrice()
                     .multiply(BigDecimal.valueOf(ci.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP));
@@ -84,9 +81,10 @@ public class OrderServiceImpl implements OrderService {
             total = total.add(orderItem.getSubTotal()).setScale(2, RoundingMode.HALF_UP);
         }
 
+        cart.getCartItems().clear();
+
         order.setTotalAmount(total);
         order.setStatus(OrderStatus.PENDING);
-
         return orderRepository.save(order);
     }
 }
