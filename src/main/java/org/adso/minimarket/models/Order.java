@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class Order {
     private OrderStatus status;
 
     @Column(precision = 19, scale = 2)
-    private java.math.BigDecimal totalAmount;
+    private BigDecimal totalAmount;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_order_user"))
@@ -98,11 +99,15 @@ public class Order {
         return createdAt;
     }
 
-    public java.math.BigDecimal getTotalAmount() {
-        return totalAmount;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setTotalAmount(java.math.BigDecimal totalAmount) {
+    public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
     }
 }

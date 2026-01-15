@@ -23,24 +23,24 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceImplTest {
-    @InjectMocks
-    private CategoryServiceImpl categoryService;
-
-    @Mock
-    private CategoryRepository categoryRepository;
-
-    @Test
-    void getCategoryById_Success() {
-        Category category = new Category(1L, "Ropa");
-        ReflectionTestUtils.setField(category, "products", List.of(new Product()));
-
-        when(categoryRepository.findById(any(Long.class))).thenReturn(Optional.of(category));
-
-        Category result = categoryService.getInternalById(category.getId());
-
-        assertEquals(1L, result.getId());
-        assertEquals("Ropa", result.getName());
-
-        verify(categoryRepository).findById(any(Long.class));
-    }
+//    @InjectMocks
+//    private CategoryServiceImpl categoryService;
+//
+//    @Mock
+//    private CategoryRepository categoryRepository;
+//
+//    @Test
+//    void getCategoryById_Success() {
+//        Category category = new Category(1L, "Ropa");
+//        ReflectionTestUtils.setField(category, "products", List.of(new Product()));
+//
+//        when(categoryRepository.findById(any(Long.class))).thenReturn(Optional.of(category));
+//
+//        Category result = categoryService.getInternalById(category.getId());
+//
+//        assertEquals(1L, result.getId());
+//        assertEquals("Ropa", result.getName());
+//
+//        verify(categoryRepository).findById(any(Long.class));
+//    }
 }

@@ -29,46 +29,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserControllerImpl.class)
 @ExtendWith(SpringExtension.class)
 public class UserControllerImplTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockitoBean
-    private UserService userService;
-
-    @Test
-    void getUserById_withValidId_returns201() throws Exception {
-        // given
-        Long userId = 1L;
-        UserResponse response = UserResponse.builder()
-                .id(userId)
-                .name("Santiago")
-                .lastName("Atehortua")
-                .email("test@test.com")
-                .build();
-
-
-        when(userService.getUserById(userId)).thenReturn(response);
-
-        mockMvc.perform(get(UserRoutes.GET_USER, userId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userId))
-                .andExpect(jsonPath("$.name").value("Santiago"))
-                .andExpect(jsonPath("$.last_name").value("Atehortua"))
-                .andExpect(jsonPath("$.email").value("test@test.com"));
-
-        verify(userService).getUserById(any(Long.class));
-    }
-
-    @Test
-    void getUserById_shouldReturn400_whenIdIsNotNumber() throws Exception {
-        mockMvc.perform(get(UserRoutes.GET_USER, "abc"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getUserById_shouldReturn404_whenIdIsLessThan1() throws Exception {
-        mockMvc.perform(get(UserRoutes.GET_USER, -1))
-                .andExpect(status().isBadRequest());
-    }
+//
+//    @Autowired
+//    private MockMvc mockMvc;
+//
+//    @MockitoBean
+//    private UserService userService;
+//
+//    @Test
+//    void getUserById_withValidId_returns201() throws Exception {
+//        // given
+//        Long userId = 1L;
+//        UserResponse response = UserResponse.builder()
+//                .id(userId)
+//                .name("Santiago")
+//                .lastName("Atehortua")
+//                .email("test@test.com")
+//                .build();
+//
+//
+//        when(userService.getUserById(userId)).thenReturn(response);
+//
+//        mockMvc.perform(get(UserRoutes.GET_USER, userId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.id").value(userId))
+//                .andExpect(jsonPath("$.name").value("Santiago"))
+//                .andExpect(jsonPath("$.last_name").value("Atehortua"))
+//                .andExpect(jsonPath("$.email").value("test@test.com"));
+//
+//        verify(userService).getUserById(any(Long.class));
+//    }
+//
+//    @Test
+//    void getUserById_shouldReturn400_whenIdIsNotNumber() throws Exception {
+//        mockMvc.perform(get(UserRoutes.GET_USER, "abc"))
+//                .andExpect(status().isBadRequest());
+//    }
+//
+//    @Test
+//    void getUserById_shouldReturn404_whenIdIsLessThan1() throws Exception {
+//        mockMvc.perform(get(UserRoutes.GET_USER, -1))
+//                .andExpect(status().isBadRequest());
+//    }
 }

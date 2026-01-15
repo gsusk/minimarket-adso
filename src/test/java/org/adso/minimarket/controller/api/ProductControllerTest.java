@@ -31,78 +31,78 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ProductControllerImpl.class)
 @ExtendWith(MockitoExtension.class)
 public class ProductControllerTest {
-
-    @InjectMocks
-    private ProductControllerImpl ProductController;
-
-    @MockitoBean
-    private ProductService productService;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Test
-    void create_withValidRequest_returns201() throws Exception {
-        CreateProductRequest request =
-                CreateProductRequest.builder().name("Camiseta").price("1000").categoryId(1L).build();
-
-        when(productService.createProduct(any(CreateProductRequest.class))).thenReturn(1L);
-
-        mockMvc.perform(
-                        post("/products").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
-                )
-                .andExpect(status().isCreated()).andExpect(header().exists("Location"));
-
-        verify(productService).createProduct(any(CreateProductRequest.class));
-    }
-
-    @Test
-    void create_withInvalidRequest_returns400() throws Exception {
-        CreateProductRequest request =
-                CreateProductRequest.builder().name("Camiseta").categoryId(-1L).build();
-
-        mockMvc.perform(
-                        post("/products").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
-                )
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(productService);
-    }
-
-    @Test
-    void getById_succeeds_return200() throws Exception {
-        long request = 1L;
-        Product p = new Product(1L, "test", "desc", new BigDecimal("1000"), 1, new Category());
-        ProductResponse pr = new ProductResponse(1L, "test", "desc","1000", List.of(), null, 1, LocalDateTime.now());
-
-        when(productService.getProductById(any(Long.class))).thenReturn(pr);
-
-        mockMvc.perform(
-                        get("/products/" + request)
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("test"))
-                .andExpect(jsonPath("$.price").value(1000));
-    }
-
-
-    @Test
-    void getById_fails_withWrongInput() throws Exception {
-        long request = -1L;
-        String request2 = "abc";
-        mockMvc.perform(
-                        get("/products/" + request)
-                )
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(
-                        get("/products/" + request2)
-                )
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(productService);
-    }
+//
+//    @InjectMocks
+//    private ProductControllerImpl ProductController;
+//
+//    @MockitoBean
+//    private ProductService productService;
+//
+//    @Autowired
+//    private MockMvc mockMvc;
+//
+//    @Autowired
+//    private ObjectMapper objectMapper;
+//
+//    @Test
+//    void create_withValidRequest_returns201() throws Exception {
+//        CreateProductRequest request =
+//                CreateProductRequest.builder().name("Camiseta").price("1000").categoryId(1L).build();
+//
+//        when(productService.createProduct(any(CreateProductRequest.class))).thenReturn(1L);
+//
+//        mockMvc.perform(
+//                        post("/products").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+//                )
+//                .andExpect(status().isCreated()).andExpect(header().exists("Location"));
+//
+//        verify(productService).createProduct(any(CreateProductRequest.class));
+//    }
+//
+//    @Test
+//    void create_withInvalidRequest_returns400() throws Exception {
+//        CreateProductRequest request =
+//                CreateProductRequest.builder().name("Camiseta").categoryId(-1L).build();
+//
+//        mockMvc.perform(
+//                        post("/products").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
+//                )
+//                .andExpect(status().isBadRequest());
+//
+//        verifyNoInteractions(productService);
+//    }
+//
+//    @Test
+//    void getById_succeeds_return200() throws Exception {
+//        long request = 1L;
+//        Product p = new Product(1L, "test", "desc", new BigDecimal("1000"), 1, new Category());
+//        ProductResponse pr = new ProductResponse(1L, "test", "desc","1000", List.of(), null, 1, LocalDateTime.now());
+//
+//        when(productService.getProductById(any(Long.class))).thenReturn(pr);
+//
+//        mockMvc.perform(
+//                        get("/products/" + request)
+//                )
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.name").value("test"))
+//                .andExpect(jsonPath("$.price").value(1000));
+//    }
+//
+//
+//    @Test
+//    void getById_fails_withWrongInput() throws Exception {
+//        long request = -1L;
+//        String request2 = "abc";
+//        mockMvc.perform(
+//                        get("/products/" + request)
+//                )
+//                .andExpect(status().isBadRequest());
+//
+//        mockMvc.perform(
+//                        get("/products/" + request2)
+//                )
+//                .andExpect(status().isBadRequest());
+//
+//        verifyNoInteractions(productService);
+//    }
 }

@@ -5,24 +5,27 @@ import org.adso.minimarket.exception.BadRequestException;
 import org.adso.minimarket.exception.OrderInsufficientStockException;
 import org.adso.minimarket.models.*;
 import org.adso.minimarket.repository.OrderRepository;
-import org.adso.minimarket.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
+    private final org.adso.minimarket.repository.ProductRepository productRepository;
     private final CartService cartService;
-    private final ProductRepository productRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository, CartService cartService,
-                            ProductRepository productRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            org.adso.minimarket.repository.ProductRepository productRepository,
+                            CartService cartService) {
         this.orderRepository = orderRepository;
-        this.cartService = cartService;
         this.productRepository = productRepository;
+        this.cartService = cartService;
     }
 
 
@@ -38,39 +41,47 @@ public class OrderServiceImpl implements OrderService {
 
         cart.setStatus(CartStatus.COMPLETE);
 
-        return new OrderDetails(order.getId(), order.getEmail(), user.getId(),
+        return new OrderDetails(order.getId(),
+                order.getEmail(),
+                user.getId(),
                 order.getStatus().toString().toLowerCase(),
+                order.getTotalAmount(),
                 order.getCreatedAt());
     }
 
-    /**
-     * PROBAR CANTIDADES SEGUN UNIDADES DISPONIBLES Y EDICION DEL CARRITO SOBRE LA MARCHA
-     */
     public Order createOrder(User user, Cart cart) {
         Order order = new Order();
         order.setUser(user);
         order.setEmail(user.getEmail());
 
+        List<Long> productIds = cart.getCartItems().stream()
+                .map(ci -> ci.getProduct().getId())
+                .collect(Collectors.toList());
+
+        Map<Long, Product> productMap = productRepository.findAllByIdIn(productIds).stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
         BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem ci : cart.getCartItems()) {
+            Product product = productMap.get(ci.getProduct().getId());
 
-            if (ci.getQuantity() > ci.getProduct().getStock()) {
-                throw new OrderInsufficientStockException(String.format("Not enough stock for product: \"%s",
-                        ci.getProduct().getName()));
+            if (product.getStock() < ci.getQuantity()) {
+                throw new OrderInsufficientStockException(String.format("Not enough stock for product: \"%s\"",
+                        product.getName()));
             }
 
-            ci.getProduct().setStock(ci.getProduct().getStock() - ci.getQuantity());
+            product.setStock(product.getStock() - ci.getQuantity());
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
-            orderItem.setProduct(ci.getProduct());
+            orderItem.setProduct(product);
             orderItem.setQuantity(ci.getQuantity());
             orderItem.setPrice(ci.getUnitPrice());
             orderItem.setSubTotal(ci.getUnitPrice()
                     .multiply(BigDecimal.valueOf(ci.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP));
             order.getOrderItems().add(orderItem);
-            total = total.add(orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+            total = total.add(orderItem.getSubTotal()).setScale(2, RoundingMode.HALF_UP);
         }
 
         order.setTotalAmount(total);
@@ -78,5 +89,4 @@ public class OrderServiceImpl implements OrderService {
 
         return orderRepository.save(order);
     }
-
 }
