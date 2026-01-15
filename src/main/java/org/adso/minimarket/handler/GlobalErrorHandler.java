@@ -3,9 +3,7 @@ package org.adso.minimarket.handler;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
-import org.adso.minimarket.exception.NotFoundException;
-import org.adso.minimarket.exception.TokenInvalidException;
-import org.adso.minimarket.exception.WrongCredentialsException;
+import org.adso.minimarket.exception.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
@@ -107,11 +105,20 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(WrongCredentialsException.class)
-    public ResponseEntity<Object> handleBadRequestException(
+    public ResponseEntity<Object> handleWrongCredentialsException(
             WrongCredentialsException ex
     ) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
         problem.setTitle("unauthorized");
+        return ResponseEntity.status(problem.getStatus()).body(problem);
+    }
+
+    @ExceptionHandler({BadRequestException.class})
+    public ResponseEntity<Object> handleBusinessExceptions(
+            BaseException ex
+    ) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getCode(), ex.getMessage());
+        problem.setTitle("Bad Request");
         return ResponseEntity.status(problem.getStatus()).body(problem);
     }
 
