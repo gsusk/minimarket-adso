@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setProduct(product);
             orderItem.setQuantity(ci.getQuantity());
             orderItem.setPrice(product.getPrice());
-            orderItem.setSubTotal(ci.getUnitPrice()
+            orderItem.setSubTotal(product.getPrice()
                     .multiply(BigDecimal.valueOf(ci.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP));
             order.getOrderItems().add(orderItem);
