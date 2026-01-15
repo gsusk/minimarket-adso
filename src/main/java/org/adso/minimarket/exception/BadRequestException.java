@@ -1,7 +1,9 @@
 package org.adso.minimarket.exception;
 
-public class CartBusinessException extends RuntimeException {
-    public CartBusinessException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class BadRequestException extends BaseException {
+    public BadRequestException(String message) {
+        super(message, HttpStatus.BAD_REQUEST);
     }
 }
