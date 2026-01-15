@@ -2,15 +2,11 @@ package org.adso.minimarket.controller.api;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.adso.minimarket.constant.AuthRoutes;
 import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RefreshRequest;
 import org.adso.minimarket.dto.RegisterRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 

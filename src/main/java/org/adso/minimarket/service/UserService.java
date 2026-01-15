@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.dto.RegisterRequest;
 import org.adso.minimarket.dto.BasicUser;
+import org.adso.minimarket.dto.RegisterRequest;
 import org.adso.minimarket.models.User;
 
 public interface UserService {
@@ -9,7 +9,9 @@ public interface UserService {
 
     BasicUser getUserByEmail(String email);
 
-    BasicUser getUserById(Long id);
+    BasicUser getBasicUserById(Long id);
+
+    User getUserById(Long id);
 
     User getUserInternalByEmail(String email);
 }
