@@ -85,6 +85,13 @@ public class Product {
         this.price = normalizePrice(price);
     }
 
+    public void setStock(Integer stock) {
+        if (stock == null || stock < 0) {
+            throw new IllegalArgumentException("Invalid stock value");
+        }
+        this.stock = stock;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -3,7 +3,10 @@ package org.adso.minimarket.handler;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
-import org.adso.minimarket.exception.*;
+import org.adso.minimarket.exception.BaseException;
+import org.adso.minimarket.exception.NotFoundException;
+import org.adso.minimarket.exception.TokenInvalidException;
+import org.adso.minimarket.exception.WrongCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.validation.FieldError;
@@ -113,12 +116,12 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(problem.getStatus()).body(problem);
     }
 
-    @ExceptionHandler({BadRequestException.class})
+    @ExceptionHandler(BaseException.class)
     public ResponseEntity<Object> handleBusinessExceptions(
             BaseException ex
     ) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getCode(), ex.getMessage());
-        problem.setTitle("Bad Request");
+        problem.setTitle(ex.getTitle());
         return ResponseEntity.status(problem.getStatus()).body(problem);
     }
 

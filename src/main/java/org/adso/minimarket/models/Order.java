@@ -35,6 +35,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    @Column(precision = 19, scale = 2)
+    private java.math.BigDecimal totalAmount;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_order_user"))
     private User user;
@@ -95,7 +98,11 @@ public class Order {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public java.math.BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(java.math.BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }
