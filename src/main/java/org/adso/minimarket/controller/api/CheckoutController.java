@@ -1,4 +1,8 @@
 package org.adso.minimarket.controller.api;
 
-public class Checkout {
+import org.adso.minimarket.dto.CheckoutRequest;
+import org.springframework.http.ResponseEntity;
+
+public interface CheckoutController {
+    ResponseEntity<?> initializeCheckout(CheckoutRequest body);
 }
