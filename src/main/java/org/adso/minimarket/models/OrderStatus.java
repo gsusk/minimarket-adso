@@ -2,6 +2,7 @@ package org.adso.minimarket.models;
 
 public enum OrderStatus {
     PENDING,
-    PAID,
+    COMPLETED,
     CANCELLED,
+    FAILED,
 }

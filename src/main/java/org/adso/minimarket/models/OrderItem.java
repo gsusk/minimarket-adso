@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,4 +44,36 @@ public class OrderItem {
     private LocalDateTime createdAt;
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public BigDecimal getSubTotal() {
+        return subTotal;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }
