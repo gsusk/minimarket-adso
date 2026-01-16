@@ -27,11 +27,11 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(totalToCents(request.getTotal()))
                 .setCurrency("usd")
+                .putMetadata("order_id", request.getId().toString())
                 .setAutomaticPaymentMethods(
                         PaymentIntentCreateParams.AutomaticPaymentMethods
                                 .builder()
                                 .setEnabled(true)
-                                .putExtraParam("order_id", request.getId())
                                 .build()
                 )
                 .build();
