@@ -25,7 +25,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         Map<String, Object> body = new HashMap<>();
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         body.put("error", "Unauthorized");
-        body.put("message", request.getServletPath().equals("/auth/login") ? "Invalid username or password" : "Not enough permissions to access this resource");
+        body.put("message", request.getServletPath().equals("/auth/login") ? "Invalid username or password" : "Not " +
+                "enough permissions to access this resource");
         body.put("path", request.getServletPath());
 
         ObjectMapper mapper = new ObjectMapper();
