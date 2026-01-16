@@ -21,9 +21,8 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public CreatePaymentResponse initializeCheckout(User user) {
         OrderDetails order = orderService.placeOrder(user);
-        CreatePaymentResponse payment;
         try {
-            payment = paymentService.createPayment(
+            return paymentService.createPayment(
                     CreatePaymentRequest.builder()
                             .id(order.getId())
                             .email(order.getEmail())
@@ -35,7 +34,5 @@ public class CheckoutServiceImpl implements CheckoutService {
         } catch (StripeException e) {
             throw new InternalErrorException(e.getMessage());
         }
-
-        return payment;
     }
 }
