@@ -31,6 +31,7 @@ public class PaymentServiceImpl implements PaymentService {
                         PaymentIntentCreateParams.AutomaticPaymentMethods
                                 .builder()
                                 .setEnabled(true)
+                                .putExtraParam("order_id", request.getId())
                                 .build()
                 )
                 .build();
