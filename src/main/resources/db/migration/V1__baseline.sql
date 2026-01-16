@@ -1,25 +1,10 @@
-create table minimarket.cart_seq
-(
-    next_val bigint null
-);
-
 create table minimarket.category
 (
     id   bigint       not null
-        primary key,
+        primary key auto_increment,
     name varchar(255) not null,
     constraint uk_category_name
         unique (name)
-);
-
-create table minimarket.category_seq
-(
-    next_val bigint null
-);
-
-create table minimarket.image_seq
-(
-    next_val bigint null
 );
 
 create table minimarket.product
@@ -29,7 +14,7 @@ create table minimarket.product
     category_id bigint         not null,
     created_at  datetime(6)    null,
     id          bigint         not null
-        primary key,
+        primary key auto_increment,
     updated_at  datetime(6)    null,
     description varchar(255)   null,
     name        varchar(255)   not null,
@@ -42,23 +27,18 @@ create table minimarket.image
 (
     created_at datetime(6)  null,
     id         bigint       not null
-        primary key,
+        primary key auto_increment,
     product_id bigint       not null,
     url        varchar(255) not null,
     constraint fk_product_image_product
         foreign key (product_id) references minimarket.product (id)
 );
 
-create table minimarket.product_seq
-(
-    next_val bigint null
-);
-
 create table minimarket.user
 (
     created_at   datetime(6)            null,
     id           bigint                 not null
-        primary key,
+        primary key auto_increment,
     updated_at   datetime(6)            null,
     address      varchar(255)           null,
     email        varchar(255)           not null,
@@ -76,7 +56,7 @@ create table minimarket.cart
 (
     created_at datetime(6)                                        null,
     id         bigint                                             not null
-        primary key,
+        primary key auto_increment,
     updated_at datetime(6)                                        null,
     user_id    bigint                                             null,
     guest_id   binary(16)                                         null,
@@ -132,9 +112,3 @@ create table minimarket.order_item
         foreign key (product_id) references minimarket.product (id),
     check (`quantity` >= 1)
 );
-
-create table minimarket.user_seq
-(
-    next_val bigint null
-);
-
