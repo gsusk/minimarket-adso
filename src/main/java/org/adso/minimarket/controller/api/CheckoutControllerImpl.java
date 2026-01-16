@@ -1,8 +1,10 @@
 package org.adso.minimarket.controller.api;
 
-import org.adso.minimarket.dto.CheckoutRequest;
+import org.adso.minimarket.config.UserPrincipal;
+import org.adso.minimarket.dto.CreatePaymentRequest;
 import org.adso.minimarket.service.CheckoutService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,7 +17,10 @@ public class CheckoutControllerImpl implements CheckoutController {
     }
 
     @Override
-    public ResponseEntity<?> initializeCheckout(@RequestBody CheckoutRequest body) {
-        return ResponseEntity.ok(checkoutService.initializeCheckout(body));
+    public ResponseEntity<?> initializeCheckout(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody(required = false) CreatePaymentRequest body) {
+
+        return ResponseEntity.ok(checkoutService.initializeCheckout(userPrincipal.getUser()));
     }
 }

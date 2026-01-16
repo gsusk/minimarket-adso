@@ -23,5 +23,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Product getById(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<Product> findAllByIdIn(List<Long> ids);
+    List<Product> findForUpdateAllByIdIn(List<Long> ids);
 }

@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
-import org.adso.minimarket.dto.CheckoutRequest;
+import org.adso.minimarket.models.User;
 
 public interface CheckoutService {
-    Object initializeCheckout(CheckoutRequest body);
+    Object initializeCheckout(User user);
 }
