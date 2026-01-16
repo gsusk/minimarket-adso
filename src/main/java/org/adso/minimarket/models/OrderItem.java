@@ -33,11 +33,11 @@ public class OrderItem {
     private BigDecimal subTotal;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", foreignKey = @ForeignKey(name = "fk_order_item_product"), nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", foreignKey = @ForeignKey(name = "fk_order_item_order"), nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @CreationTimestamp(source = SourceType.DB)

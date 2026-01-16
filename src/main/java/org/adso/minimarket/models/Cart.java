@@ -17,10 +17,6 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(check = @CheckConstraint(constraint =
-        "(user_id IS NULL AND guest_id IS NOT NULL)" +
-                " OR (user_id IS NOT NULL AND guest_id IS NULL)" +
-                " OR (user_id IS NOT NULL AND guest_id IS NULL AND status = 'MERGED')"))
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

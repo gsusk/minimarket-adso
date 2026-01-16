@@ -13,11 +13,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_user_email", columnNames = "email")
-        }
-)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

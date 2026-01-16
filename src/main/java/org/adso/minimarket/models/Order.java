@@ -40,7 +40,7 @@ public class Order {
     private BigDecimal totalAmount;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_order_user"))
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

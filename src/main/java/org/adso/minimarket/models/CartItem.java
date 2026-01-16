@@ -15,11 +15,6 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_cart_product_id", columnNames = {"product_id", "cart_id"}),
-        }
-)
 public class CartItem {
 
     @EmbeddedId
@@ -27,12 +22,12 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("productId")
-    @JoinColumn(name = "product_id", foreignKey = @ForeignKey(name = "fk_cart_item_product"))
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("cartId")
-    @JoinColumn(name = "cart_id", foreignKey = @ForeignKey(name = "fk_cart_item_cart"))
+    @JoinColumn(name = "cart_id")
     private Cart cart;
 
     @Column(nullable = false)

@@ -12,11 +12,6 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_category_name", columnNames = "name")
-        }
-)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
