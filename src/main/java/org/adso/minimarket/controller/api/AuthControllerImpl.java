@@ -34,6 +34,7 @@ public class AuthControllerImpl implements AuthController {
                                               @CookieValue(name = "CGUESTID", required = false) UUID guestId,
                                               HttpServletResponse response) {
         AuthResponse auth = this.authService.loginUser(loginRequest, guestId);
+        addRefreshTokenCookie(response, auth.getRefreshToken());
         clearGuestCookie(response);
         return ResponseEntity.ok(auth);
     }
@@ -45,6 +46,7 @@ public class AuthControllerImpl implements AuthController {
                                                  HttpServletResponse response) {
 
         AuthResponse auth = this.authService.register(registerRequest, guestId);
+        addRefreshTokenCookie(response, auth.getRefreshToken());
         clearGuestCookie(response);
         return new ResponseEntity<>(auth, HttpStatus.CREATED);
     }
@@ -65,4 +67,17 @@ public class AuthControllerImpl implements AuthController {
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
+
+    private void addRefreshTokenCookie(HttpServletResponse response, String token) {
+        ResponseCookie cookie = ResponseCookie
+                .from("X-REFRESH-TOKEN", token)
+                .maxAge(3600)
+                .path("/auth/refresh")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
 }

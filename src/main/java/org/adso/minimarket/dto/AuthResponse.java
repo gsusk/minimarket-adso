@@ -1,5 +1,6 @@
 package org.adso.minimarket.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,6 @@ public class AuthResponse {
     @JsonProperty("access_token")
     private String token;
 
-    @JsonProperty("refresh_token")
+    @JsonIgnore
     private String refreshToken;
 }
