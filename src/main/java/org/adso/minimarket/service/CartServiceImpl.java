@@ -10,8 +10,8 @@ import org.adso.minimarket.models.cart.CartItem;
 import org.adso.minimarket.models.cart.CartStatus;
 import org.adso.minimarket.models.product.Product;
 import org.adso.minimarket.models.user.User;
-import org.adso.minimarket.repository.CartRepository;
-import org.adso.minimarket.repository.UserRepository;
+import org.adso.minimarket.repository.jpa.CartRepository;
+import org.adso.minimarket.repository.jpa.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

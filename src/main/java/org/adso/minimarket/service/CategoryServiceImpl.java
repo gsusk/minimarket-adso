@@ -2,7 +2,7 @@ package org.adso.minimarket.service;
 
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.models.Category;
-import org.adso.minimarket.repository.CategoryRepository;
+import org.adso.minimarket.repository.jpa.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 @Service

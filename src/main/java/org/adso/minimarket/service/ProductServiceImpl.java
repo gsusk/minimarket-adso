@@ -6,7 +6,8 @@ import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.product.Product;
-import org.adso.minimarket.repository.ProductRepository;
+import org.adso.minimarket.repository.elastic.ProductSearchRepository;
+import org.adso.minimarket.repository.jpa.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -16,12 +17,14 @@ public class ProductServiceImpl implements ProductService {
 
     private final CategoryService categoryService;
     private final ProductRepository productRepository;
+    private final ProductSearchRepository productSearchRepository;
     private final ProductMapper productMapper;
 
-    ProductServiceImpl(CategoryService categoryService, ProductRepository productRepository,
+    ProductServiceImpl(CategoryService categoryService, ProductRepository productRepository, ProductSearchRepository productSearchRepository,
                        ProductMapper productMapper) {
         this.categoryService = categoryService;
         this.productRepository = productRepository;
+        this.productSearchRepository = productSearchRepository;
         this.productMapper = productMapper;
     }
 
@@ -34,9 +37,12 @@ public class ProductServiceImpl implements ProductService {
                 productRequest.getDescription(),
                 new BigDecimal(productRequest.getPrice()),
                 productRequest.getStock(),
-                category
+                category,
+                productRequest.getAttributes(),
+                productRequest.getCategoryName()
         );
-
+        Product newProduct = product;
+        productSearchRepository.save(product);
         return productRepository.save(product).getId();
     }
 

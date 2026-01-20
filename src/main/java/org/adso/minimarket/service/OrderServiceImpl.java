@@ -10,7 +10,8 @@ import org.adso.minimarket.models.order.OrderItem;
 import org.adso.minimarket.models.order.OrderStatus;
 import org.adso.minimarket.models.product.Product;
 import org.adso.minimarket.models.user.User;
-import org.adso.minimarket.repository.OrderRepository;
+import org.adso.minimarket.repository.jpa.OrderRepository;
+import org.adso.minimarket.repository.jpa.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +24,11 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
-    private final org.adso.minimarket.repository.ProductRepository productRepository;
+    private final ProductRepository productRepository;
     private final CartService cartService;
 
     public OrderServiceImpl(OrderRepository orderRepository,
-                            org.adso.minimarket.repository.ProductRepository productRepository,
+                            ProductRepository productRepository,
                             CartService cartService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;

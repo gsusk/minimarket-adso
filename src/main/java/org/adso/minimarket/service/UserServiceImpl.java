@@ -6,7 +6,7 @@ import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.user.Role;
 import org.adso.minimarket.models.user.User;
-import org.adso.minimarket.repository.UserRepository;
+import org.adso.minimarket.repository.jpa.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service
