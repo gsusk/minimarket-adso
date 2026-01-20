@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * TODO:
  *  - Seguimiento de inventario
+ *  - Lockout carrito
+ *  - Validacion de JSON para variantes del producto
  *
  */
 @SpringBootApplication
