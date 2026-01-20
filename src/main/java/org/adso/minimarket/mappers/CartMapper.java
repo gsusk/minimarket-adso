@@ -2,8 +2,8 @@ package org.adso.minimarket.mappers;
 
 import org.adso.minimarket.dto.Item;
 import org.adso.minimarket.dto.ShoppingCart;
-import org.adso.minimarket.models.Cart;
-import org.adso.minimarket.models.CartItem;
+import org.adso.minimarket.models.cart.Cart;
+import org.adso.minimarket.models.cart.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

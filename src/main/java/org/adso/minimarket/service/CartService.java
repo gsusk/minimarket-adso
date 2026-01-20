@@ -2,7 +2,7 @@ package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
-import org.adso.minimarket.models.Cart;
+import org.adso.minimarket.models.cart.Cart;
 
 import java.util.UUID;
 

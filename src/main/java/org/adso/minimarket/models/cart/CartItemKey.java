@@ -1,4 +1,4 @@
-package org.adso.minimarket.models;
+package org.adso.minimarket.models.cart;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

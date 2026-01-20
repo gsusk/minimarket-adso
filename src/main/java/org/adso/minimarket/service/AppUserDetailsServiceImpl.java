@@ -1,7 +1,7 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.config.UserPrincipal;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.user.User;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

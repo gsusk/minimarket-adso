@@ -1,6 +1,6 @@
 package org.adso.minimarket.config;
 
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

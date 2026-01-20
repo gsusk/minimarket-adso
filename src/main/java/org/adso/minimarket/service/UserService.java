@@ -2,7 +2,7 @@ package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.dto.RegisterRequest;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.user.User;
 
 public interface UserService {
     User createUser(RegisterRequest registerRequest);

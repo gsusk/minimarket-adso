@@ -1,9 +1,10 @@
-package org.adso.minimarket.models;
+package org.adso.minimarket.models.cart;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.adso.minimarket.exception.InternalErrorException;
+import org.adso.minimarket.models.product.Product;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;

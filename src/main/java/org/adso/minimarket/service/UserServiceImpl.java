@@ -4,8 +4,8 @@ import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.dto.RegisterRequest;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
-import org.adso.minimarket.models.Role;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.user.Role;
+import org.adso.minimarket.models.user.User;
 import org.adso.minimarket.repository.UserRepository;
 import org.springframework.stereotype.Service;
 

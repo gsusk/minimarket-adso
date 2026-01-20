@@ -1,7 +1,7 @@
 package org.adso.minimarket.repository;
 
-import org.adso.minimarket.models.Cart;
-import org.adso.minimarket.models.CartStatus;
+import org.adso.minimarket.models.cart.Cart;
+import org.adso.minimarket.models.cart.CartStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 

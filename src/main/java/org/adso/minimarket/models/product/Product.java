@@ -1,4 +1,4 @@
-package org.adso.minimarket.models;
+package org.adso.minimarket.models.product;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.adso.minimarket.models.cart.CartItem;
+import org.adso.minimarket.models.Category;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;

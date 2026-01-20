@@ -1,7 +1,7 @@
 package org.adso.minimarket.repository;
 
 import jakarta.persistence.LockModeType;
-import org.adso.minimarket.models.Product;
+import org.adso.minimarket.models.product.Product;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

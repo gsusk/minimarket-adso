@@ -1,8 +1,8 @@
 package org.adso.minimarket.repository;
 
-import org.adso.minimarket.models.Order;
-import org.adso.minimarket.models.OrderStatus;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.order.Order;
+import org.adso.minimarket.models.order.OrderStatus;
+import org.adso.minimarket.models.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

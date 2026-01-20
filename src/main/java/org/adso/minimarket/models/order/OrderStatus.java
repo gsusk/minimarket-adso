@@ -1,4 +1,4 @@
-package org.adso.minimarket.models;
+package org.adso.minimarket.models.order;
 
 public enum OrderStatus {
     PENDING,

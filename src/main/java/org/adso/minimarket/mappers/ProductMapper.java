@@ -1,8 +1,8 @@
 package org.adso.minimarket.mappers;
 
 import org.adso.minimarket.dto.DetailedProduct;
-import org.adso.minimarket.models.Image;
-import org.adso.minimarket.models.Product;
+import org.adso.minimarket.models.product.Image;
+import org.adso.minimarket.models.product.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -5,7 +5,7 @@ import org.adso.minimarket.dto.DetailedProduct;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
-import org.adso.minimarket.models.Product;
+import org.adso.minimarket.models.product.Product;
 import org.adso.minimarket.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 

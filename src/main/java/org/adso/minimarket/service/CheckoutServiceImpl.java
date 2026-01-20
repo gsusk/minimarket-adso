@@ -5,7 +5,7 @@ import org.adso.minimarket.dto.CreatePaymentRequest;
 import org.adso.minimarket.dto.CreatePaymentResponse;
 import org.adso.minimarket.dto.OrderDetails;
 import org.adso.minimarket.exception.InternalErrorException;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.user.User;
 import org.springframework.stereotype.Service;
 
 @Service

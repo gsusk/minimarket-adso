@@ -1,4 +1,4 @@
-package org.adso.minimarket.models;
+package org.adso.minimarket.models.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

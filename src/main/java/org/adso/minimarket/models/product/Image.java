@@ -1,4 +1,4 @@
-package org.adso.minimarket.models;
+package org.adso.minimarket.models.product;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

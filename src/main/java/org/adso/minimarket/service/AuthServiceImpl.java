@@ -6,7 +6,7 @@ import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
 import org.adso.minimarket.exception.TokenInvalidException;
-import org.adso.minimarket.models.User;
+import org.adso.minimarket.models.user.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
