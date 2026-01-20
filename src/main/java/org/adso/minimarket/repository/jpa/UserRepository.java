@@ -1,4 +1,4 @@
-package org.adso.minimarket.repository;
+package org.adso.minimarket.repository.jpa;
 
 import org.adso.minimarket.models.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

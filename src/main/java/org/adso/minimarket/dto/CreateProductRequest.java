@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.util.Map;
+
 
 @Getter
 @Setter
@@ -33,4 +35,10 @@ public class CreateProductRequest {
 
     @Min(value = 1, message = "Stock has to be greater than 0")
     private Integer stock;
+
+    @NotNull(message = "attributes required")
+    private Map<String, Object> attributes;
+
+    @NotNull
+    private String categoryName;
 }

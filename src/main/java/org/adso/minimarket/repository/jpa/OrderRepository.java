@@ -1,4 +1,4 @@
-package org.adso.minimarket.repository;
+package org.adso.minimarket.repository.jpa;
 
 import org.adso.minimarket.models.order.Order;
 import org.adso.minimarket.models.order.OrderStatus;
