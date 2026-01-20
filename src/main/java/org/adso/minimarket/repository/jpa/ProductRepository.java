@@ -1,4 +1,4 @@
-package org.adso.minimarket.repository;
+package org.adso.minimarket.repository.jpa;
 
 import jakarta.persistence.LockModeType;
 import org.adso.minimarket.models.product.Product;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductJpaRepository extends JpaRepository<Product, Long> {
     @Override
     <S extends Product> S save(S entity);
 

@@ -1,49 +1,64 @@
 package org.adso.minimarket.models.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.cart.CartItem;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(indexName = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.annotation.Id // ES specific ID
     private Long id;
 
+    @Field(type = FieldType.Text, analyzer = "standard")
     @Column(nullable = false)
     private String name;
 
+    @Field(type = FieldType.Text)
     private String description;
 
+    @Field(type = FieldType.Double)
     @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
+    @Field(type = FieldType.Integer)
     @Column(nullable = false)
-    @Min(value = 0, message = "stock cant be less than 0")
     private Integer stock;
 
-    @Setter
+    @Field(type = FieldType.Keyword)
+    @Column(nullable = false, name = "category_name")
+    public String categoryName;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "attributes", columnDefinition = "json")
+    @Field(type = FieldType.Object, name = "attributes")
+    private Map<String, Object> attributes = new HashMap<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
+    @org.springframework.data.annotation.Transient
     private Category category;
 
     @OneToMany(
@@ -62,7 +77,7 @@ public class Product {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public Product(String name, String description, BigDecimal price, Integer stock, Category category) {
+    public Product(String name, String description, BigDecimal price, Integer stock, Category category, Map<String, Object> attributes, String categoryName) {
         this.name = name;
         this.description = description;
         this.price = normalizePrice(price);
@@ -71,6 +86,8 @@ public class Product {
             throw new IllegalArgumentException("Invalid stock argument");
         }
         this.stock = stock;
+        this.attributes = attributes;
+        this.categoryName = categoryName;
     }
 
     BigDecimal normalizePrice(BigDecimal price) {
