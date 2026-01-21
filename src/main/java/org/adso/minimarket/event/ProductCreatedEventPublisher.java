@@ -16,7 +16,7 @@ public class ProductCreatedEventPublisher {
     }
 
     @Async
-    public void publishProductCreatedEvent(Product product, String categoryName) {
+    public void handleProductCreatedEvent(Product product, String categoryName) {
         ProductCreatedEvent productCreatedEvent = new ProductCreatedEvent(this, product, categoryName);
         applicationEventPublisher.publishEvent(productCreatedEvent);
     }
