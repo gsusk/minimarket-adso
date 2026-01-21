@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProductCreatedEventPublisher {
-    @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public ProductCreatedEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.applicationEventPublisher = applicationEventPublisher;
