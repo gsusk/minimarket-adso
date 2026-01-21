@@ -18,7 +18,7 @@ import java.util.Map;
 public class ProductDocument {
 
     @Id
-    private String id;
+    private Long id;
 
     @Field(type = FieldType.Text, analyzer = "standard")
     private String name;
