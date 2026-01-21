@@ -1,0 +1,16 @@
+package org.adso.minimarket.event;
+
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ProductCreatedEventListener implements ApplicationListener<ProductCreatedEvent> {
+    @Async
+    @Override
+    @EventListener
+    public void onApplicationEvent(ProductCreatedEvent event) {
+        System.out.println("evento recibido" + event.getProduct()) ;
+    }
+}
