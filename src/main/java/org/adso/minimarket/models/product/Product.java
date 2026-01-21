@@ -25,40 +25,30 @@ import java.util.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(indexName = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @org.springframework.data.annotation.Id // ES specific ID
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
     @Column(nullable = false)
     private String name;
 
-    @Field(type = FieldType.Text)
     private String description;
 
-    @Field(type = FieldType.Double)
     @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
-    @Field(type = FieldType.Integer)
     @Column(nullable = false)
     private Integer stock;
 
-    @Field(type = FieldType.Keyword)
-    @Column(nullable = false, name = "category_name")
-    public String categoryName;
+    private String brand;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attributes", columnDefinition = "json")
-    @Field(type = FieldType.Object, name = "attributes")
     private Map<String, Object> attributes = new HashMap<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    @org.springframework.data.annotation.Transient
     private Category category;
 
     @OneToMany(
@@ -77,7 +67,7 @@ public class Product {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public Product(String name, String description, BigDecimal price, Integer stock, Category category, Map<String, Object> attributes, String categoryName) {
+    public Product(String name, String description, BigDecimal price, Integer stock, Category category, Map<String, Object> attributes) {
         this.name = name;
         this.description = description;
         this.price = normalizePrice(price);
@@ -87,7 +77,6 @@ public class Product {
         }
         this.stock = stock;
         this.attributes = attributes;
-        this.categoryName = categoryName;
     }
 
     BigDecimal normalizePrice(BigDecimal price) {

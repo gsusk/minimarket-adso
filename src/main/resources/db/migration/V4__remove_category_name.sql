@@ -1,0 +1,2 @@
+ALTER TABLE product DROP COLUMN category_name;
+ALTER TABLE product ADD COLUMN brand VARCHAR(255);
