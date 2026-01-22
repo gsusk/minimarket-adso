@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Item {
+public class ShoppingCartItem {
     @JsonProperty("product_id")
     private Long productId;
     private String name;
