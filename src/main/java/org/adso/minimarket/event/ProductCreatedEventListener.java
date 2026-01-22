@@ -29,7 +29,7 @@ public class ProductCreatedEventListener {
                 p.getStock(),
                 p.getAttributes(),
                 p.getCreatedAt()
-                );
+        );
         searchService.saveIndex(productDocument);
     }
 }
