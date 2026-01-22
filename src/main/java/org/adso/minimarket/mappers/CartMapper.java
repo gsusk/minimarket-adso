@@ -1,6 +1,6 @@
 package org.adso.minimarket.mappers;
 
-import org.adso.minimarket.dto.Item;
+import org.adso.minimarket.dto.ShoppingCartItem;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.models.cart.Cart;
 import org.adso.minimarket.models.cart.CartItem;
@@ -16,5 +16,5 @@ public interface CartMapper {
 
     @Mapping(target = "productId", expression = "java(item.getProduct().getId())")
     @Mapping(target = "name", expression = "java(item.getProduct().getName())")
-    Item toCartItemDto(CartItem item);
+    ShoppingCartItem toCartItemDto(CartItem item);
 }

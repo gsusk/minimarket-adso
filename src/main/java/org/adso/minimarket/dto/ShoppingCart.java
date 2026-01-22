@@ -11,7 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShoppingCart {
-    private Set<Item> items;
+    private Set<ShoppingCartItem> shoppingCartItems;
     @JsonProperty("sub_total")
     private String subTotal;
     private int size;
