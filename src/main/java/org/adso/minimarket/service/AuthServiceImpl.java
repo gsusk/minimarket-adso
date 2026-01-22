@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest req, UUID guestId) {
         User user = this.userService.createUser(RegisterRequest.builder()
-                .name(req.name())
+                .firstName(req.firstName())
                 .lastName(req.lastName())
                 .email(req.email())
                 .password(this.passwordEncoder.encode(req.password()))

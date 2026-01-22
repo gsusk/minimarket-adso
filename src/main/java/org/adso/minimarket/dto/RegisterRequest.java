@@ -12,7 +12,8 @@ import lombok.Builder;
 public record RegisterRequest(
         @NotBlank(message = "required")
         @Size(max = 255, message = "too long")
-        String name,
+        @JsonProperty("first_name")
+        String firstName,
 
         @NotBlank(message = "required")
         @JsonProperty("last_name")
@@ -27,8 +28,8 @@ public record RegisterRequest(
         String password
 ) {
     @Override
-    public String name() {
-        return name;
+    public String firstName() {
+        return firstName;
     }
 
     @Override

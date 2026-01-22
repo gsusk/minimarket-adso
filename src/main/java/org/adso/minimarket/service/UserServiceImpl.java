@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(RegisterRequest body) {
-        User usr = new User(body.name(), body.lastName(), body.email(), body.password());
+        User usr = new User(body.firstName(), body.lastName(), body.email(), body.password());
         usr.setRole(Role.USER);
         return userRepository.save(usr);
     }
