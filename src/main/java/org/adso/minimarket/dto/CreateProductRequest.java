@@ -29,7 +29,6 @@ public class CreateProductRequest {
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal price;
 
-    @JsonProperty("category_id")
     @NotNull(message = "Category ID is required")
     private Long categoryId;
 

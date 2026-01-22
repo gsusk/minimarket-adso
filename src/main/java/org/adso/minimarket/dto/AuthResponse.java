@@ -18,8 +18,7 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthResponse {
-    @JsonProperty("access_token")
-    private String token;
+    private String accessToken;
 
     @JsonIgnore
     private String refreshToken;

@@ -12,11 +12,9 @@ import lombok.Builder;
 public record RegisterRequest(
         @NotBlank(message = "required")
         @Size(max = 255, message = "too long")
-        @JsonProperty("first_name")
         String firstName,
 
         @NotBlank(message = "required")
-        @JsonProperty("last_name")
         String lastName,
 
         @Email(message = "Must be a valid email")

@@ -9,6 +9,6 @@ import lombok.Data;
 public class CategorySummary {
     private Long id;
 
-    @JsonProperty("category_name")
+    @JsonProperty("categoryName")
     private String name;
 }

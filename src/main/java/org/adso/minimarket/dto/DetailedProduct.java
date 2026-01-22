@@ -23,6 +23,6 @@ public class DetailedProduct {
     private CategorySummary category;
     private int stock;
     private List<String> images = new ArrayList<>();
-    @JsonProperty(value = "listed_at")
+    @JsonProperty(value = "listedAt")
     private LocalDateTime createdAt;
 }

@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddCartItemRequest {
-    @JsonProperty("product_id")
     @NotNull(message = "required")
     private Long productId;
     @Min(1)

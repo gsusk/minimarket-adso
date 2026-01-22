@@ -13,10 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDetails {
-    @JsonProperty("order_id")
+    @JsonProperty("orderId")
     private UUID id;
     private String email;
-    @JsonProperty("user_id")
     private Long userId;
     private String status;
     private BigDecimal total;

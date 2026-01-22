@@ -14,11 +14,9 @@ import lombok.Data;
 public class CreateUserRequest {
     @NotBlank(message = "required")
     @Size(max = 255, message = "too long")
-    @JsonProperty("first_name")
     String firstName;
 
     @NotBlank(message = "required")
-    @JsonProperty("last_name")
     String lastName;
 
     @Email(message = "must be a valid email")

@@ -10,10 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShoppingCartItem {
-    @JsonProperty("product_id")
     private Long productId;
     private String name;
-    @JsonProperty("unit_price")
     private String unitPrice;
     private int quantity;
 }
