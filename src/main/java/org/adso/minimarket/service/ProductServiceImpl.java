@@ -8,7 +8,10 @@ import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
 import org.adso.minimarket.models.product.Product;
 import org.adso.minimarket.repository.jpa.ProductRepository;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 public class ProductServiceImpl implements ProductService {

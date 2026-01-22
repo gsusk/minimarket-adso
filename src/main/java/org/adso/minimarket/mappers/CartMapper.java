@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {
-    @Mapping(target = "items", source = "cartItems")
+    @Mapping(target = "shoppingCartItems", source = "cartItems")
     @Mapping(target = "subTotal", expression = "java(cart.getTotal().toString())")
     @Mapping(target = "size", expression = "java(cart.getSize())")
     ShoppingCart toDto(Cart cart);
