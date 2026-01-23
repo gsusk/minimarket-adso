@@ -5,12 +5,15 @@ import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.AuthResponse;
 import org.adso.minimarket.dto.LoginRequest;
 import org.adso.minimarket.dto.RegisterRequest;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.TokenInvalidException;
+import org.adso.minimarket.exception.WrongCredentialsException;
 import org.adso.minimarket.models.user.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -65,9 +68,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse loginUser(LoginRequest req, UUID guestId) throws NullPointerException {
-        Authentication authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.password())
-        );
+        Authentication authentication;
+        try {
+            authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.email(), req.password())
+            );
+        } catch (AuthenticationException e) {
+            throw new WrongCredentialsException("Invalid email or password");
+        }
 
         UserPrincipal user = (UserPrincipal) Objects.requireNonNull(authentication.getPrincipal());
 

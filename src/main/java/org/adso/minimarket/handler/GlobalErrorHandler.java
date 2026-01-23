@@ -3,62 +3,69 @@ package org.adso.minimarket.handler;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import org.adso.minimarket.dto.ErrorResponse;
 import org.adso.minimarket.exception.BaseException;
-import org.adso.minimarket.exception.NotFoundException;
-import org.adso.minimarket.exception.TokenInvalidException;
-import org.adso.minimarket.exception.WrongCredentialsException;
+import org.adso.minimarket.exception.ErrorCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Global exception handler for all API errors.
+ * Provides consistent error responses using ErrorResponse DTO.
+ */
 @RestControllerAdvice
 public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalErrorHandler.class);
 
     private static final Map<String, String> CONSTRAINT_MESSAGES = Map.of(
             "uk_user_email", "Email already in use"
     );
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleDataIntegrityViolation(
-            DataIntegrityViolationException ex
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ErrorResponse> handleBaseException(
+            BaseException ex,
+            WebRequest request
     ) {
-        var problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        problem.setTitle("Constraint violation");
-
-        String message = Optional.ofNullable(getRootCause(ex))
-                .map(Throwable::getMessage)
-                .orElse("")
-                .toLowerCase();
-
-        CONSTRAINT_MESSAGES.forEach((constraint, detail) -> {
-            if (message.contains(constraint)) {
-                problem.setProperty(
-                        "errors",
-                        List.of(Map.of(
-                                "field", constraint.substring(constraint.lastIndexOf('_') + 1),
-                                "detail", detail
-                        ))
-                );
-            }
-        });
-
-        if (problem.getProperties() == null || !problem.getProperties().containsKey("errors")) {
-            problem.setDetail("Unknown conflict");
+        HttpStatus status = ex.getStatus();
+        
+        // Log based on severity
+        if (status.is5xxServerError()) {
+            log.error("Server error: {}", ex.getMessage(), ex);
+        } else {
+            log.warn("Client error: {} - {}", ex.getErrorCode(), ex.getMessage());
         }
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+        ErrorResponse errorResponse = new ErrorResponse(
+                status.value(),
+                ex.getTitle(),
+                ex.getMessage(),
+                ex.getErrorCode().name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                null
+        );
+
+        return ResponseEntity.status(status).body(errorResponse);
     }
 
     @Override
@@ -68,119 +75,155 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request
     ) {
+        log.warn("Validation failed: {} errors", ex.getBindingResult().getErrorCount());
 
-        ProblemDetail problem = ProblemDetail.forStatus(status);
-        problem.setTitle("Validation failed");
-        problem.setDetail("One or more constraints were violated");
-
-        List<Map<String, String>> errors = ex.getBindingResult()
+        List<ErrorResponse.ValidationError> validationErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .collect(Collectors.groupingBy(
-                        FieldError::getField,
-                        Collectors.mapping(
-                                FieldError::getDefaultMessage,
-                                Collectors.toList()
-                        )
-                ))
-                .entrySet()
-                .stream()
-                .map(entry -> Map.of(
-                        "field", entry.getKey(),
-                        "detail", String.join(" | ", entry.getValue())
+                .map(error -> new ErrorResponse.ValidationError(
+                        error.getField(),
+                        error.getDefaultMessage(),
+                        error.getRejectedValue()
                 ))
                 .toList();
 
-        problem.setProperty("errors", errors);
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                ex.getMessage(),
+                ErrorCode.VALIDATION_FAILED.name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                validationErrors
+        );
 
-        return ResponseEntity.status(status).body(problem);
-    }
-
-    @ExceptionHandler(TokenInvalidException.class)
-    public ResponseEntity<Object> handleUnauthenticatedException(
-            TokenInvalidException ex,
-            WebRequest webRequest
-    ) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-        problem.setTitle("Unauthorized");
-        problem.setInstance(URI.create(webRequest.getContextPath()));
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
-    }
-
-    @ExceptionHandler(WrongCredentialsException.class)
-    public ResponseEntity<Object> handleWrongCredentialsException(
-            WrongCredentialsException ex
-    ) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
-        problem.setTitle("unauthorized");
-        return ResponseEntity.status(problem.getStatus()).body(problem);
-    }
-
-    @ExceptionHandler(BaseException.class)
-    public ResponseEntity<Object> handleBusinessExceptions(
-            BaseException ex
-    ) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getCode(), ex.getMessage());
-        problem.setTitle(ex.getTitle());
-        return ResponseEntity.status(problem.getStatus()).body(problem);
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Object> handleConstraintViolationException(
-            ConstraintViolationException ex
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex,
+            WebRequest request
     ) {
-        var problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problem.setTitle("Validation failed");
+        log.warn("Constraint violation: {} violations", ex.getConstraintViolations().size());
 
-        problem.setProperty(
-                "errors",
-                ex.getConstraintViolations()
-                        .stream()
-                        .collect(Collectors.groupingBy(
-                                v -> extractFieldName(v.getPropertyPath()),
-                                Collectors.mapping(ConstraintViolation::getMessage, Collectors.toList())
-                        ))
-                        .entrySet()
-                        .stream()
-                        .map(e -> Map.of(
-                                "field", e.getKey(),
-                                "detail", String.join(" | ", e.getValue())
-                        ))
-                        .toList()
+        List<ErrorResponse.ValidationError> validationErrors = ex.getConstraintViolations()
+                .stream()
+                .map(violation -> new ErrorResponse.ValidationError(
+                        extractFieldName(violation.getPropertyPath()),
+                        violation.getMessage(),
+                        violation.getInvalidValue()
+                ))
+                .toList();
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                ex.getMessage(),
+                ErrorCode.VALIDATION_CONSTRAINT_VIOLATION.name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                validationErrors
         );
 
-        return ResponseEntity.badRequest().body(problem);
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
-    private static String extractFieldName(Path propertyPath) {
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            WebRequest request
+    ) {
+        log.warn("Data integrity violation: {}", ex.getMessage());
+
+        String message = Optional.ofNullable(getRootCause(ex))
+                .map(Throwable::getMessage)
+                .orElse("")
+                .toLowerCase();
+
+        String detail = "A database constraint was violated";
+        for (Map.Entry<String, String> entry : CONSTRAINT_MESSAGES.entrySet()) {
+            if (message.contains(entry.getKey())) {
+                detail = entry.getValue();
+                break;
+            }
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                detail,
+                ErrorCode.RESOURCE_CONFLICT.name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            WebRequest request
+    ) {
+        log.warn("Type mismatch: {} for parameter '{}'", ex.getValue(), ex.getName());
+
+        String message = String.format(
+                "Invalid value '%s' for parameter '%s'. Expected type: %s",
+                ex.getValue(),
+                ex.getName(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown"
+        );
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                message,
+                ErrorCode.VALIDATION_FAILED.name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                null
+        );
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(
+            Exception ex,
+            WebRequest request
+    ) {
+        log.error("Unexpected error occurred", ex);
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "An unexpected error occurred. Please try again later.",
+                ErrorCode.SERVER_INTERNAL_ERROR.name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    // Helper methods
+
+    private String getRequestPath(WebRequest request) {
+        if (request instanceof ServletWebRequest servletRequest) {
+            return servletRequest.getRequest().getRequestURI();
+        }
+        return request.getDescription(false).replace("uri=", "");
+    }
+
+    private String extractFieldName(Path propertyPath) {
         String field = null;
         for (Path.Node node : propertyPath) {
             field = node.getName();
         }
         return field != null ? field : propertyPath.toString();
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Object> handleNotFoundException(
-            NotFoundException ex
-    ) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-        problem.setTitle("Resource Not Found");
-        return ResponseEntity.status(problem.getStatus()).body(problem);
-    }
-
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Object> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problem.setDetail(
-                String.format(
-                        "Invalid value '%s' for parameter '%s'",
-                        ex.getValue(),
-                        ex.getName()
-                )
-        );
-        return ResponseEntity.badRequest().body(problem);
     }
 
     private Throwable getRootCause(Throwable ex) {
@@ -191,4 +234,3 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
         return cause;
     }
 }
-

@@ -3,20 +3,26 @@ package org.adso.minimarket.exception;
 import org.springframework.http.HttpStatus;
 
 public class BaseException extends RuntimeException {
-    private final HttpStatus code;
+    private final HttpStatus status;
     private final String title;
+    private final ErrorCode errorCode;
 
-    public BaseException(String message, HttpStatus code, String title) {
+    public BaseException(String message, HttpStatus status, String title, ErrorCode errorCode) {
         super(message);
-        this.code = code;
+        this.status = status;
         this.title = title;
+        this.errorCode = errorCode;
     }
 
-    public HttpStatus getCode() {
-        return code;
+    public HttpStatus getStatus() {
+        return status;
     }
 
     public String getTitle() {
         return title;
+    }
+
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 }
