@@ -1,6 +1,5 @@
 package org.adso.minimarket.handler;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.adso.minimarket.dto.ErrorResponse;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,12 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-/**
- * Global exception handler for all API errors.
- * Provides consistent error responses using ErrorResponse DTO.
- */
 @RestControllerAdvice
 public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
 
@@ -47,8 +40,7 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
             WebRequest request
     ) {
         HttpStatus status = ex.getStatus();
-        
-        // Log based on severity
+
         if (status.is5xxServerError()) {
             log.error("Server error: {}", ex.getMessage(), ex);
         } else {
@@ -208,8 +200,6 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
-
-    // Helper methods
 
     private String getRequestPath(WebRequest request) {
         if (request instanceof ServletWebRequest servletRequest) {
