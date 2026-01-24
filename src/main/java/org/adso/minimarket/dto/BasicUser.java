@@ -22,5 +22,5 @@ public class BasicUser {
 
     private String email;
 
-    private LocalDateTime createdAt;
+    // profile pic
 }
