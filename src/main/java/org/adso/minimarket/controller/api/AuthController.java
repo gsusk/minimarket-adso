@@ -19,5 +19,5 @@ public interface AuthController {
                                           UUID guestId,
                                           HttpServletResponse response);
 
-    ResponseEntity<AuthResponse> auth(@Valid RefreshRequest refreshRequest);
+    ResponseEntity<AuthResponse> auth(String cookieRefreshToken);
 }

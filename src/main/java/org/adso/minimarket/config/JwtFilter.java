@@ -20,11 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 
-/**
- * TODO:
- *  - ANADIR ERROR HANDLIND APROPIADO AL JWT
- *
- */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
@@ -68,16 +63,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            response.setHeader(HttpHeaders.AUTHORIZATION, null);
-            response.setStatus(401);
-            response.setContentType(MimeTypeUtils.APPLICATION_JSON.toString());
-            response.getWriter().write("{\"title\": \"Unauthorized\", "
-                    + "\"message\": \"" + e.getMessage()
-                    + "\", \"status\": \"401\", "
-                    + "\"instance\": " + "\"" + request.getRequestURI()
-                    + "\"" + "}");
-            return;
+            logger.debug("JWT Validation failed: {}", e.getMessage());
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

@@ -53,8 +53,16 @@ public class AuthControllerImpl implements AuthController {
 
     @Override
     @PostMapping(AuthRoutes.REFRESH_TOKEN)
-    public ResponseEntity<AuthResponse> auth(@RequestBody @Valid RefreshRequest refreshRequest) {
-        return new ResponseEntity<>(this.authService.refresh(refreshRequest.getRefreshToken()), HttpStatus.OK);
+    public ResponseEntity<AuthResponse> auth(
+            @CookieValue(name = "X-REFRESH-TOKEN", required = false) String cookieRefreshToken
+    ) {
+        String token = cookieRefreshToken;
+
+        if (token == null) {
+            throw new org.adso.minimarket.exception.TokenInvalidException("Refresh token is missing");
+        }
+
+        return new ResponseEntity<>(this.authService.refresh(token), HttpStatus.OK);
     }
 
     private void clearGuestCookie(HttpServletResponse response) {
