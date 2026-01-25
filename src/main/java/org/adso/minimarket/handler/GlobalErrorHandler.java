@@ -181,26 +181,6 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
-    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
-            org.springframework.http.converter.HttpMessageNotReadableException ex,
-            WebRequest request
-    ) {
-        log.warn("Message not readable: {}", ex.getMessage());
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                "Request body is missing or malformed",
-                ErrorCode.VALIDATION_FAILED.name(),
-                LocalDateTime.now(),
-                getRequestPath(request),
-                null
-        );
-
-        return ResponseEntity.badRequest().body(errorResponse);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(
             Exception ex,
