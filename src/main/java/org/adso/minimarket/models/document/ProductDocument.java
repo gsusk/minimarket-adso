@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@Setting(settingPath = "elasticsearch-settings.json")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,9 +37,9 @@ public class ProductDocument {
     @Field(type = FieldType.Integer)
     private Integer stock;
 
-    @Field(type = FieldType.Object)
+    @Field(type = FieldType.Nested)
     private Map<String, Object> specifications;
 
-    @Field(type = FieldType.Date, format = DateFormat.date_time)
+    @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 }
