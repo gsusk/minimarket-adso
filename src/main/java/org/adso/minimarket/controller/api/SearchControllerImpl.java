@@ -1,5 +1,7 @@
 package org.adso.minimarket.controller.api;
 
+import org.adso.minimarket.dto.SearchFilters;
+import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.service.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -26,7 +29,16 @@ public class SearchControllerImpl implements SearchController {
                                @RequestParam("brand") Optional<String> brand,
                                @RequestParam("min") Optional<BigDecimal> minValue,
                                @RequestParam("max") Optional<BigDecimal> maxValue) {
-        log.info("query: {}\nbrand: {}\nmin: {}\nmax: {}",query, brand, minValue, maxValue);
-        return ResponseEntity.ok("");
+        log.info("\nquery: {}\nbrand: {}\nmin: {}\nmax: {}",query, brand.orElseGet(() -> "none"), minValue.orElseGet(() -> null), maxValue.orElseGet(() -> null));
+        List<ProductDocument> productDocuments = searchService.searchWithFilters(
+                new SearchFilters(
+                        null,
+                        brand.orElseGet(() -> null),
+                        minValue.orElseGet(() -> null),
+                        maxValue.orElseGet(() -> null)
+                ),
+                query
+        );
+        return ResponseEntity.ok(productDocuments);
     }
 }
