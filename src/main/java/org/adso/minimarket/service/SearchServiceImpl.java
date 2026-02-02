@@ -14,6 +14,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
@@ -59,6 +60,29 @@ public class SearchServiceImpl implements SearchService {
         natQuery.withAggregation("min_price", AggregationBuilders.min(m -> m.field("price")))
                 .withAggregation("max_price", AggregationBuilders.max(m -> m.field("price")));
 
+        if (filters.getMinPrice() != null && filters.getMinPrice().compareTo(BigDecimal.ZERO) > 0) {
+            natQuery.withFilter(f -> f
+                    .range(r -> r
+                            .number(n -> n
+                                    .field("price")
+                                    .gte(filters.getMinPrice().doubleValue())
+                            )
+                    )
+            );
+        }
+
+        if (filters.getMaxPrice() != null && filters.getMaxPrice().compareTo(BigDecimal.ZERO) > 0) {
+            natQuery.withFilter(f -> f
+                    .range(r -> r
+                            .number(n -> n
+                                    .field("price")
+                                    .lte(filters.getMaxPrice().doubleValue())
+                            )
+                    )
+            );
+        }
+
+
         Query searchQuery = natQuery.withMaxResults(20).build();
 
         SearchHits<ProductDocument> searchHits = operations.search(searchQuery, ProductDocument.class);
@@ -68,7 +92,7 @@ public class SearchServiceImpl implements SearchService {
                 .aggregation()
                 .getAggregate();
 
-        var maxPrice =  ((ElasticsearchAggregations) searchHits.getAggregations())
+        var maxPrice = ((ElasticsearchAggregations) searchHits.getAggregations())
                 .get("max_price")
                 .aggregation()
                 .getAggregate();
@@ -78,7 +102,7 @@ public class SearchServiceImpl implements SearchService {
             ProductDocument pd = searchHit.getContent();
             log.info("name: {}", pd.getName());
             log.info("brand: {}", pd.getBrand());
-            log.info("att: {}", pd.getSpecifications());
+            log.info("price: {}", pd.getPrice());
             log.info("=================================");
         }
         log.info("aggs: {}, {}", minPrice, maxPrice);

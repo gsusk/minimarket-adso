@@ -34,8 +34,8 @@ public class SearchControllerImpl implements SearchController {
                 new SearchFilters(
                         null,
                         brand.orElseGet(() -> null),
-                        minValue.orElseGet(() -> null),
-                        maxValue.orElseGet(() -> null)
+                        maxValue.orElseGet(() -> null),
+                        minValue.orElseGet(() -> null)
                 ),
                 query
         );
