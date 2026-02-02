@@ -1,11 +1,11 @@
 package org.adso.minimarket.service;
 
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.AggregationVariant;
+import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import lombok.extern.slf4j.Slf4j;
 import org.adso.minimarket.dto.SearchFilters;
 import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.repository.elastic.ProductSearchRepository;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -35,10 +35,6 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<ProductDocument> searchWithFilters(SearchFilters filters, String query) {
         NativeQueryBuilder natQuery = NativeQuery.builder()
-                .withAggregation("colors", new Aggregation((AggregationVariant) Aggregation.of(b -> b
-                        .terms(t -> t
-                                .field("colors"))))
-                )
                 .withQuery(q -> q
                         .match(m -> m
                                 .field("name")
@@ -60,20 +56,32 @@ public class SearchServiceImpl implements SearchService {
             );
         }
 
+        natQuery.withAggregation("min_price", AggregationBuilders.min(m -> m.field("price")))
+                .withAggregation("max_price", AggregationBuilders.max(m -> m.field("price")));
+
         Query searchQuery = natQuery.withMaxResults(20).build();
 
         SearchHits<ProductDocument> searchHits = operations.search(searchQuery, ProductDocument.class);
 
+        var minPrice = ((ElasticsearchAggregations) searchHits.getAggregations())
+                .get("min_price")
+                .aggregation()
+                .getAggregate();
+
+        var maxPrice =  ((ElasticsearchAggregations) searchHits.getAggregations())
+                .get("max_price")
+                .aggregation()
+                .getAggregate();
+
         log.info("search result: {}", searchHits);
         for (SearchHit<ProductDocument> searchHit : searchHits) {
             ProductDocument pd = searchHit.getContent();
-            log.info("search hit product document");
             log.info("name: {}", pd.getName());
-            log.info("desc: {}", pd.getDescription());
             log.info("brand: {}", pd.getBrand());
             log.info("att: {}", pd.getSpecifications());
             log.info("=================================");
         }
+        log.info("aggs: {}, {}", minPrice, maxPrice);
         return searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
     }
 }
