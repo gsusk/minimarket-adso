@@ -1,7 +1,7 @@
 package org.adso.minimarket.controller.api;
 
 import org.adso.minimarket.dto.SearchFilters;
-import org.adso.minimarket.models.document.ProductDocument;
+import org.adso.minimarket.dto.SearchResult;
 import org.adso.minimarket.service.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -26,11 +25,12 @@ public class SearchControllerImpl implements SearchController {
     @Override
     @GetMapping("/search")
     public ResponseEntity<?> searchProducts(@RequestParam("q") String query,
-                               @RequestParam("brand") Optional<String> brand,
-                               @RequestParam("min") Optional<BigDecimal> minValue,
-                               @RequestParam("max") Optional<BigDecimal> maxValue) {
-        log.info("\nquery: {}\nbrand: {}\nmin: {}\nmax: {}",query, brand.orElseGet(() -> "none"), minValue.orElseGet(() -> null), maxValue.orElseGet(() -> null));
-        List<ProductDocument> productDocuments = searchService.searchWithFilters(
+                                            @RequestParam("brand") Optional<String> brand,
+                                            @RequestParam("min") Optional<BigDecimal> minValue,
+                                            @RequestParam("max") Optional<BigDecimal> maxValue) {
+        log.info("\nquery: {}\nbrand: {}\nmin: {}\nmax: {}", query, brand.orElseGet(() -> "none"),
+                minValue.orElseGet(() -> null), maxValue.orElseGet(() -> null));
+        SearchResult productDocuments = searchService.searchWithFilters(
                 new SearchFilters(
                         null,
                         brand.orElseGet(() -> null),

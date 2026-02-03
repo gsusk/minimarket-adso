@@ -1,10 +1,11 @@
 package org.adso.minimarket.service;
 
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.adso.minimarket.dto.SearchFilters;
+import org.adso.minimarket.dto.SearchResult;
 import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.repository.elastic.ProductSearchRepository;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -15,6 +16,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Slf4j
@@ -34,8 +36,29 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public List<ProductDocument> searchWithFilters(SearchFilters filters, String query) {
+    public SearchResult searchWithFilters(SearchFilters filters, String query) {
+        NativeQuery searchQuery = buildQuery(filters, query);
+        SearchHits<ProductDocument> searchHits = operations.search(searchQuery, ProductDocument.class);
+
+        List<ProductDocument> products = searchHits.getSearchHits()
+                .stream()
+                .map(SearchHit::getContent)
+                .toList();
+
+        BigDecimal minPrice = extractMinPrice(searchHits);
+        BigDecimal maxPrice = extractMaxPrice(searchHits);
+
+        return SearchResult.builder()
+                .products(products)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .total(searchHits.getSearchHits().size())
+                .build();
+    }
+
+    private NativeQuery buildQuery(SearchFilters filters, String query) {
         BoolQuery.Builder bool = new BoolQuery.Builder();
+
         bool.must(mu -> mu
                 .match(m -> m
                         .field("name")
@@ -43,7 +66,6 @@ public class SearchServiceImpl implements SearchService {
                         .fuzziness("1")
                 )
         );
-
 
         if (filters.getBrand() != null) {
             bool.filter(f -> f
@@ -54,7 +76,7 @@ public class SearchServiceImpl implements SearchService {
             );
         }
 
-        if (filters.getMinPrice() != null && filters.getMinPrice().compareTo(BigDecimal.ZERO) > 0) {
+        if (isValidMinPrice(filters)) {
             bool.filter(f -> f
                     .range(r -> r
                             .number(n -> n
@@ -65,9 +87,7 @@ public class SearchServiceImpl implements SearchService {
             );
         }
 
-        if (filters.getMaxPrice() != null
-                && filters.getMaxPrice().compareTo(BigDecimal.ZERO) > 0
-                && filters.getMaxPrice().compareTo(filters.getMinPrice()) > -1) {
+        if (isValidMaxPrice(filters)) {
             bool.filter(f -> f
                     .range(r -> r
                             .number(n -> n
@@ -78,37 +98,52 @@ public class SearchServiceImpl implements SearchService {
             );
         }
 
-        Aggregation min = AggregationBuilders.min(m -> m.field("price"));
-        Aggregation max = AggregationBuilders.max(m -> m.field("price"));
-
-        NativeQuery searchQuery = NativeQuery.builder()
+        return NativeQuery.builder()
                 .withQuery(q -> q.bool(bool.build()))
-                .withAggregation("min_price", min)
-                .withAggregation("max_price", max)
+                .withAggregation("min_price", AggregationBuilders.min(m -> m.field("price")))
+                .withAggregation("max_price", AggregationBuilders.max(m -> m.field("price")))
                 .withMaxResults(20)
                 .build();
+    }
 
-        SearchHits<ProductDocument> searchHits = operations.search(searchQuery, ProductDocument.class);
+    private BigDecimal extractMinPrice(SearchHits<ProductDocument> searchHits) {
+        return extractAggregationValue(searchHits, "min_price");
+    }
 
-        var minPrice = ((ElasticsearchAggregations) searchHits.getAggregations())
-                .get("min_price")
-                .aggregation()
-                .getAggregate();
+    private BigDecimal extractMaxPrice(SearchHits<ProductDocument> searchHits) {
+        return extractAggregationValue(searchHits, "max_price");
+    }
 
-        var maxPrice = ((ElasticsearchAggregations) searchHits.getAggregations())
-                .get("max_price")
-                .aggregation()
-                .getAggregate();
+    private BigDecimal extractAggregationValue(SearchHits<ProductDocument> searchHits, String aggName) {
+        try {
+            ElasticsearchAggregations aggs = (ElasticsearchAggregations) searchHits.getAggregations();
+            Aggregate aggregate = aggs.get(aggName).aggregation().getAggregate();
 
-        log.info("search result: {}", searchHits);
-        for (SearchHit<ProductDocument> searchHit : searchHits) {
-            ProductDocument pd = searchHit.getContent();
-            log.info("brand: {}", pd.getBrand());
-            log.info("price: {}", pd.getPrice());
-            log.info("=================================");
+            Double value = aggName.equals("min_price")
+                    ? aggregate.min().value()
+                    : aggregate.max().value();
+
+            if (value == null || value.isNaN() || value.isInfinite()) {
+                return null;
+            }
+
+            return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
+        } catch (Exception e) {
+            log.warn("Failed to extract aggregation '{}': {}", aggName, e.getMessage());
+            return null;
         }
-        log.info("aggs: {}, {}", minPrice, maxPrice);
-        return searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
+    }
+
+    private boolean isValidMinPrice(SearchFilters filters) {
+        return filters.getMinPrice() != null
+                && filters.getMinPrice().compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private boolean isValidMaxPrice(SearchFilters filters) {
+        return filters.getMaxPrice() != null
+                && filters.getMaxPrice().compareTo(BigDecimal.ZERO) > 0
+                && filters.getMinPrice() != null
+                && filters.getMaxPrice().compareTo(filters.getMinPrice()) >= 0;
     }
 }
 
