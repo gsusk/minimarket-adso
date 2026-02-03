@@ -3,6 +3,7 @@ package org.adso.minimarket.service;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.adso.minimarket.dto.SearchFilters;
 import org.adso.minimarket.dto.SearchResult;
@@ -10,6 +11,7 @@ import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.repository.elastic.ProductSearchRepository;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -47,11 +49,13 @@ public class SearchServiceImpl implements SearchService {
 
         BigDecimal minPrice = extractMinPrice(searchHits);
         BigDecimal maxPrice = extractMaxPrice(searchHits);
+        List<String> brands = extractBrand(searchHits);
 
         return SearchResult.builder()
                 .products(products)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
+                .brands(brands)
                 .total(searchHits.getSearchHits().size())
                 .build();
     }
@@ -60,50 +64,73 @@ public class SearchServiceImpl implements SearchService {
         BoolQuery.Builder bool = new BoolQuery.Builder();
 
         bool.must(mu -> mu
-                .match(m -> m
-                        .field("name")
-                        .query(query)
-                        .fuzziness("1")
+                .bool(b -> b
+                        .should(s -> s
+                                .multiMatch(m -> m
+                                        .fields("name^3", "description^1")
+                                        .query(query)
+                                        .fuzziness("AUTO")
+                                )
+                        )
+                        .should(s -> s.prefix(p -> p
+                                        .field("name")
+                                        .value(query.toLowerCase())
+                                )
+                        )
                 )
         );
 
-        if (filters.getBrand() != null) {
-            bool.filter(f -> f
-                    .term(t -> t
-                            .field("specifications.brand")
-                            .value(filters.getBrand())
-                    )
-            );
+        if (filters.getBrand() != null && !filters.getBrand().trim().isEmpty()) {
+            bool.filter(f -> f.term(t -> t.field("specifications.brand").value(filters.getBrand())));
         }
 
+        BoolQuery.Builder postFilter = new BoolQuery.Builder();
+        boolean priceFilter = false;
+
         if (isValidMinPrice(filters)) {
-            bool.filter(f -> f
-                    .range(r -> r
-                            .number(n -> n
-                                    .field("price")
-                                    .gte(filters.getMinPrice().doubleValue())
-                            )
-                    )
-            );
+            postFilter.filter(f -> f.range(r -> r.number(n -> n
+                    .field("price").gte(filters.getMinPrice().doubleValue()))));
+            priceFilter = true;
         }
 
         if (isValidMaxPrice(filters)) {
-            bool.filter(f -> f
-                    .range(r -> r
-                            .number(n -> n
-                                    .field("price")
-                                    .lte(filters.getMaxPrice().doubleValue())
-                            )
-                    )
-            );
+            postFilter.filter(f -> f.range(r -> r.number(n -> n
+                    .field("price").lte(filters.getMaxPrice().doubleValue()))));
+            priceFilter = true;
         }
 
-        return NativeQuery.builder()
-                .withQuery(q -> q.bool(bool.build()))
+        NativeQueryBuilder nq = NativeQuery.builder()
+                .withQuery(q -> q.bool(bool.build())) // Afecta a aggs y resultados
                 .withAggregation("min_price", AggregationBuilders.min(m -> m.field("price")))
                 .withAggregation("max_price", AggregationBuilders.max(m -> m.field("price")))
-                .withMaxResults(20)
-                .build();
+                .withAggregation("brands", AggregationBuilders.terms(t -> t
+                        .field("specifications.brand.keyword")
+                        .size(50)
+                ))
+                .withMaxResults(20);
+
+        if (priceFilter) {
+            nq.withFilter(f -> f.bool(postFilter.build()));
+        }
+
+        return nq.build();
+    }
+
+    private List<String> extractBrand(SearchHits<ProductDocument> searchHits) {
+        try {
+            ElasticsearchAggregations agg = (ElasticsearchAggregations) searchHits.getAggregations();
+            Aggregate aggregate = agg.get("brands").aggregation().getAggregate();
+
+            if (aggregate.isMissing()) {
+                return List.of();
+            }
+
+            return aggregate.sterms().buckets().array().stream().map(b -> b.key().stringValue()).toList();
+        } catch (Exception e) {
+            log.error("Elastic search brand agg error: {} : {}", e.getCause(), e.getMessage());
+            log.error("Stack: {}", e.getStackTrace());
+            return List.of();
+        }
     }
 
     private BigDecimal extractMinPrice(SearchHits<ProductDocument> searchHits) {
@@ -141,9 +168,7 @@ public class SearchServiceImpl implements SearchService {
 
     private boolean isValidMaxPrice(SearchFilters filters) {
         return filters.getMaxPrice() != null
-                && filters.getMaxPrice().compareTo(BigDecimal.ZERO) > 0
-                && filters.getMinPrice() != null
-                && filters.getMaxPrice().compareTo(filters.getMinPrice()) >= 0;
+                && filters.getMaxPrice().compareTo(BigDecimal.ZERO) > 0;
     }
 }
 
