@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Builder
 public class SearchResult {
-    Integer total;
+    Long total;
     BigDecimal minPrice;
     BigDecimal maxPrice;
     List<?> brands;

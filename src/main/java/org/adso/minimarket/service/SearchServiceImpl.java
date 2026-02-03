@@ -46,7 +46,6 @@ public class SearchServiceImpl implements SearchService {
                 .stream()
                 .map(SearchHit::getContent)
                 .toList();
-
         BigDecimal minPrice = extractMinPrice(searchHits);
         BigDecimal maxPrice = extractMaxPrice(searchHits);
         List<String> brands = extractBrand(searchHits);
@@ -56,7 +55,7 @@ public class SearchServiceImpl implements SearchService {
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .brands(brands)
-                .total(searchHits.getSearchHits().size())
+                .total(searchHits.getTotalHits())
                 .build();
     }
 
