@@ -3,6 +3,7 @@ package org.adso.minimarket.handler;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import org.adso.minimarket.dto.ErrorResponse;
+import org.adso.minimarket.exception.AttributeValidationException;
 import org.adso.minimarket.exception.BaseException;
 import org.adso.minimarket.exception.ErrorCode;
 import org.slf4j.Logger;
@@ -58,6 +59,35 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
         );
 
         return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    @ExceptionHandler(AttributeValidationException.class)
+    public ResponseEntity<ErrorResponse> handleAttributeValidation(
+            AttributeValidationException ex,
+            WebRequest request
+    ) {
+        log.warn("Attribute validation failed: {} error(s)", ex.getValidationErrors().size());
+
+        List<ErrorResponse.ValidationError> validationErrors = ex.getValidationErrors()
+                .stream()
+                .map(error -> new ErrorResponse.ValidationError(
+                        error.getAttributeName(),
+                        error.getErrorMessage(),
+                        error.getProvidedValue()
+                ))
+                .toList();
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Attribute Validation Failed",
+                ex.getMessage(),
+                ex.getErrorCode().name(),
+                LocalDateTime.now(),
+                getRequestPath(request),
+                validationErrors
+        );
+
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
     @Override

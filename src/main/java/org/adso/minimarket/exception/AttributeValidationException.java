@@ -1,0 +1,26 @@
+package org.adso.minimarket.exception;
+
+import lombok.Getter;
+import org.adso.minimarket.validation.ValidationError;
+
+import java.util.List;
+
+@Getter
+public class AttributeValidationException extends BadRequestException {
+    private final List<ValidationError> validationErrors;
+
+    public AttributeValidationException(List<ValidationError> validationErrors) {
+        super(buildMessage(validationErrors), ErrorCode.VALIDATION_ATTRIBUTE_FAILED);
+        this.validationErrors = validationErrors;
+    }
+
+    private static String buildMessage(List<ValidationError> errors) {
+        if (errors == null || errors.isEmpty()) {
+            return "Attribute validation failed";
+        }
+        if (errors.size() == 1) {
+            return errors.get(0).getErrorMessage();
+        }
+        return String.format("Attribute validation failed with %d error(s)", errors.size());
+    }
+}
