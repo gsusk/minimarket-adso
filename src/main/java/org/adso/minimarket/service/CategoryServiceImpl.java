@@ -18,4 +18,9 @@ public class CategoryServiceImpl implements CategoryService {
         return this.categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
     }
+
+    @Override
+    public Category createCategory(org.adso.minimarket.dto.CreateCategoryRequest request) {
+        return this.categoryRepository.save(new Category(request.getName(), request.getAttributeDefinitions()));
+    }
 }
