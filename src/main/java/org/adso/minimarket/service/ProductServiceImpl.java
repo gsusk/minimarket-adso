@@ -3,6 +3,7 @@ package org.adso.minimarket.service;
 import org.adso.minimarket.dto.CreateProductRequest;
 import org.adso.minimarket.dto.DetailedProduct;
 import org.adso.minimarket.event.ProductCreatedEventPublisher;
+import org.adso.minimarket.exception.BadRequestException;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
@@ -63,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
             String type = (String) def.get("type");
 
             if (required && (attributes == null || !attributes.containsKey(name))) {
-                throw new IllegalArgumentException("Missing required attribute: " + name);
+                throw new BadRequestException("Missing required attribute: " + name);
             }
 
             if (attributes != null && attributes.containsKey(name)) {
@@ -79,17 +80,17 @@ public class ProductServiceImpl implements ProductService {
         switch (type.toLowerCase()) {
             case "string":
                 if (!(value instanceof String)) {
-                    throw new IllegalArgumentException("Attribute " + name + " must be a string");
+                    throw new BadRequestException("Attribute " + name + " must be a string");
                 }
                 break;
             case "number":
                 if (!(value instanceof Number)) {
-                    throw new IllegalArgumentException("Attribute " + name + " must be a number");
+                    throw new BadRequestException("Attribute " + name + " must be a number");
                 }
                 break;
             case "boolean":
                 if (!(value instanceof Boolean)) {
-                    throw new IllegalArgumentException("Attribute " + name + " must be a boolean");
+                    throw new BadRequestException("Attribute " + name + " must be a boolean");
                 }
                 break;
             default:
@@ -107,10 +108,10 @@ public class ProductServiceImpl implements ProductService {
                            .map(opt -> ((Number) opt).doubleValue())
                            .anyMatch(optVal -> Double.compare(optVal, ((Number) value).doubleValue()) == 0);
                    if (!found) {
-                       throw new IllegalArgumentException("Attribute " + name + " has invalid value: " + value + ". Allowed: " + options);
+                       throw new BadRequestException("Attribute " + name + " has invalid value: " + value + ". Allowed: " + options);
                    }
                 } else {
-                    throw new IllegalArgumentException("Attribute " + name + " has invalid value: " + value + ". Allowed: " + options);
+                    throw new BadRequestException("Attribute " + name + " has invalid value: " + value + ". Allowed: " + options);
                 }
             }
         }
@@ -123,14 +124,14 @@ public class ProductServiceImpl implements ProductService {
             if (minObj instanceof Number) {
                 double min = ((Number) minObj).doubleValue();
                 if (doubleVal < min) {
-                    throw new IllegalArgumentException("Attribute " + name + " must be >= " + min);
+                    throw new BadRequestException("Attribute " + name + " must be >= " + min);
                 }
             }
 
             if (maxObj instanceof Number) {
                 double max = ((Number) maxObj).doubleValue();
                 if (doubleVal > max) {
-                    throw new IllegalArgumentException("Attribute " + name + " must be <= " + max);
+                    throw new BadRequestException("Attribute " + name + " must be <= " + max);
                 }
             }
         }
