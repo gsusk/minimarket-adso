@@ -63,7 +63,7 @@ public class Product {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public Product(String name, String description, BigDecimal price, Integer stock, Category category, Map<String,
+    public Product(String name, String description, BigDecimal price, Integer stock, Category category, String brand, Map<String,
             Object> attributes) {
         this.name = name;
         this.description = description;
@@ -73,6 +73,7 @@ public class Product {
             throw new IllegalArgumentException("Invalid stock argument");
         }
         this.stock = stock;
+        this.brand = brand;
         this.attributes = attributes;
     }
 
