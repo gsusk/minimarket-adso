@@ -28,17 +28,37 @@ public class Category {
     @Column(name = "attribute_definitions", columnDefinition = "json")
     private List<Map<String, Object>> attributeDefinitions = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+    
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    private List<Category> subcategories = new ArrayList<>();
+
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
 
-    public Category(Long id, String name, List<Map<String, Object>> attributeDefinitions) {
+    public Category(Long id, String name, List<Map<String, Object>> attributeDefinitions, Category parent) {
         this.id = id;
         this.name = name;
         this.attributeDefinitions = attributeDefinitions;
+        this.parent = parent;
     }
 
-    public Category(String name, List<Map<String, Object>> attributeDefinitions) {
+    public Category(String name, List<Map<String, Object>> attributeDefinitions, Category parent) {
         this.name = name;
         this.attributeDefinitions = attributeDefinitions;
+        this.parent = parent;
+    }
+
+    public List<Map<String, Object>> getAllAttributeDefinitions() {
+        List<Map<String, Object>> allDefinitions = new ArrayList<>();
+        if (parent != null) {
+            allDefinitions.addAll(parent.getAllAttributeDefinitions());
+        }
+        if (attributeDefinitions != null) {
+            allDefinitions.addAll(attributeDefinitions);
+        }
+        return allDefinitions;
     }
 }

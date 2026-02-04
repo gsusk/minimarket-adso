@@ -3,7 +3,6 @@ package org.adso.minimarket.service;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.adso.minimarket.dto.SearchFilters;
 import org.adso.minimarket.dto.SearchResult;
@@ -80,7 +79,7 @@ public class SearchServiceImpl implements SearchService {
         );
 
         if (filters.getBrand() != null && !filters.getBrand().trim().isEmpty()) {
-            bool.filter(f -> f.term(t -> t.field("specifications.brand").value(filters.getBrand())));
+            bool.filter(f -> f.term(t -> t.field("brand").value(filters.getBrand()).caseInsensitive(true)));
         }
 
         BoolQuery.Builder postFilter = new BoolQuery.Builder();
@@ -99,12 +98,12 @@ public class SearchServiceImpl implements SearchService {
         }
 
         NativeQueryBuilder nq = NativeQuery.builder()
-                .withQuery(q -> q.bool(bool.build())) // Afecta a aggs y resultados
+                .withQuery(q -> q.bool(bool.build()))
                 .withAggregation("min_price", AggregationBuilders.min(m -> m.field("price")))
                 .withAggregation("max_price", AggregationBuilders.max(m -> m.field("price")))
                 .withAggregation("brands", AggregationBuilders.terms(t -> t
-                        .field("specifications.brand.keyword")
-                        .size(50)
+                        .field("brand")
+                        .size(6)
                 ))
                 .withMaxResults(20);
 

@@ -21,6 +21,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category createCategory(org.adso.minimarket.dto.CreateCategoryRequest request) {
-        return this.categoryRepository.save(new Category(request.getName(), request.getAttributeDefinitions()));
+        Category parent = null;
+        if (request.getParentId() != null) {
+            parent = getById(request.getParentId());
+        }
+        return this.categoryRepository.save(new Category(request.getName(), request.getAttributeDefinitions(), parent));
     }
 }

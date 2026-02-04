@@ -19,4 +19,6 @@ public class CreateCategoryRequest {
     private String name;
 
     private List<Map<String, Object>> attributeDefinitions;
+
+    private Long parentId;
 }

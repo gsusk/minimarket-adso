@@ -34,7 +34,7 @@ public class ProductServiceImpl implements ProductService {
     public Long createProduct(CreateProductRequest productRequest) {
         Category category = categoryService.getById(productRequest.getCategoryId());
 
-        attributeValidator.validate(productRequest.getSpecifications(), category.getAttributeDefinitions());
+        attributeValidator.validate(productRequest.getSpecifications(), category.getAllAttributeDefinitions());
 
         Product product = new Product(
                 productRequest.getName(),
