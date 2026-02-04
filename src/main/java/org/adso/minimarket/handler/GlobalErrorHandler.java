@@ -79,7 +79,7 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Attribute Validation Failed",
+                "Validation Failed",
                 ex.getMessage(),
                 ex.getErrorCode().name(),
                 LocalDateTime.now(),

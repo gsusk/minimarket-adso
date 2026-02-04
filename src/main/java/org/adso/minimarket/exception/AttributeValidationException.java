@@ -19,7 +19,8 @@ public class AttributeValidationException extends BadRequestException {
             return "Attribute validation failed";
         }
         if (errors.size() == 1) {
-            return errors.get(0).getErrorMessage();
+            ValidationError err = errors.get(0);
+            return String.format("%s %s", err.getAttributeName(), err.getErrorMessage());
         }
         return String.format("Attribute validation failed with %d error(s)", errors.size());
     }

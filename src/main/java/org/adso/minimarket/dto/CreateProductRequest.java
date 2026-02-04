@@ -17,7 +17,7 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateProductRequest {
-    @NotBlank(message = "Product firstName is required")
+    @NotBlank(message = "Product name is required")
     private String name;
 
     private String description;

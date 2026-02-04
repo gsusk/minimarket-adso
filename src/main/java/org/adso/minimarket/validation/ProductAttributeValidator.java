@@ -38,9 +38,10 @@ public class ProductAttributeValidator {
             for (String attrName : attributes.keySet()) {
                 if (!definedAttributeNames.contains(attrName)) {
                     errors.add(new ValidationError(
-                            attrName,
-                            "Unknown attribute '" + attrName + "' is not defined in the category schema",
-                            attributes.get(attrName)
+                            "specifications[" + attrName + "]",
+                            "Attribute is not defined in the category schema",
+                            attributes.get(attrName),
+                            "UnknownAttribute"
                     ));
                 }
             }
@@ -53,15 +54,16 @@ public class ProductAttributeValidator {
 
     private void validateAttribute(AttributeDefinition def, Map<String, Object> attributes, List<ValidationError> errors) {
         String name = def.getName();
+        String fieldName = "specifications[" + name + "]";
         Object value = attributes != null ? attributes.get(name) : null;
 
         if (def.isRequired()) {
             if (attributes == null || !attributes.containsKey(name)) {
-                errors.add(new ValidationError(name, "Missing required attribute: " + name));
+                errors.add(new ValidationError(fieldName, "is required", null, "Required"));
                 return;
             }
             if (value == null) {
-                errors.add(new ValidationError(name, "Attribute '" + name + "' cannot be null", value));
+                errors.add(new ValidationError(fieldName, "cannot be null", value, "NotNull"));
                 return;
             }
         }
@@ -70,19 +72,18 @@ public class ProductAttributeValidator {
             return;
         }
 
-        validateType(def, value, errors);
+        validateType(def, fieldName, value, errors);
 
         if (def.hasOptions()) {
-            validateEnum(def, value, errors);
+            validateEnum(def, fieldName, value, errors);
         }
 
         if (def.getType() == AttributeType.NUMBER) {
-            validateRange(def, value, errors);
+            validateRange(def, fieldName, value, errors);
         }
     }
 
-    private void validateType(AttributeDefinition def, Object value, List<ValidationError> errors) {
-        String name = def.getName();
+    private void validateType(AttributeDefinition def, String fieldName, Object value, List<ValidationError> errors) {
         AttributeType expectedType = def.getType();
 
         boolean isValid = switch (expectedType) {
@@ -97,22 +98,23 @@ public class ProductAttributeValidator {
             
             if (expectedType == AttributeType.STRING && value instanceof String && ((String) value).isBlank()) {
                 errors.add(new ValidationError(
-                        name,
-                        "Attribute '" + name + "' cannot be blank",
-                        value
+                        fieldName,
+                        "cannot be blank",
+                        value,
+                        "NotBlank"
                 ));
             } else {
                 errors.add(new ValidationError(
-                        name,
-                        "Attribute '" + name + "' must be a " + expectedTypeStr + ", but got " + actualType,
-                        value
+                        fieldName,
+                        "must be a " + expectedTypeStr + ", but got " + actualType,
+                        value,
+                        "TypeMismatch"
                 ));
             }
         }
     }
 
-    private void validateEnum(AttributeDefinition def, Object value, List<ValidationError> errors) {
-        String name = def.getName();
+    private void validateEnum(AttributeDefinition def, String fieldName, Object value, List<ValidationError> errors) {
         List<?> options = def.getOptions();
 
         boolean found = false;
@@ -129,30 +131,29 @@ public class ProductAttributeValidator {
 
         if (!found) {
             errors.add(new ValidationError(
-                    name,
-                    "Attribute '" + name + "' has invalid value. Allowed values: " + options,
+                    fieldName,
+                    "must be one of: " + options,
                     value,
-                    "enum: " + options
+                    "InList"
             ));
         }
     }
 
-    private void validateRange(AttributeDefinition def, Object value, List<ValidationError> errors) {
+    private void validateRange(AttributeDefinition def, String fieldName, Object value, List<ValidationError> errors) {
         if (!(value instanceof Number)) {
             return;
         }
 
-        String name = def.getName();
         double doubleVal = ((Number) value).doubleValue();
 
         if (def.hasMin()) {
             double min = def.getMin().doubleValue();
             if (doubleVal < min) {
                 errors.add(new ValidationError(
-                        name,
-                        "Attribute '" + name + "' must be >= " + min + ", but got " + doubleVal,
+                        fieldName,
+                        "must be >= " + min,
                         value,
-                        "min: " + min
+                        "Min"
                 ));
             }
         }
@@ -161,10 +162,10 @@ public class ProductAttributeValidator {
             double max = def.getMax().doubleValue();
             if (doubleVal > max) {
                 errors.add(new ValidationError(
-                        name,
-                        "Attribute '" + name + "' must be <= " + max + ", but got " + doubleVal,
+                        fieldName,
+                        "must be <= " + max,
                         value,
-                        "max: " + max
+                        "Max"
                 ));
             }
         }
