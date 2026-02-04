@@ -1,5 +1,6 @@
 package org.adso.minimarket.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,9 +33,11 @@ public class Category {
     @JoinColumn(name = "parent_id")
     private Category parent;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<Category> subcategories = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
 
@@ -49,6 +52,13 @@ public class Category {
         this.name = name;
         this.attributeDefinitions = attributeDefinitions;
         this.parent = parent;
+    }
+
+    public String getFullPath() {
+        if (parent == null) {
+            return name;
+        }
+        return parent.getFullPath() + " > " + name;
     }
 
     public List<Map<String, Object>> getAllAttributeDefinitions() {

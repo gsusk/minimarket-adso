@@ -13,6 +13,8 @@ public interface ProductMapper {
             expression = "java(product.getPrice().toPlainString())"
     )
     @Mapping(target = "category", source = "category")
+    @Mapping(target = "category.fullPath", expression = "java(product.getCategory().getFullPath())")
+    @Mapping(target = "category.parentName", expression = "java(product.getCategory().getParent() != null ? product.getCategory().getParent().getName() : null)")
     DetailedProduct toDto(Product product);
 
     default String map(Image image) {

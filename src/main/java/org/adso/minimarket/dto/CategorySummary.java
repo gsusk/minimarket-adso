@@ -11,4 +11,8 @@ public class CategorySummary {
 
     @JsonProperty("categoryName")
     private String name;
+
+    private String parentName;
+
+    private String fullPath;
 }
