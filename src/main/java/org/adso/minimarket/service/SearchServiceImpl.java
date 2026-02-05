@@ -5,13 +5,17 @@ import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import lombok.extern.slf4j.Slf4j;
 import org.adso.minimarket.dto.FacetValue;
 import org.adso.minimarket.dto.SearchFilters;
 import org.adso.minimarket.dto.SearchResult;
 import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.repository.elastic.ProductSearchRepository;
-import org.adso.minimarket.validation.*;
+import org.adso.minimarket.validation.AttributeDefinition;
+import org.adso.minimarket.validation.AttributeSchemaValidator;
+import org.adso.minimarket.validation.FacetStrategy;
+import org.adso.minimarket.validation.FilterType;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -53,7 +57,7 @@ public class SearchServiceImpl implements SearchService {
                 .stream()
                 .map(SearchHit::getContent)
                 .toList();
-        
+
         BigDecimal minPrice = extractMinPrice(searchHits);
         BigDecimal maxPrice = extractMaxPrice(searchHits);
         Map<String, List<FacetValue>> facets = extractFacets(searchHits, filters.getCategory());
@@ -70,7 +74,6 @@ public class SearchServiceImpl implements SearchService {
     private NativeQuery buildQuery(SearchFilters filters, String query) {
         BoolQuery.Builder bool = new BoolQuery.Builder();
 
-        // Full-text search query
         bool.must(mu -> mu
                 .bool(b -> b
                         .should(s -> s
@@ -78,6 +81,7 @@ public class SearchServiceImpl implements SearchService {
                                         .fields("name^3", "description^1")
                                         .query(query)
                                         .fuzziness("AUTO")
+                                        .type(TextQueryType.BestFields)
                                 )
                         )
                         .should(s -> s.prefix(p -> p
@@ -116,7 +120,7 @@ public class SearchServiceImpl implements SearchService {
             for (Map.Entry<String, String> entry : filters.getAttributes().entrySet()) {
                 String attrName = entry.getKey();
                 String attrValue = entry.getValue();
-                
+
                 if (attrValue == null || attrValue.trim().isEmpty()) {
                     continue;
                 }
@@ -142,15 +146,16 @@ public class SearchServiceImpl implements SearchService {
         return nq.build();
     }
 
-    private void applyAttributeFilter(BoolQuery.Builder postFilter, String attrName, String attrValue, FilterType filterType) {
+    private void applyAttributeFilter(BoolQuery.Builder postFilter, String attrName, String attrValue,
+                                      FilterType filterType) {
         String fieldPath = "specifications." + attrName;
-        
+
         switch (filterType) {
             case TERM -> postFilter.filter(f -> f.term(t -> t
                     .field(fieldPath + ".keyword")
                     .value(attrValue)
                     .caseInsensitive(true)));
-            
+
             case MULTI_SELECT -> {
                 String[] values = attrValue.split(",");
                 if (values.length == 1) {
@@ -167,11 +172,11 @@ public class SearchServiceImpl implements SearchService {
                                     .toList()))));
                 }
             }
-            
+
             case BOOLEAN -> postFilter.filter(f -> f.term(t -> t
                     .field(fieldPath)
                     .value(Boolean.parseBoolean(attrValue))));
-            
+
             case RANGE -> {
                 try {
                     if (attrValue.contains("-")) {
@@ -192,7 +197,7 @@ public class SearchServiceImpl implements SearchService {
                     log.warn("invalid range value for attribute '{}': {}", attrName, attrValue);
                 }
             }
-            
+
             default -> log.warn("attribute '{}' has filter type NONE, skipping filter", attrName);
         }
     }
@@ -203,7 +208,7 @@ public class SearchServiceImpl implements SearchService {
                 .size(20)));
 
         Map<String, AttributeDefinition> definitions = attributeSchemaValidator.getAttributeDefinitions(category);
-        
+
         for (AttributeDefinition def : definitions.values()) {
             if (!def.isFacetable()) {
                 continue;
@@ -225,21 +230,21 @@ public class SearchServiceImpl implements SearchService {
             case TERMS -> AggregationBuilders.terms(t -> t
                     .field(fieldPath)
                     .size(strategy.getDefaultSize()));
-            
+
             case SIGNIFICANT_TERMS -> AggregationBuilders.significantTerms(st -> st
                     .field(fieldPath)
                     .size(strategy.getDefaultSize()));
-            
+
             case SAMPLER -> AggregationBuilders.sampler(s -> s
                     .shardSize(strategy.getSampleSize()));
-            
+
             case NONE -> null;
         };
     }
 
     private Map<String, List<FacetValue>> extractFacets(SearchHits<ProductDocument> searchHits, String category) {
         Map<String, List<FacetValue>> facets = new HashMap<>();
-        
+
         try {
             ElasticsearchAggregations agg = (ElasticsearchAggregations) searchHits.getAggregations();
             if (agg == null) return facets;
@@ -247,7 +252,7 @@ public class SearchServiceImpl implements SearchService {
             extractTermsFacet(agg, "brand", facets);
 
             Map<String, AttributeDefinition> definitions = attributeSchemaValidator.getAttributeDefinitions(category);
-            
+
             for (AttributeDefinition def : definitions.values()) {
                 if (!def.isFacetable()) {
                     continue;
@@ -255,21 +260,23 @@ public class SearchServiceImpl implements SearchService {
 
                 String attrName = def.getName();
                 FacetStrategy strategy = def.getFacetStrategy();
-                
+
                 switch (strategy) {
                     case TERMS, SIGNIFICANT_TERMS -> extractTermsFacet(agg, attrName, facets);
                     case SAMPLER -> extractSamplerFacet(agg, attrName, facets);
-                    case NONE -> {} // Skip
+                    case NONE -> {
+                    } // Skip
                 }
             }
         } catch (Exception e) {
             log.warn("Failed to extract facets: {}", e.getMessage());
         }
-        
+
         return facets;
     }
 
-    private void extractTermsFacet(ElasticsearchAggregations agg, String facetName, Map<String, List<FacetValue>> facets) {
+    private void extractTermsFacet(ElasticsearchAggregations agg, String facetName,
+                                   Map<String, List<FacetValue>> facets) {
         try {
             if (agg.get(facetName) == null) {
                 return;
@@ -315,7 +322,8 @@ public class SearchServiceImpl implements SearchService {
         }
     }
 
-    private void extractSamplerFacet(ElasticsearchAggregations agg, String facetName, Map<String, List<FacetValue>> facets) {
+    private void extractSamplerFacet(ElasticsearchAggregations agg, String facetName,
+                                     Map<String, List<FacetValue>> facets) {
         try {
             if (agg.get(facetName) == null) {
                 return;
