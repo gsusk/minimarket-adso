@@ -8,6 +8,7 @@ import org.adso.minimarket.models.document.ProductDocument;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -17,5 +18,6 @@ public class SearchResult {
     BigDecimal minPrice;
     BigDecimal maxPrice;
     List<?> brands;
+    Map<String, List<String>> facets;
     List<ProductDocument> products;
 }

@@ -8,6 +8,7 @@ import org.adso.minimarket.dto.SearchFilters;
 import org.adso.minimarket.dto.SearchResult;
 import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.repository.elastic.ProductSearchRepository;
+import org.adso.minimarket.validation.AttributeSchemaValidator;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
@@ -19,16 +20,20 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class SearchServiceImpl implements SearchService {
     private final ProductSearchRepository searchRepository;
     private final ElasticsearchOperations operations;
+    private final AttributeSchemaValidator attributeSchemaValidator;
 
-    public SearchServiceImpl(ProductSearchRepository searchRepository, ElasticsearchOperations operations) {
+    public SearchServiceImpl(ProductSearchRepository searchRepository, ElasticsearchOperations operations,
+                             AttributeSchemaValidator attributeSchemaValidator) {
         this.searchRepository = searchRepository;
         this.operations = operations;
+        this.attributeSchemaValidator = attributeSchemaValidator;
     }
 
     @Override
@@ -38,6 +43,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public SearchResult searchWithFilters(SearchFilters filters, String query) {
+        sanitizeFilters(filters);
         NativeQuery searchQuery = buildQuery(filters, query);
         SearchHits<ProductDocument> searchHits = operations.search(searchQuery, ProductDocument.class);
 
@@ -49,11 +55,15 @@ public class SearchServiceImpl implements SearchService {
         BigDecimal maxPrice = extractMaxPrice(searchHits);
         List<String> brands = extractBrand(searchHits);
 
+//        Set<String> facetableAttributes = attributeSchemaValidator.getFacetableAttributes(filters.getCategory());
+//        Map<String, List<String>> facets = extractFacets(searchHits, facetableAttributes);
+
         return SearchResult.builder()
                 .products(products)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .brands(brands)
+//              .facets(facets)
                 .total(searchHits.getTotalHits())
                 .build();
     }
@@ -78,9 +88,23 @@ public class SearchServiceImpl implements SearchService {
                 )
         );
 
-        if (filters.getBrand() != null && !filters.getBrand().trim().isEmpty()) {
-            bool.filter(f -> f.term(t -> t.field("brand").value(filters.getBrand()).caseInsensitive(true)));
+//        if (filters.getBrand() != null && !filters.getBrand().trim().isEmpty()) {
+//            bool.filter(f -> f.term(t -> t.field("brand").value(filters.getBrand()).caseInsensitive(true)));
+//
+//        }
+
+        if (filters.getCategory() != null && !filters.getCategory().trim().isEmpty()) {
+            bool.filter(f -> f.term(t -> t.field("category").value(filters.getCategory()).caseInsensitive(true)));
         }
+
+//        if (filters.getAttributes() != null && !filters.getAttributes().isEmpty()) {
+//            filters.getAttributes().forEach((key, value) -> {
+//                if (value != null && !value.trim().isEmpty()) {
+//                    bool.filter(f -> f.term(t -> t.field("specifications." + key + ".keyword").value(value)
+//                    .caseInsensitive(true)));
+//                }
+//            });
+//        }
 
         BoolQuery.Builder postFilter = new BoolQuery.Builder();
         boolean priceFilter = false;
@@ -107,6 +131,9 @@ public class SearchServiceImpl implements SearchService {
                 ))
                 .withMaxResults(20);
 
+        if (filters.getBrand() != null) {
+            nq.withFilter(f -> f.term(t -> t.field("brand").value(filters.getBrand())));
+        }
         if (priceFilter) {
             nq.withFilter(f -> f.bool(postFilter.build()));
         }
@@ -123,7 +150,7 @@ public class SearchServiceImpl implements SearchService {
                 return List.of();
             }
 
-            return aggregate.sterms().buckets().array().stream().map(b -> b.key().stringValue()).toList();
+            return aggregate.sterms().buckets().array().stream().map(b -> b.key().stringValue() + b.docCount()).toList();
         } catch (Exception e) {
             log.error("Elastic search brand agg error: {} : {}", e.getCause(), e.getMessage());
             log.error("Stack: {}", e.getStackTrace());
@@ -156,6 +183,53 @@ public class SearchServiceImpl implements SearchService {
         } catch (Exception e) {
             log.warn("Failed to extract aggregation '{}': {}", aggName, e.getMessage());
             return null;
+        }
+    }
+
+//    private Map<String, List<String>> extractFacets(SearchHits<ProductDocument> searchHits, Set<String> attributes) {
+//        Map<String, List<String>> facets = new HashMap<>();
+//        try {
+//            ElasticsearchAggregations agg = (ElasticsearchAggregations) searchHits.getAggregations();
+//            if (agg == null) return facets;
+//
+//            for (String attr : attributes) {
+//                if (agg.get(attr) != null) {
+//                    Aggregate aggregate = agg.get(attr).aggregation().getAggregate();
+//
+//                    if (aggregate.isSterms()) {
+//                        List<String> values = aggregate.sterms().buckets().array().stream()
+//                                .map(b -> b.key().stringValue())
+//                                .toList();
+//                        if (!values.isEmpty()) facets.put(attr, values);
+//                    } else if (aggregate.isLterms()) {
+//                        List<String> values = aggregate.lterms().buckets().array().stream()
+//                                .map(b -> String.valueOf(b.key()))
+//                                .toList();
+//                        if (!values.isEmpty()) facets.put(attr, values);
+//                    } else if (aggregate.isDterms()) {
+//                        List<String> values = aggregate.dterms().buckets().array().stream()
+//                                .map(b -> String.valueOf(b.key()))
+//                                .toList();
+//                        if (!values.isEmpty()) facets.put(attr, values);
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.warn("Failed to extract facets: {}", e.getMessage());
+//        }
+//        return facets;
+//    }
+
+    private void sanitizeFilters(SearchFilters filters) {
+        if (filters.getAttributes() == null || filters.getAttributes().isEmpty()) {
+            return;
+        }
+
+        Set<String> allowedAttributes = attributeSchemaValidator.getAllowedAttributes(filters.getCategory());
+        filters.getAttributes().keySet().retainAll(allowedAttributes);
+
+        if (filters.getAttributes().isEmpty()) {
+            log.debug("All attribute filters were invalid for category: {}", filters.getCategory());
         }
     }
 

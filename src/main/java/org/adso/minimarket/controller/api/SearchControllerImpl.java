@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -24,21 +26,46 @@ public class SearchControllerImpl implements SearchController {
 
     @Override
     @GetMapping("/search")
-    public ResponseEntity<?> searchProducts(@RequestParam("q") String query,
-                                            @RequestParam("brand") Optional<String> brand,
-                                            @RequestParam("min") Optional<BigDecimal> minValue,
-                                            @RequestParam("max") Optional<BigDecimal> maxValue) {
-        log.info("\nquery: {}\nbrand: {}\nmin: {}\nmax: {}", query, brand.orElseGet(() -> "none"),
-                minValue.orElseGet(() -> null), maxValue.orElseGet(() -> null));
+    public ResponseEntity<?> searchProducts(@RequestParam Map<String, String> allParams) {
+        String query = allParams.getOrDefault("q", "");
+        String category = allParams.get("category");
+        String brand = allParams.get("brand");
+        String minValue = allParams.get("min");
+        String maxValue = allParams.get("max");
+
+        log.info("\nquery: {}\ncategory: {}\nbrand: {}\nmin: {}\nmax: {}", query, 
+                category, brand, minValue, maxValue);
+
+        BigDecimal min = parseSafely(minValue).orElse(null);
+        BigDecimal max = parseSafely(maxValue).orElse(null);
+
+        Map<String, String> attributes = new HashMap<>(allParams);
+        attributes.remove("q");
+        attributes.remove("category");
+        attributes.remove("brand");
+        attributes.remove("min");
+        attributes.remove("max");
+
         SearchResult productDocuments = searchService.searchWithFilters(
                 new SearchFilters(
-                        null,
-                        brand.orElseGet(() -> null),
-                        maxValue.orElseGet(() -> null),
-                        minValue.orElseGet(() -> null)
+                        category,
+                        brand,
+                        max,
+                        min,
+                        attributes
                 ),
                 query
         );
         return ResponseEntity.ok(productDocuments);
+    }
+
+    private Optional<BigDecimal> parseSafely(String value) {
+        try {
+            BigDecimal result = new BigDecimal(value);
+            return result.compareTo(BigDecimal.ZERO) >= 0 ? Optional.of(result) : Optional.empty();
+        } catch (NumberFormatException | NullPointerException e) {
+            log.debug("Invalid numeric filter value ignored: {}", value);
+            return Optional.empty();
+        }
     }
 }
