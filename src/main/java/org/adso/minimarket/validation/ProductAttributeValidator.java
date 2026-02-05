@@ -87,7 +87,7 @@ public class ProductAttributeValidator {
         AttributeType expectedType = def.getType();
 
         boolean isValid = switch (expectedType) {
-            case STRING -> value instanceof String && !((String) value).isBlank();
+            case STRING, ENUM -> value instanceof String && !((String) value).isBlank();
             case NUMBER -> value instanceof Number;
             case BOOLEAN -> value instanceof Boolean;
         };
@@ -96,7 +96,7 @@ public class ProductAttributeValidator {
             String actualType = getActualType(value);
             String expectedTypeStr = expectedType.name().toLowerCase();
             
-            if (expectedType == AttributeType.STRING && value instanceof String && ((String) value).isBlank()) {
+            if ((expectedType == AttributeType.STRING || expectedType == AttributeType.ENUM) && value instanceof String && ((String) value).isBlank()) {
                 errors.add(new ValidationError(
                         fieldName,
                         "cannot be blank",

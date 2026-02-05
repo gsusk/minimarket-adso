@@ -3,7 +3,8 @@ package org.adso.minimarket.validation;
 public enum AttributeType {
     STRING,
     NUMBER,
-    BOOLEAN;
+    BOOLEAN,
+    ENUM;
 
     public static AttributeType fromString(String type) {
         if (type == null) {
@@ -13,6 +14,7 @@ public enum AttributeType {
             case "string" -> STRING;
             case "number" -> NUMBER;
             case "boolean" -> BOOLEAN;
+            case "enum" -> ENUM;
             default -> throw new IllegalArgumentException("Unknown attribute type: " + type);
         };
     }

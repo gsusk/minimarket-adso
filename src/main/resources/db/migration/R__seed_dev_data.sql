@@ -13,30 +13,19 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO category (id, name, parent_id, attribute_definitions)
 VALUES
-(1, 'Electronics', NULL, '[{"name": "brand", "type": "string", "required": true}, {"name": "warranty_months", "type": "number", "min": 0}]'),
-(2, 'Books', NULL, '[{"name": "author", "type": "string", "required": true}, {"name": "genre", "type": "string", "facetable": true}]'),
-(3, 'Clothing', NULL, '[{"name": "size", "type": "string", "required": true, "options": ["XS", "S", "M", "L", "XL", "XXL"], "facetable": true}, {"name": "material", "type": "string", "facetable": true}]'),
-(4, 'Sports', NULL, '[
-  {
-    "name": "sport_type",
-    "type": "string",
-    "required": true,
-    "facetable": true
-  },
-  {
-    "name": "weight_kg",
-    "type": "number"
-  }
-]');
+(1, 'Electronics', NULL, '[]'),
+(2, 'Books', NULL, '[]'),
+(3, 'Clothing', NULL, '[]'),
+(4, 'Sports', NULL, '[]');
 
 INSERT INTO category (id, name, parent_id, attribute_definitions)
 VALUES
-(5, 'TVs', 1, '[{"name": "screen_size_inch", "type": "number", "required": true}, {"name": "resolution", "type": "string", "options": ["4K", "8K", "Full HD"], "facetable":  true}]'),
-(6, 'PCs', 1, '[{"name": "ram_gb", "type": "number", "required": true, "facetable":  true}, {"name": "cpu", "type": "string", "required": true}]'),
-(7, 'Phones', 1, '[{"name": "storage_gb", "type": "number", "required": true, "options": [64, 128, 256, 512, 1024], "facetable": true}, {"name": "dual_sim", "type": "boolean"}]'),
-(8, 'Earphones', 1, '[{"name": "type", "type": "string", "options": ["In-ear", "Over-ear", "On-ear"]}, {"name": "wireless", "type": "boolean", "required": true}]'),
-(9, 'E-Books', 2, '[{"name": "file_format", "type": "string", "options": ["EPUB", "PDF", "MOBI"], "facetable": true}]'),
-(10, 'Physical Books', 2, '[{"name": "weight_g", "type": "number", "required": true}, {"name": "hardcover", "type": "boolean"}]');
+(5, 'TVs', 1, '[]'),
+(6, 'PCs', 1, '[]'),
+(7, 'Phones', 1, '[]'),
+(8, 'Earphones', 1, '[]'),
+(9, 'E-Books', 2, '[]'),
+(10, 'Physical Books', 2, '[]');
 
 INSERT INTO product (name, description, price, stock, category_id, created_at, brand, attributes)
 VALUES

@@ -1,0 +1,262 @@
+[
+  {
+    "name": "Electronics",
+    "attributeDefinitions": [
+      {
+        "name": "brand",
+        "type": "string",
+        "required": true,
+        "facetable": true,
+        "filterType": "TERM",
+        "facetStrategy": "TERMS",
+        "cardinalityHint": "LOW",
+        "searchable": true,
+        "sortable": true
+      },
+      {
+        "name": "warranty_months",
+        "type": "number",
+        "min": 0,
+        "facetable": false,
+        "filterType": "RANGE",
+        "facetStrategy": "NONE",
+        "cardinalityHint": "MEDIUM",
+        "searchable": false,
+        "sortable": false
+      }
+    ],
+    "children": [
+      {
+        "name": "TVs",
+        "attributeDefinitions": [
+          {
+            "name": "screen_size_inch",
+            "type": "number",
+            "required": true,
+            "facetable": false,
+            "filterType": "RANGE",
+            "facetStrategy": "NONE",
+            "cardinalityHint": "MEDIUM",
+            "searchable": false,
+            "sortable": true
+          },
+          {
+            "name": "resolution",
+            "type": "enum",
+            "options": ["4K", "8K", "Full HD"],
+            "facetable": true,
+            "filterType": "MULTI_SELECT",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": true,
+            "sortable": false
+          }
+        ]
+      },
+      {
+        "name": "PCs",
+        "attributeDefinitions": [
+          {
+            "name": "ram_gb",
+            "type": "number",
+            "required": true,
+            "facetable": true,
+            "filterType": "RANGE",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": false,
+            "sortable": true
+          },
+          {
+            "name": "cpu",
+            "type": "string",
+            "required": true,
+            "facetable": true,
+            "filterType": "TERM",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "MEDIUM",
+            "searchable": true,
+            "sortable": false
+          }
+        ]
+      },
+      {
+        "name": "Phones",
+        "attributeDefinitions": [
+          {
+            "name": "storage_gb",
+            "type": "number",
+            "required": true,
+            "options": [64, 128, 256, 512, 1024],
+            "facetable": true,
+            "filterType": "MULTI_SELECT",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": false,
+            "sortable": true
+          },
+          {
+            "name": "dual_sim",
+            "type": "boolean",
+            "facetable": true,
+            "filterType": "BOOLEAN",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": false,
+            "sortable": false
+          }
+        ]
+      },
+      {
+        "name": "Earphones",
+        "attributeDefinitions": [
+          {
+            "name": "type",
+            "type": "enum",
+            "options": ["In-ear", "Over-ear", "On-ear"],
+            "facetable": true,
+            "filterType": "MULTI_SELECT",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": true,
+            "sortable": false
+          },
+          {
+            "name": "wireless",
+            "type": "boolean",
+            "required": true,
+            "facetable": true,
+            "filterType": "BOOLEAN",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": false,
+            "sortable": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Books",
+    "attributeDefinitions": [
+      {
+        "name": "author",
+        "type": "string",
+        "required": true,
+        "facetable": false,
+        "filterType": "TERM",
+        "facetStrategy": "NONE",
+        "cardinalityHint": "HIGH",
+        "searchable": true,
+        "sortable": true
+      },
+      {
+        "name": "genre",
+        "type": "string",
+        "facetable": true,
+        "filterType": "TERM",
+        "facetStrategy": "TERMS",
+        "cardinalityHint": "LOW",
+        "searchable": true,
+        "sortable": false
+      }
+    ],
+    "children": [
+      {
+        "name": "E-Books",
+        "attributeDefinitions": [
+          {
+            "name": "file_format",
+            "type": "enum",
+            "options": ["EPUB", "PDF", "MOBI"],
+            "facetable": true,
+            "filterType": "MULTI_SELECT",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": false,
+            "sortable": false
+          }
+        ]
+      },
+      {
+        "name": "Physical Books",
+        "attributeDefinitions": [
+          {
+            "name": "weight_g",
+            "type": "number",
+            "required": true,
+            "facetable": false,
+            "filterType": "RANGE",
+            "facetStrategy": "NONE",
+            "cardinalityHint": "HIGH",
+            "searchable": false,
+            "sortable": true
+          },
+          {
+            "name": "hardcover",
+            "type": "boolean",
+            "facetable": true,
+            "filterType": "BOOLEAN",
+            "facetStrategy": "TERMS",
+            "cardinalityHint": "LOW",
+            "searchable": false,
+            "sortable": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Clothing",
+    "attributeDefinitions": [
+      {
+        "name": "size",
+        "type": "enum",
+        "required": true,
+        "options": ["XS", "S", "M", "L", "XL", "XXL"],
+        "facetable": true,
+        "filterType": "MULTI_SELECT",
+        "facetStrategy": "TERMS",
+        "cardinalityHint": "LOW",
+        "searchable": false,
+        "sortable": false
+      },
+      {
+        "name": "material",
+        "type": "string",
+        "facetable": true,
+        "filterType": "TERM",
+        "facetStrategy": "TERMS",
+        "cardinalityHint": "LOW",
+        "searchable": true,
+        "sortable": false
+      }
+    ]
+  },
+  {
+    "name": "Sports",
+    "attributeDefinitions": [
+      {
+        "name": "sport_type",
+        "type": "string",
+        "required": true,
+        "facetable": true,
+        "filterType": "TERM",
+        "facetStrategy": "TERMS",
+        "cardinalityHint": "LOW",
+        "searchable": true,
+        "sortable": false
+      },
+      {
+        "name": "weight_kg",
+        "type": "number",
+        "facetable": false,
+        "filterType": "RANGE",
+        "facetStrategy": "NONE",
+        "cardinalityHint": "MEDIUM",
+        "searchable": false,
+        "sortable": true
+      }
+    ]
+  }
+]

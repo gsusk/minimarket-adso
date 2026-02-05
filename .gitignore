@@ -19,7 +19,6 @@ target/
 *.iws
 *.iml
 *.ipr
-cat_attr.json
 
 ### NetBeans ###
 /nbproject/private/

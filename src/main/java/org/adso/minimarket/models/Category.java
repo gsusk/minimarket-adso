@@ -71,4 +71,8 @@ public class Category {
         }
         return allDefinitions;
     }
+
+    public void setAttributeDefinitions(List<Map<String, Object>> attributeDefinitions) {
+        this.attributeDefinitions = attributeDefinitions;
+    }
 }

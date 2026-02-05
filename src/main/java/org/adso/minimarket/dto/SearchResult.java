@@ -1,6 +1,5 @@
 package org.adso.minimarket.dto;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +16,6 @@ public class SearchResult {
     Long total;
     BigDecimal minPrice;
     BigDecimal maxPrice;
-    List<?> brands;
-    Map<String, List<String>> facets;
+    Map<String, List<FacetValue>> facets;
     List<ProductDocument> products;
 }
