@@ -27,10 +27,25 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class SearchServiceImpl implements SearchService {
+    private static final String FIELD_PRICE = "price";
+    private static final String FIELD_BRAND = "brand";
+    private static final String FIELD_CATEGORY = "category";
+    private static final String FIELD_NAME = "name";
+    private static final String FIELD_DESCRIPTION = "description";
+    private static final String FIELD_SPECIFICATIONS = "specifications";
+    private static final String KEYWORD_SUFFIX = ".keyword";
+    private static final String AGG_MIN_PRICE = "min_price";
+    private static final String AGG_MAX_PRICE = "max_price";
+    private static final String FUZZINESS_AUTO = "AUTO";
+    private static final int MAX_RESULTS = 20;
+    private static final int BRAND_FACET_SIZE = 20;
+
     private final ProductSearchRepository searchRepository;
     private final ElasticsearchOperations operations;
     private final AttributeSchemaValidator attributeSchemaValidator;
@@ -53,176 +68,190 @@ public class SearchServiceImpl implements SearchService {
         NativeQuery searchQuery = buildQuery(filters, query);
         SearchHits<ProductDocument> searchHits = operations.search(searchQuery, ProductDocument.class);
 
-        List<ProductDocument> products = searchHits.getSearchHits()
-                .stream()
-                .map(SearchHit::getContent)
-                .toList();
-
-        BigDecimal minPrice = extractMinPrice(searchHits);
-        BigDecimal maxPrice = extractMaxPrice(searchHits);
-        Map<String, List<FacetValue>> facets = extractFacets(searchHits, filters.getCategory());
-
         return SearchResult.builder()
-                .products(products)
-                .minPrice(minPrice)
-                .maxPrice(maxPrice)
-                .facets(facets)
+                .products(extractProducts(searchHits))
+                .minPrice(extractMinPrice(searchHits))
+                .maxPrice(extractMaxPrice(searchHits))
+                .facets(extractFacets(searchHits, filters.getCategory()))
                 .total(searchHits.getTotalHits())
                 .build();
     }
 
+    private List<ProductDocument> extractProducts(SearchHits<ProductDocument> searchHits) {
+        return searchHits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .toList();
+    }
+
     private NativeQuery buildQuery(SearchFilters filters, String query) {
-        BoolQuery.Builder bool = new BoolQuery.Builder();
+        BoolQuery boolQuery = buildBoolQuery(filters, query);
+        BoolQuery postFilterQuery = buildPostFilterQuery(filters);
 
-        bool.must(mu -> mu
-                .bool(b -> b
-                        .should(s -> s
-                                .multiMatch(m -> m
-                                        .fields("name^3", "description^1")
-                                        .query(query)
-                                        .fuzziness("AUTO")
-                                        .type(TextQueryType.BestFields)
-                                )
-                        )
+        NativeQueryBuilder nqBuilder = NativeQuery.builder()
+                .withQuery(q -> q.bool(boolQuery))
+                .withAggregation(AGG_MIN_PRICE, AggregationBuilders.min(m -> m.field(FIELD_PRICE)))
+                .withAggregation(AGG_MAX_PRICE, AggregationBuilders.max(m -> m.field(FIELD_PRICE)))
+                .withMaxResults(MAX_RESULTS);
+
+        addFacetAggregations(nqBuilder, filters.getCategory());
+
+        if (hasFilters(postFilterQuery)) {
+            nqBuilder.withFilter(f -> f.bool(postFilterQuery));
+        }
+
+        return nqBuilder.build();
+    }
+
+    private BoolQuery buildBoolQuery(SearchFilters filters, String query) {
+        BoolQuery.Builder bool = new BoolQuery.Builder()
+                .must(mu -> mu.bool(b -> b
+                        .should(s -> s.multiMatch(m -> m
+                                .fields(FIELD_NAME + "^3", FIELD_DESCRIPTION + "^1")
+                                .query(query)
+                                .fuzziness(FUZZINESS_AUTO)
+                                .type(TextQueryType.BestFields)))
                         .should(s -> s.prefix(p -> p
-                                        .field("name")
-                                        .value(query.toLowerCase())
-                                )
-                        )
-                )
-        );
+                                .field(FIELD_NAME)
+                                .value(query.toLowerCase())))));
 
-        if (filters.getCategory() != null && !filters.getCategory().trim().isEmpty()) {
-            bool.filter(f -> f.term(t -> t.field("category").value(filters.getCategory()).caseInsensitive(true)));
+        if (isNotBlank(filters.getCategory())) {
+            bool.filter(f -> f.term(t -> t
+                    .field(FIELD_CATEGORY)
+                    .value(filters.getCategory())
+                    .caseInsensitive(true)));
         }
 
+        return bool.build();
+    }
+
+    private BoolQuery buildPostFilterQuery(SearchFilters filters) {
         BoolQuery.Builder postFilter = new BoolQuery.Builder();
-        boolean hasPostFilters = false;
 
-        if (isValidMinPrice(filters)) {
+        applyPriceFilters(postFilter, filters);
+        applyBrandFilter(postFilter, filters);
+        applyAttributeFilters(postFilter, filters);
+
+        return postFilter.build();
+    }
+
+    private void applyPriceFilters(BoolQuery.Builder postFilter, SearchFilters filters) {
+        if (isValidPrice(filters.getMinPrice())) {
             postFilter.filter(f -> f.range(r -> r.number(n -> n
-                    .field("price").gte(filters.getMinPrice().doubleValue()))));
-            hasPostFilters = true;
+                    .field(FIELD_PRICE)
+                    .gte(filters.getMinPrice().doubleValue()))));
         }
 
-        if (isValidMaxPrice(filters)) {
+        if (isValidPrice(filters.getMaxPrice())) {
             postFilter.filter(f -> f.range(r -> r.number(n -> n
-                    .field("price").lte(filters.getMaxPrice().doubleValue()))));
-            hasPostFilters = true;
+                    .field(FIELD_PRICE)
+                    .lte(filters.getMaxPrice().doubleValue()))));
+        }
+    }
+
+    private void applyBrandFilter(BoolQuery.Builder postFilter, SearchFilters filters) {
+        if (isNotBlank(filters.getBrand())) {
+            postFilter.filter(f -> f.term(t -> t
+                    .field(FIELD_BRAND)
+                    .value(filters.getBrand())
+                    .caseInsensitive(true)));
+        }
+    }
+
+    private void applyAttributeFilters(BoolQuery.Builder postFilter, SearchFilters filters) {
+        if (filters.getAttributes() == null || filters.getAttributes().isEmpty()) {
+            return;
         }
 
-        if (filters.getBrand() != null && !filters.getBrand().trim().isEmpty()) {
-            postFilter.filter(f -> f.term(t -> t.field("brand").value(filters.getBrand()).caseInsensitive(true)));
-            hasPostFilters = true;
-        }
-
-        if (filters.getAttributes() != null && !filters.getAttributes().isEmpty()) {
-            for (Map.Entry<String, String> entry : filters.getAttributes().entrySet()) {
-                String attrName = entry.getKey();
-                String attrValue = entry.getValue();
-
-                if (attrValue == null || attrValue.trim().isEmpty()) {
-                    continue;
-                }
-
-                FilterType filterType = attributeSchemaValidator.getFilterType(filters.getCategory(), attrName);
-                applyAttributeFilter(postFilter, attrName, attrValue, filterType);
-                hasPostFilters = true;
-            }
-        }
-
-        NativeQueryBuilder nq = NativeQuery.builder()
-                .withQuery(q -> q.bool(bool.build()))
-                .withAggregation("min_price", AggregationBuilders.min(m -> m.field("price")))
-                .withAggregation("max_price", AggregationBuilders.max(m -> m.field("price")))
-                .withMaxResults(20);
-
-        addFacetAggregations(nq, filters.getCategory());
-
-        if (hasPostFilters) {
-            nq.withFilter(f -> f.bool(postFilter.build()));
-        }
-
-        return nq.build();
+        filters.getAttributes().entrySet().stream()
+                .filter(entry -> isNotBlank(entry.getValue()))
+                .forEach(entry -> {
+                    FilterType filterType = attributeSchemaValidator.getFilterType(
+                            filters.getCategory(), entry.getKey());
+                    applyAttributeFilter(postFilter, entry.getKey(), entry.getValue(), filterType);
+                });
     }
 
     private void applyAttributeFilter(BoolQuery.Builder postFilter, String attrName, String attrValue,
                                       FilterType filterType) {
-        String fieldPath = "specifications." + attrName;
+        String fieldPath = FIELD_SPECIFICATIONS + "." + attrName;
 
         switch (filterType) {
-            case TERM -> postFilter.filter(f -> f.term(t -> t
-                    .field(fieldPath + ".keyword")
-                    .value(attrValue)
+            case TERM -> applyTermFilter(postFilter, fieldPath, attrValue);
+            case MULTI_SELECT -> applyMultiSelectFilter(postFilter, fieldPath, attrValue);
+            case BOOLEAN -> applyBooleanFilter(postFilter, fieldPath, attrValue);
+            case RANGE -> applyRangeFilter(postFilter, fieldPath, attrValue, attrName);
+            default -> log.warn("Attribute '{}' has filter type NONE, skipping", attrName);
+        }
+    }
+
+    private void applyTermFilter(BoolQuery.Builder postFilter, String fieldPath, String value) {
+        postFilter.filter(f -> f.term(t -> t
+                .field(fieldPath + KEYWORD_SUFFIX)
+                .value(value)
+                .caseInsensitive(true)));
+    }
+
+    private void applyMultiSelectFilter(BoolQuery.Builder postFilter, String fieldPath, String value) {
+        String[] values = value.split(",");
+        String keywordField = fieldPath + KEYWORD_SUFFIX;
+
+        if (values.length == 1) {
+            postFilter.filter(f -> f.term(t -> t
+                    .field(keywordField)
+                    .value(values[0].trim())
                     .caseInsensitive(true)));
+        } else {
+            List<FieldValue> fieldValues = Arrays.stream(values)
+                    .map(String::trim)
+                    .map(FieldValue::of)
+                    .toList();
+            postFilter.filter(f -> f.terms(t -> t
+                    .field(keywordField)
+                    .terms(ts -> ts.value(fieldValues))));
+        }
+    }
 
-            case MULTI_SELECT -> {
-                String[] values = attrValue.split(",");
-                if (values.length == 1) {
-                    postFilter.filter(f -> f.term(t -> t
-                            .field(fieldPath + ".keyword")
-                            .value(values[0].trim())
-                            .caseInsensitive(true)));
-                } else {
-                    postFilter.filter(f -> f.terms(t -> t
-                            .field(fieldPath + ".keyword")
-                            .terms(ts -> ts.value(Arrays.stream(values)
-                                    .map(String::trim)
-                                    .map(FieldValue::of)
-                                    .toList()))));
-                }
+    private void applyBooleanFilter(BoolQuery.Builder postFilter, String fieldPath, String value) {
+        postFilter.filter(f -> f.term(t -> t
+                .field(fieldPath)
+                .value(Boolean.parseBoolean(value))));
+    }
+
+    private void applyRangeFilter(BoolQuery.Builder postFilter, String fieldPath, String value, String attrName) {
+        try {
+            if (value.contains("-")) {
+                String[] parts = value.split("-");
+                double min = Double.parseDouble(parts[0].trim());
+                double max = Double.parseDouble(parts[1].trim());
+                postFilter.filter(f -> f.range(r -> r.number(n -> n
+                        .field(fieldPath)
+                        .gte(min)
+                        .lte(max))));
+            } else {
+                double numValue = Double.parseDouble(value.trim());
+                postFilter.filter(f -> f.term(t -> t
+                        .field(fieldPath)
+                        .value(numValue)));
             }
-
-            case BOOLEAN -> postFilter.filter(f -> f.term(t -> t
-                    .field(fieldPath)
-                    .value(Boolean.parseBoolean(attrValue))));
-
-            case RANGE -> {
-                try {
-                    if (attrValue.contains("-")) {
-                        String[] parts = attrValue.split("-");
-                        double min = Double.parseDouble(parts[0].trim());
-                        double max = Double.parseDouble(parts[1].trim());
-                        postFilter.filter(f -> f.range(r -> r.number(n -> n
-                                .field(fieldPath)
-                                .gte(min)
-                                .lte(max))));
-                    } else {
-                        double value = Double.parseDouble(attrValue.trim());
-                        postFilter.filter(f -> f.term(t -> t
-                                .field(fieldPath)
-                                .value(value)));
-                    }
-                } catch (NumberFormatException e) {
-                    log.warn("invalid range value for attribute '{}': {}", attrName, attrValue);
-                }
-            }
-
-            default -> log.warn("attribute '{}' has filter type NONE, skipping filter", attrName);
+        } catch (NumberFormatException e) {
+            log.warn("Invalid range value for attribute '{}': {}", attrName, value);
         }
     }
 
     private void addFacetAggregations(NativeQueryBuilder nq, String category) {
-        nq.withAggregation("brand", AggregationBuilders.terms(t -> t
-                .field("brand")
-                .size(20)));
+        nq.withAggregation(FIELD_BRAND, AggregationBuilders.terms(t -> t
+                .field(FIELD_BRAND)
+                .size(BRAND_FACET_SIZE)));
 
-        Map<String, AttributeDefinition> definitions = attributeSchemaValidator.getAttributeDefinitions(category);
-
-        for (AttributeDefinition def : definitions.values()) {
-            if (!def.isFacetable()) {
-                continue;
-            }
-
-            String attrName = def.getName();
-            FacetStrategy strategy = def.getFacetStrategy();
-            String fieldPath = "specifications." + attrName + ".keyword";
-
-            Aggregation agg = buildFacetAggregation(fieldPath, strategy);
-            if (agg != null) {
-                nq.withAggregation(attrName, agg);
-            }
-        }
+        attributeSchemaValidator.getAttributeDefinitions(category).values().stream()
+                .filter(AttributeDefinition::isFacetable)
+                .forEach(def -> {
+                    String fieldPath = FIELD_SPECIFICATIONS + "." + def.getName() + KEYWORD_SUFFIX;
+                    Aggregation agg = buildFacetAggregation(fieldPath, def.getFacetStrategy());
+                    if (agg != null) {
+                        nq.withAggregation(def.getName(), agg);
+                    }
+                });
     }
 
     private Aggregation buildFacetAggregation(String fieldPath, FacetStrategy strategy) {
@@ -230,14 +259,11 @@ public class SearchServiceImpl implements SearchService {
             case TERMS -> AggregationBuilders.terms(t -> t
                     .field(fieldPath)
                     .size(strategy.getDefaultSize()));
-
             case SIGNIFICANT_TERMS -> AggregationBuilders.significantTerms(st -> st
                     .field(fieldPath)
                     .size(strategy.getDefaultSize()));
-
             case SAMPLER -> AggregationBuilders.sampler(s -> s
                     .shardSize(strategy.getSampleSize()));
-
             case NONE -> null;
         };
     }
@@ -245,29 +271,15 @@ public class SearchServiceImpl implements SearchService {
     private Map<String, List<FacetValue>> extractFacets(SearchHits<ProductDocument> searchHits, String category) {
         Map<String, List<FacetValue>> facets = new HashMap<>();
 
+        ElasticsearchAggregations agg = (ElasticsearchAggregations) searchHits.getAggregations();
+        if (agg == null) return facets;
+
         try {
-            ElasticsearchAggregations agg = (ElasticsearchAggregations) searchHits.getAggregations();
-            if (agg == null) return facets;
+            extractTermsFacet(agg, FIELD_BRAND, facets);
 
-            extractTermsFacet(agg, "brand", facets);
-
-            Map<String, AttributeDefinition> definitions = attributeSchemaValidator.getAttributeDefinitions(category);
-
-            for (AttributeDefinition def : definitions.values()) {
-                if (!def.isFacetable()) {
-                    continue;
-                }
-
-                String attrName = def.getName();
-                FacetStrategy strategy = def.getFacetStrategy();
-
-                switch (strategy) {
-                    case TERMS, SIGNIFICANT_TERMS -> extractTermsFacet(agg, attrName, facets);
-                    case SAMPLER -> extractSamplerFacet(agg, attrName, facets);
-                    case NONE -> {
-                    } // Skip
-                }
-            }
+            attributeSchemaValidator.getAttributeDefinitions(category).values().stream()
+                    .filter(AttributeDefinition::isFacetable)
+                    .forEach(def -> extractFacetByStrategy(agg, def.getName(), def.getFacetStrategy(), facets));
         } catch (Exception e) {
             log.warn("Failed to extract facets: {}", e.getMessage());
         }
@@ -275,76 +287,68 @@ public class SearchServiceImpl implements SearchService {
         return facets;
     }
 
+    private void extractFacetByStrategy(ElasticsearchAggregations agg, String facetName, 
+                                       FacetStrategy strategy, Map<String, List<FacetValue>> facets) {
+        switch (strategy) {
+            case TERMS, SIGNIFICANT_TERMS -> extractTermsFacet(agg, facetName, facets);
+            case SAMPLER -> extractSamplerFacet(agg, facetName, facets);
+            case NONE -> {}
+        }
+    }
+
     private void extractTermsFacet(ElasticsearchAggregations agg, String facetName,
                                    Map<String, List<FacetValue>> facets) {
         try {
-            if (agg.get(facetName) == null) {
-                return;
-            }
+            Aggregate aggregate = getAggregate(agg, facetName);
+            if (aggregate == null) return;
 
-            Aggregate aggregate = agg.get(facetName).aggregation().getAggregate();
-
-            if (aggregate.isSterms()) {
-                List<FacetValue> values = aggregate.sterms().buckets().array().stream()
-                        .map(b -> new FacetValue(b.key().stringValue(), b.docCount()))
-                        .filter(fv -> fv.getCount() > 0)
-                        .toList();
-                if (!values.isEmpty()) {
-                    facets.put(facetName, values);
-                }
-            } else if (aggregate.isLterms()) {
-                List<FacetValue> values = aggregate.lterms().buckets().array().stream()
-                        .map(b -> new FacetValue(String.valueOf(b.key()), b.docCount()))
-                        .filter(fv -> fv.getCount() > 0)
-                        .toList();
-                if (!values.isEmpty()) {
-                    facets.put(facetName, values);
-                }
-            } else if (aggregate.isDterms()) {
-                List<FacetValue> values = aggregate.dterms().buckets().array().stream()
-                        .map(b -> new FacetValue(String.valueOf(b.key()), b.docCount()))
-                        .filter(fv -> fv.getCount() > 0)
-                        .toList();
-                if (!values.isEmpty()) {
-                    facets.put(facetName, values);
-                }
-            } else if (aggregate.isSigsterms()) {
-                List<FacetValue> values = aggregate.sigsterms().buckets().array().stream()
-                        .map(b -> new FacetValue(b.key(), b.docCount()))
-                        .filter(fv -> fv.getCount() > 0)
-                        .toList();
-                if (!values.isEmpty()) {
-                    facets.put(facetName, values);
-                }
+            List<FacetValue> values = extractFacetValues(aggregate);
+            if (!values.isEmpty()) {
+                facets.put(facetName, values);
             }
         } catch (Exception e) {
-            log.debug("failed to extract terms facet '{}': {}", facetName, e.getMessage());
+            log.debug("Failed to extract terms facet '{}': {}", facetName, e.getMessage());
         }
+    }
+
+    private List<FacetValue> extractFacetValues(Aggregate aggregate) {
+        Stream<FacetValue> facetStream = null;
+
+        if (aggregate.isSterms()) {
+            facetStream = aggregate.sterms().buckets().array().stream()
+                    .map(b -> new FacetValue(b.key().stringValue(), b.docCount()));
+        } else if (aggregate.isLterms()) {
+            facetStream = aggregate.lterms().buckets().array().stream()
+                    .map(b -> new FacetValue(String.valueOf(b.key()), b.docCount()));
+        } else if (aggregate.isDterms()) {
+            facetStream = aggregate.dterms().buckets().array().stream()
+                    .map(b -> new FacetValue(String.valueOf(b.key()), b.docCount()));
+        } else if (aggregate.isSigsterms()) {
+            facetStream = aggregate.sigsterms().buckets().array().stream()
+                    .map(b -> new FacetValue(b.key(), b.docCount()));
+        }
+
+        return facetStream != null 
+                ? facetStream.filter(fv -> fv.getCount() > 0).toList()
+                : Collections.emptyList();
     }
 
     private void extractSamplerFacet(ElasticsearchAggregations agg, String facetName,
                                      Map<String, List<FacetValue>> facets) {
         try {
-            if (agg.get(facetName) == null) {
-                return;
-            }
-
-            Aggregate samplerAgg = agg.get(facetName).aggregation().getAggregate();
-            if (!samplerAgg.isSampler()) {
-                return;
-            }
+            Aggregate samplerAgg = getAggregate(agg, facetName);
+            if (samplerAgg == null || !samplerAgg.isSampler()) return;
 
             Map<String, Aggregate> subAggs = samplerAgg.sampler().aggregations();
-            if (subAggs.containsKey("sampled_terms")) {
-                Aggregate termsAgg = subAggs.get("sampled_terms");
-                if (termsAgg.isSterms()) {
-                    List<FacetValue> values = termsAgg.sterms().buckets().array().stream()
-                            .map(b -> new FacetValue(b.key().stringValue(), b.docCount()))
-                            .filter(fv -> fv.getCount() > 0)
-                            .toList();
-                    if (!values.isEmpty()) {
-                        facets.put(facetName, values);
-                    }
+            Aggregate termsAgg = subAggs.get("sampled_terms");
+            
+            if (termsAgg != null && termsAgg.isSterms()) {
+                List<FacetValue> values = termsAgg.sterms().buckets().array().stream()
+                        .map(b -> new FacetValue(b.key().stringValue(), b.docCount()))
+                        .filter(fv -> fv.getCount() > 0)
+                        .toList();
+                if (!values.isEmpty()) {
+                    facets.put(facetName, values);
                 }
             }
         } catch (Exception e) {
@@ -353,27 +357,26 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private BigDecimal extractMinPrice(SearchHits<ProductDocument> searchHits) {
-        return extractAggregationValue(searchHits, "min_price");
+        return extractAggregationValue(searchHits, AGG_MIN_PRICE, Aggregate::min);
     }
 
     private BigDecimal extractMaxPrice(SearchHits<ProductDocument> searchHits) {
-        return extractAggregationValue(searchHits, "max_price");
+        return extractAggregationValue(searchHits, AGG_MAX_PRICE, Aggregate::max);
     }
 
-    private BigDecimal extractAggregationValue(SearchHits<ProductDocument> searchHits, String aggName) {
+    private BigDecimal extractAggregationValue(SearchHits<ProductDocument> searchHits, String aggName,
+                                               Function<Aggregate, ?> extractor) {
         try {
             ElasticsearchAggregations aggs = (ElasticsearchAggregations) searchHits.getAggregations();
             Aggregate aggregate = aggs.get(aggName).aggregation().getAggregate();
 
-            Double value = aggName.equals("min_price")
+            Double value = aggName.equals(AGG_MIN_PRICE)
                     ? aggregate.min().value()
                     : aggregate.max().value();
 
-            if (value == null || value.isNaN() || value.isInfinite()) {
-                return null;
-            }
-
-            return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
+            return isValidDouble(value) 
+                    ? BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP)
+                    : null;
         } catch (Exception e) {
             log.warn("Failed to extract aggregation '{}': {}", aggName, e.getMessage());
             return null;
@@ -393,13 +396,23 @@ public class SearchServiceImpl implements SearchService {
         }
     }
 
-    private boolean isValidMinPrice(SearchFilters filters) {
-        return filters.getMinPrice() != null
-                && filters.getMinPrice().compareTo(BigDecimal.ZERO) > 0;
+    private Aggregate getAggregate(ElasticsearchAggregations agg, String name) {
+        return agg.get(name) != null ? agg.get(name).aggregation().getAggregate() : null;
     }
 
-    private boolean isValidMaxPrice(SearchFilters filters) {
-        return filters.getMaxPrice() != null
-                && filters.getMaxPrice().compareTo(BigDecimal.ZERO) > 0;
+    private boolean hasFilters(BoolQuery query) {
+        return !query.filter().isEmpty();
+    }
+
+    private boolean isNotBlank(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+    private boolean isValidPrice(BigDecimal price) {
+        return price != null && price.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private boolean isValidDouble(Double value) {
+        return value != null && !value.isNaN() && !value.isInfinite();
     }
 }
