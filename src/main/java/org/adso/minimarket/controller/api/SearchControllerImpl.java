@@ -33,7 +33,7 @@ public class SearchControllerImpl implements SearchController {
         String minValue = allParams.get("min");
         String maxValue = allParams.get("max");
 
-        log.info("\nquery: {}\ncategory: {}\nbrand: {}\nmin: {}\nmax: {}", query, 
+        log.info("\nquery: {}\ncategory: {}\nbrand: {}\nmin: {}\nmax: {}", query,
                 category, brand, minValue, maxValue);
 
         BigDecimal min = parseSafely(minValue).orElse(null);

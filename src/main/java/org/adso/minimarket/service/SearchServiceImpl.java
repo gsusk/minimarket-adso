@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import lombok.extern.slf4j.Slf4j;
 import org.adso.minimarket.dto.FacetValue;
+import org.adso.minimarket.dto.ProductCard;
 import org.adso.minimarket.dto.SearchFilters;
 import org.adso.minimarket.dto.SearchResult;
 import org.adso.minimarket.models.document.ProductDocument;
@@ -20,7 +21,6 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregatio
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
@@ -77,9 +77,9 @@ public class SearchServiceImpl implements SearchService {
                 .build();
     }
 
-    private List<ProductDocument> extractProducts(SearchHits<ProductDocument> searchHits) {
+    private List<ProductCard> extractProducts(SearchHits<ProductDocument> searchHits) {
         return searchHits.getSearchHits().stream()
-                .map(SearchHit::getContent)
+                .map(doc -> doc.getContent().toProductCard())
                 .toList();
     }
 
@@ -91,6 +91,7 @@ public class SearchServiceImpl implements SearchService {
                 .withQuery(q -> q.bool(boolQuery))
                 .withAggregation(AGG_MIN_PRICE, AggregationBuilders.min(m -> m.field(FIELD_PRICE)))
                 .withAggregation(AGG_MAX_PRICE, AggregationBuilders.max(m -> m.field(FIELD_PRICE)))
+                .withFields("name", "id", "description")
                 .withMaxResults(MAX_RESULTS);
 
         addFacetAggregations(nqBuilder, filters.getCategory());
@@ -268,7 +269,8 @@ public class SearchServiceImpl implements SearchService {
         };
     }
 
-    private Map<String, List<FacetValue>> extractFacets(SearchHits<ProductDocument> searchHits, String category) {
+    private Map<String, List<FacetValue>> extractFacets(SearchHits<ProductDocument> searchHits,
+                                                        String category) {
         Map<String, List<FacetValue>> facets = new HashMap<>();
 
         ElasticsearchAggregations agg = (ElasticsearchAggregations) searchHits.getAggregations();
@@ -287,12 +289,13 @@ public class SearchServiceImpl implements SearchService {
         return facets;
     }
 
-    private void extractFacetByStrategy(ElasticsearchAggregations agg, String facetName, 
-                                       FacetStrategy strategy, Map<String, List<FacetValue>> facets) {
+    private void extractFacetByStrategy(ElasticsearchAggregations agg, String facetName,
+                                        FacetStrategy strategy, Map<String, List<FacetValue>> facets) {
         switch (strategy) {
             case TERMS, SIGNIFICANT_TERMS -> extractTermsFacet(agg, facetName, facets);
             case SAMPLER -> extractSamplerFacet(agg, facetName, facets);
-            case NONE -> {}
+            case NONE -> {
+            }
         }
     }
 
@@ -328,7 +331,7 @@ public class SearchServiceImpl implements SearchService {
                     .map(b -> new FacetValue(b.key(), b.docCount()));
         }
 
-        return facetStream != null 
+        return facetStream != null
                 ? facetStream.filter(fv -> fv.getCount() > 0).toList()
                 : Collections.emptyList();
     }
@@ -341,7 +344,7 @@ public class SearchServiceImpl implements SearchService {
 
             Map<String, Aggregate> subAggs = samplerAgg.sampler().aggregations();
             Aggregate termsAgg = subAggs.get("sampled_terms");
-            
+
             if (termsAgg != null && termsAgg.isSterms()) {
                 List<FacetValue> values = termsAgg.sterms().buckets().array().stream()
                         .map(b -> new FacetValue(b.key().stringValue(), b.docCount()))
@@ -374,7 +377,7 @@ public class SearchServiceImpl implements SearchService {
                     ? aggregate.min().value()
                     : aggregate.max().value();
 
-            return isValidDouble(value) 
+            return isValidDouble(value)
                     ? BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP)
                     : null;
         } catch (Exception e) {
