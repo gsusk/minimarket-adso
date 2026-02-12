@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
 
         attributeValidator.validate(productRequest.getSpecifications(), category.getAllAttributeDefinitions());
 
-        Integer initialStock = productRequest.getStock() != null ? productRequest.getStock() : 0;
+        int initialStock = productRequest.getStock() != null ? productRequest.getStock() : 0;
 
         Product product = new Product(
                 productRequest.getName(),
