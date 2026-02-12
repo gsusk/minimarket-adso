@@ -7,6 +7,7 @@ import org.adso.minimarket.dto.OrderDetails;
 import org.adso.minimarket.exception.InternalErrorException;
 import org.adso.minimarket.models.user.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
@@ -19,6 +20,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     }
 
     @Override
+    @Transactional
     public CreatePaymentResponse initializeCheckout(User user) {
         OrderDetails order = orderService.placeOrder(user);
         try {
