@@ -42,6 +42,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    @Transactional
+    public void logTransaction(Product product, int quantity, TransactionType type, String reason) {
+        InventoryTransaction transaction = new InventoryTransaction(product, quantity, type, reason);
+        inventoryTransactionRepository.save(transaction);
+    }
+
+    @Override
     public List<InventoryTransaction> getStockHistory(Long productId) {
         return inventoryTransactionRepository.findByProductIdOrderByCreatedAtDesc(productId);
     }

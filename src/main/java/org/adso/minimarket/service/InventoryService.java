@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface InventoryService {
     void adjustStock(Long productId, int quantity, TransactionType type, String reason);
+    void logTransaction(org.adso.minimarket.models.product.Product product, int quantity, TransactionType type, String reason);
     List<InventoryTransaction> getStockHistory(Long productId);
 }

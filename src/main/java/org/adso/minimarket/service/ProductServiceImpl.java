@@ -41,13 +41,13 @@ public class ProductServiceImpl implements ProductService {
 
         attributeValidator.validate(productRequest.getSpecifications(), category.getAllAttributeDefinitions());
 
-        Integer initialStock = productRequest.getStock();
+        Integer initialStock = productRequest.getStock() != null ? productRequest.getStock() : 0;
 
         Product product = new Product(
                 productRequest.getName(),
                 productRequest.getDescription(),
                 productRequest.getPrice(),
-                0,
+                initialStock,
                 category,
                 productRequest.getBrand(),
                 productRequest.getSpecifications()
@@ -56,9 +56,9 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        if (initialStock != null && initialStock > 0) {
-            inventoryService.adjustStock(
-                    savedProduct.getId(),
+        if (initialStock > 0) {
+            inventoryService.logTransaction(
+                    savedProduct,
                     initialStock,
                     TransactionType.RESTOCK,
                     "Initial Stock"
