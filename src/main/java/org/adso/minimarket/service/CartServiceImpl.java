@@ -4,6 +4,7 @@ import org.adso.minimarket.dto.AddCartItemRequest;
 import org.adso.minimarket.dto.ShoppingCart;
 import org.adso.minimarket.exception.InternalErrorException;
 import org.adso.minimarket.exception.NotFoundException;
+import org.adso.minimarket.exception.OrderInsufficientStockException;
 import org.adso.minimarket.mappers.CartMapper;
 import org.adso.minimarket.models.cart.Cart;
 import org.adso.minimarket.models.cart.CartItem;
@@ -18,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
-// TODO:
-//  - Unir los carritos
 @Service
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
@@ -106,21 +105,23 @@ public class CartServiceImpl implements CartService {
         return cartRepository.save(new Cart(guestId));
     }
 
-    /**
-     * TODO:
-     *  - Anadir upsert para hacer mas eficiente la query
-     *
-     *
-     */
     @Override
     @Transactional
     public ShoppingCart addItemToCart(Long userId, UUID guestId, AddCartItemRequest item) {
         Cart cart = getOrCreateCart(userId, guestId);
 
         Product product = productService.getById(item.getProductId());
+
+        if (product.getStock() < item.getQuantity()) {
+             throw new OrderInsufficientStockException("Not enough stock for product: " + product.getName() + ". Available: " + product.getStock() + ", Requested: " + item.getQuantity());
+        }
+
         Optional<CartItem> repeated = this.findCartItemByProductId(cart, product.getId());
 
         if (repeated.isPresent()) {
+            if (product.getStock() < repeated.get().getQuantity() + item.getQuantity()) {
+                throw new OrderInsufficientStockException("Not enough stock for product: " + product.getName() + ". Available: " + product.getStock() + ", Requested total: " + (repeated.get().getQuantity() + item.getQuantity()));
+            }
             repeated.get().addToQuantity(item.getQuantity());
         } else {
             CartItem newCartItem = new CartItem(cart, product, item.getQuantity());
@@ -156,6 +157,9 @@ public class CartServiceImpl implements CartService {
         if (quantity == 0) {
             cart.getCartItems().remove(cartItem);
         } else {
+            if (cartItem.getProduct().getStock() < quantity) {
+                throw new OrderInsufficientStockException("Not enough stock for product: " + cartItem.getProduct().getName() + ". Available: " + cartItem.getProduct().getStock() + ", Requested: " + quantity);
+            }
             cartItem.setQuantity(quantity);
         }
         return cartMapper.toDto(cart);
