@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.List;
 
 
 @Getter
@@ -37,4 +38,6 @@ public class CreateProductRequest {
 
     @NotNull(message = "attributes required")
     private Map<String, Object> specifications;
+
+    private List<String> images;
 }

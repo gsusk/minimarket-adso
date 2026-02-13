@@ -18,10 +18,13 @@ public class Image {
     @Column(nullable = false)
     private String url;
 
+    @Column(name = "position", nullable = false)
+    private int position;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    protected Image() {
+    public Image() {
     }
 
     public Long getId() {
@@ -48,12 +51,12 @@ public class Image {
         this.url = url;
     }
 
-    public LocalDateTime getCreated_at() {
-        return createdAt;
+    public int getPosition() {
+        return position;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.createdAt = created_at;
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     @Override

@@ -32,6 +32,10 @@ public class ProductSeederEvent {
         List<ProductDocument> productDocuments = new ArrayList<>();
 
         for (Product p: products) {
+            java.util.List<String> imageUrls = p.getImages() != null
+                    ? p.getImages().stream().map(org.adso.minimarket.models.product.Image::getUrl).toList()
+                    : java.util.Collections.emptyList();
+            
             productDocuments.add(new ProductDocument(
                     p.getId(),
                     p.getName(),
@@ -41,6 +45,7 @@ public class ProductSeederEvent {
                     p.getBrand(),
                     p.getStock(),
                     p.getAttributes(),
+                    imageUrls,
                     p.getCreatedAt()
             ));
         }

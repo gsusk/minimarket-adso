@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -44,6 +45,9 @@ public class ProductDocument {
     @Field(type = FieldType.Nested)
     private Map<String, Object> specifications;
 
+    @Field(type = FieldType.Keyword)
+    private List<String> images;
+
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
     private LocalDateTime createdAt;
 
@@ -54,7 +58,8 @@ public class ProductDocument {
                 category,
                 price,
                 brand,
-                createdAt
+                createdAt,
+                images
         );
     }
 }

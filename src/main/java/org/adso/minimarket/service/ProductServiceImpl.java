@@ -2,16 +2,20 @@ package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.CreateProductRequest;
 import org.adso.minimarket.dto.DetailedProduct;
-import org.adso.minimarket.event.ProductCreatedEventPublisher;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.ProductMapper;
 import org.adso.minimarket.models.Category;
+import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.models.inventory.TransactionType;
+import org.adso.minimarket.models.product.Image;
 import org.adso.minimarket.models.product.Product;
 import org.adso.minimarket.repository.jpa.ProductRepository;
 import org.adso.minimarket.validation.ProductAttributeValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -19,17 +23,17 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryService categoryService;
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    private final ProductCreatedEventPublisher productCreatedEventPublisher;
+    private final SearchService searchService;
     private final ProductAttributeValidator attributeValidator;
     private final InventoryService inventoryService;
 
     ProductServiceImpl(CategoryService categoryService, ProductRepository productRepository,
-                       ProductMapper productMapper, ProductCreatedEventPublisher productCreatedEventPublisher,
+                       ProductMapper productMapper, SearchService searchService,
                        ProductAttributeValidator attributeValidator, InventoryService inventoryService) {
         this.categoryService = categoryService;
         this.productRepository = productRepository;
         this.productMapper = productMapper;
-        this.productCreatedEventPublisher = productCreatedEventPublisher;
+        this.searchService = searchService;
         this.attributeValidator = attributeValidator;
         this.inventoryService = inventoryService;
     }
@@ -53,6 +57,16 @@ public class ProductServiceImpl implements ProductService {
                 productRequest.getSpecifications()
         );
 
+        if (productRequest.getImages() != null) {
+            for (int i = 0; i < productRequest.getImages().size(); i++) {
+                Image image = new Image();
+                image.setUrl(productRequest.getImages().get(i));
+                image.setProduct(product);
+                image.setPosition(i);
+                product.getImages().add(image);
+            }
+        }
+
 
         Product savedProduct = productRepository.save(product);
 
@@ -65,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
             );
         }
 
-        productCreatedEventPublisher.handleProductCreatedEvent(product, category.getName());
+        indexProductToElasticsearch(savedProduct, category.getName());
         return savedProduct.getId();
     }
 
@@ -79,5 +93,26 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.toDto(productRepository.findDetailedById(id).orElseThrow(
                 () -> new NotFoundException("Product not found")
         ));
+    }
+
+    private void indexProductToElasticsearch(Product product, String categoryName) {
+        List<String> imageUrls = product.getImages() != null
+                ? product.getImages().stream().map(Image::getUrl).toList()
+                : Collections.emptyList();
+
+        ProductDocument productDocument = new ProductDocument(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                categoryName,
+                product.getPrice(),
+                product.getBrand(),
+                product.getStock(),
+                product.getAttributes(),
+                imageUrls,
+                product.getCreatedAt()
+        );
+
+        searchService.saveIndex(productDocument);
     }
 }

@@ -52,6 +52,7 @@ public class Product {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @OrderBy("position ASC")
     private List<Image> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
