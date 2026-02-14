@@ -44,7 +44,7 @@ public class SearchServiceImpl implements SearchService {
     private static final String AGG_MAX_PRICE = "max_price";
     private static final String FUZZINESS_AUTO = "AUTO";
     private static final int MAX_RESULTS = 20;
-    private static final int BRAND_FACET_SIZE = 20;
+    private static final int BRAND_FACET_SIZE = 10;
 
     private final ProductSearchRepository searchRepository;
     private final ElasticsearchOperations operations;
@@ -91,7 +91,6 @@ public class SearchServiceImpl implements SearchService {
                 .withQuery(q -> q.bool(boolQuery))
                 .withAggregation(AGG_MIN_PRICE, AggregationBuilders.min(m -> m.field(FIELD_PRICE)))
                 .withAggregation(AGG_MAX_PRICE, AggregationBuilders.max(m -> m.field(FIELD_PRICE)))
-                .withFields("name", "id", "description")
                 .withMaxResults(MAX_RESULTS);
 
         addFacetAggregations(nqBuilder, filters.getCategory());
