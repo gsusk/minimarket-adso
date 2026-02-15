@@ -1,5 +1,6 @@
 package org.adso.minimarket.controller.api;
 
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.validation.Valid;
 import org.adso.minimarket.constant.ProductRoutes;
 import org.adso.minimarket.dto.CreateProductRequest;

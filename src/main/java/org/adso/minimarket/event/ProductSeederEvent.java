@@ -24,7 +24,8 @@ public class ProductSeederEvent {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ProductSeederEvent(ProductRepository dbRepo, ProductSearchRepository esRepo, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public ProductSeederEvent(ProductRepository dbRepo, ProductSearchRepository esRepo, UserRepository userRepository
+            , PasswordEncoder passwordEncoder) {
         this.dbRepo = dbRepo;
         this.esRepo = esRepo;
         this.userRepository = userRepository;
@@ -40,11 +41,11 @@ public class ProductSeederEvent {
         var products = dbRepo.findAll();
         List<ProductDocument> productDocuments = new ArrayList<>();
 
-        for (Product p: products) {
+        for (Product p : products) {
             java.util.List<String> imageUrls = p.getImages() != null
                     ? p.getImages().stream().map(org.adso.minimarket.models.product.Image::getUrl).toList()
                     : java.util.Collections.emptyList();
-            
+
             productDocuments.add(new ProductDocument(
                     p.getId(),
                     p.getName(),
@@ -75,7 +76,7 @@ public class ProductSeederEvent {
             );
             admin.setRole(Role.ADMIN);
             userRepository.save(admin);
-            System.out.println("Admin user created: " + adminEmail);
+            System.out.println("creado usuario admin: " + adminEmail);
         }
     }
 }
