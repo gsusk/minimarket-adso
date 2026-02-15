@@ -1,5 +1,6 @@
 package org.adso.minimarket.controller.api;
 
+import jakarta.validation.Valid;
 import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.dto.DetailedUser;
@@ -11,5 +12,5 @@ public interface UserController {
 
     ResponseEntity<DetailedUser> getProfile(UserPrincipal userPrincipal);
 
-    ResponseEntity<DetailedUser> updateProfile(UserPrincipal userPrincipal, UserUpdateRequest userUpdateRequest);
+    ResponseEntity<DetailedUser> updateProfile(UserPrincipal userPrincipal, @Valid UserUpdateRequest userUpdateRequest);
 }

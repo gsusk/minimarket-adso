@@ -1,7 +1,6 @@
 package org.adso.minimarket.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +19,6 @@ public class UserUpdateRequest {
     private String lastName;
     @Size(max = 300, message = "too long")
     private String address;
-    @NotBlank
+    @Size(min = 6)
     private String phoneNumber;
 }

@@ -47,20 +47,21 @@ public class UserServiceImpl implements UserService {
     public DetailedUser updateUserProfile(UserUpdateRequest dto, Long id) {
         User usr = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        if (!dto.getFirstName().equals(usr.getName())) {
+
+        if (dto.getFirstName() != null) {
             usr.setName(dto.getFirstName());
         }
 
-        if (!dto.getAddress().equals(usr.getAddress())) {
-            usr.setAddress(dto.getAddress());
-        }
-
-        if (!dto.getLastName().equals(usr.getLastName())) {
+        if (dto.getLastName() != null) {
             usr.setLastName(dto.getLastName());
         }
 
-        if (!dto.getPhoneNumber().equals(usr.getPhoneNumber())) {
-            usr.setLastName(usr.getLastName());
+        if (dto.getAddress() != null) {
+            usr.setAddress(dto.getAddress());
+        }
+
+        if (dto.getPhoneNumber() != null) {
+            usr.setPhoneNumber(dto.getPhoneNumber());
         }
 
         User updatedUser = userRepository.save(usr);

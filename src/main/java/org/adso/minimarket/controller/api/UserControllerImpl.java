@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -38,7 +39,7 @@ public class UserControllerImpl implements UserController {
     @Override
     @PutMapping("/user/profile")
     public ResponseEntity<DetailedUser> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                                                      @Valid UserUpdateRequest userUpdateRequest) {
+                                                      @RequestBody @Valid UserUpdateRequest userUpdateRequest) {
         return ResponseEntity.ok(userService.updateUserProfile(userUpdateRequest, userPrincipal.getId()));
     }
 }
