@@ -1,7 +1,9 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.BasicUser;
+import org.adso.minimarket.dto.DetailedUser;
 import org.adso.minimarket.dto.RegisterRequest;
+import org.adso.minimarket.dto.UserUpdateRequest;
 import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.models.user.Role;
@@ -39,6 +41,31 @@ public class UserServiceImpl implements UserService {
         User usr = this.userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         return userMapper.toResponseDto(usr);
+    }
+
+    @Override
+    public DetailedUser updateUserProfile(UserUpdateRequest dto, Long id) {
+        User usr = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        if (!dto.getFirstName().equals(usr.getName())) {
+            usr.setName(dto.getFirstName());
+        }
+
+        if (!dto.getAddress().equals(usr.getAddress())) {
+            usr.setAddress(dto.getAddress());
+        }
+
+        if (!dto.getLastName().equals(usr.getLastName())) {
+            usr.setLastName(dto.getLastName());
+        }
+
+        if (!dto.getPhoneNumber().equals(usr.getPhoneNumber())) {
+            usr.setLastName(usr.getLastName());
+        }
+
+        User updatedUser = userRepository.save(usr);
+
+        return userMapper.toDetailedUserDto(updatedUser);
     }
 
     @Override
