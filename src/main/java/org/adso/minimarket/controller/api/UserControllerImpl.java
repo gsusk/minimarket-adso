@@ -5,6 +5,7 @@ import org.adso.minimarket.config.UserPrincipal;
 import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.dto.DetailedUser;
 import org.adso.minimarket.dto.UserUpdateRequest;
+import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserControllerImpl implements UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
-    public UserControllerImpl(UserService userService) {
+    public UserControllerImpl(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -32,8 +35,8 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @GetMapping("/user/profile")
-    public ResponseEntity<DetailedUser> getProfile(UserPrincipal userPrincipal) {
-        return null;
+    public ResponseEntity<DetailedUser> getProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(userMapper.toDetailedUserDto(userPrincipal.getUser()));
     }
 
     @Override
