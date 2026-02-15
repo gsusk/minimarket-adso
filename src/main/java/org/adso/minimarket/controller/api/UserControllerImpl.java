@@ -7,13 +7,12 @@ import org.adso.minimarket.dto.DetailedUser;
 import org.adso.minimarket.dto.UserUpdateRequest;
 import org.adso.minimarket.mappers.UserMapper;
 import org.adso.minimarket.service.UserService;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Validated
 @RestController
@@ -44,5 +43,15 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<DetailedUser> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                       @RequestBody @Valid UserUpdateRequest userUpdateRequest) {
         return ResponseEntity.ok(userService.updateUserProfile(userUpdateRequest, userPrincipal.getId()));
+    }
+
+
+    @Override
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        userService.deleteUser(userPrincipal.getId());
+        ResponseCookie.from("X-REFRESH-TOKEN").build();
+        ResponseCookie.from("CGUESTID").build();
+        return ResponseEntity.ok().build();
     }
 }

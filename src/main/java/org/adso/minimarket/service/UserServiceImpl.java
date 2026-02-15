@@ -10,6 +10,7 @@ import org.adso.minimarket.models.user.Role;
 import org.adso.minimarket.models.user.User;
 import org.adso.minimarket.repository.jpa.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -79,5 +80,11 @@ public class UserServiceImpl implements UserService {
     public User getUserInternalByEmail(String email) {
         return this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        userRepository.removeUserById(id);
     }
 }

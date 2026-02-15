@@ -6,6 +6,8 @@ import org.adso.minimarket.dto.BasicUser;
 import org.adso.minimarket.dto.DetailedUser;
 import org.adso.minimarket.dto.UserUpdateRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 public interface UserController {
     ResponseEntity<BasicUser> getMe(UserPrincipal userPrincipal);
@@ -13,4 +15,6 @@ public interface UserController {
     ResponseEntity<DetailedUser> getProfile(UserPrincipal userPrincipal);
 
     ResponseEntity<DetailedUser> updateProfile(UserPrincipal userPrincipal, @Valid UserUpdateRequest userUpdateRequest);
+
+    ResponseEntity<?> deleteUser(@AuthenticationPrincipal UserPrincipal userPrincipal);
 }
