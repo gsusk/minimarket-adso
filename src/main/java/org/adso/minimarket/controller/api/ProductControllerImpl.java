@@ -1,6 +1,5 @@
 package org.adso.minimarket.controller.api;
 
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.validation.Valid;
 import org.adso.minimarket.constant.ProductRoutes;
 import org.adso.minimarket.dto.CreateProductRequest;
@@ -26,6 +25,14 @@ public class ProductControllerImpl implements ProductController {
     @PostMapping(ProductRoutes.CREATE_PRODUCT)
     public ResponseEntity<?> create(@RequestBody @Valid CreateProductRequest productRequest) {
         return ResponseEntity.created(URI.create("/products/" + productService.createProduct(productRequest))).build();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(ProductRoutes.DELETE_PRODUCT)
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok().build();
     }
 
     @Override

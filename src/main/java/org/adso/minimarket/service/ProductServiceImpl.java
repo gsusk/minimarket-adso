@@ -95,6 +95,11 @@ public class ProductServiceImpl implements ProductService {
         ));
     }
 
+    @Override
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
     private void indexProductToElasticsearch(Product product, String categoryName) {
         List<String> imageUrls = product.getImages() != null
                 ? product.getImages().stream().map(Image::getUrl).toList()
