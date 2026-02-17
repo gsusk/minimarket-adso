@@ -18,7 +18,7 @@ public class OrderControllerImpl implements OrderController {
 
 
     @Override
-    @GetMapping("/api/orders/{order_id}")
+    @GetMapping("/orders/{order_id}")
     public ResponseEntity<?> getOrderDetails(@AuthenticationPrincipal UserPrincipal principal,
                                              @PathVariable("order_id") String orderId) {
         return ResponseEntity.ok(null);

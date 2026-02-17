@@ -75,17 +75,14 @@ public class OrderServiceImpl implements OrderService {
             Product product = productMap.get(ci.getProduct().getId());
 
             if (product.getStock() < ci.getQuantity()) {
-                throw new OrderInsufficientStockException("Not enough stock for product: " + product.getName() + ". Available: " + product.getStock() + ", Requested: " + ci.getQuantity());
+                throw new OrderInsufficientStockException("Not enough stock for product: " + product.getName() + ". " +
+                        "Available: " + product.getStock() + ", Requested: " + ci.getQuantity());
             }
 
-            // Use InventoryService to adjust stock
-            inventoryService.adjustStock(product.getId(), -ci.getQuantity(), 
-                                       org.adso.minimarket.models.inventory.TransactionType.SALE, 
-                                       "Order placed: " + order.getId());
-            
-            // Reload product to get updated stock if needed, or just trust the check above.
-            // Since we already have the product object, we can update strictly for the OrderItem creation if we want,
-            // but the database update is handled by InventoryService.
+            inventoryService.adjustStock(product.getId(), -ci.getQuantity(),
+                    org.adso.minimarket.models.inventory.TransactionType.SALE,
+                    "Order placed: " + order.getId());
+
             product.setStock(product.getStock() - ci.getQuantity());
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
