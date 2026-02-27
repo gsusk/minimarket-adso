@@ -158,10 +158,9 @@ class ProductAttributeValidatorTest {
         );
 
         Map<String, Object> attributes = Map.of(
-                "price", 5,  // Below min
-                "available", "not a boolean",  // Wrong type
-                "extraField", "value"  // Unknown attribute
-                // size is missing
+                "price", 5,
+                "available", "not a boolean", 
+                "extraField", "value"
         );
         AttributeValidationException exception = assertThrows(
                 AttributeValidationException.class,
