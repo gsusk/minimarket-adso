@@ -4,7 +4,6 @@ import org.adso.minimarket.models.document.ProductDocument;
 import org.adso.minimarket.models.product.Product;
 import org.adso.minimarket.models.user.Role;
 import org.adso.minimarket.models.user.User;
-import org.adso.minimarket.repository.elastic.ProductSearchRepository;
 import org.adso.minimarket.repository.jpa.ProductRepository;
 import org.adso.minimarket.repository.jpa.UserRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -20,14 +19,15 @@ import java.util.List;
 public class ProductSeederEvent {
 
     private final ProductRepository dbRepo;
-    private final ProductSearchRepository esRepo;
+    //private final ProductSearchRepository esRepo;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ProductSeederEvent(ProductRepository dbRepo, ProductSearchRepository esRepo, UserRepository userRepository
+    public ProductSeederEvent(ProductRepository dbRepo, /*ProductSearchRepository esRepo,
+    */ UserRepository userRepository
             , PasswordEncoder passwordEncoder) {
         this.dbRepo = dbRepo;
-        this.esRepo = esRepo;
+        //this.esRepo = esRepo;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -36,7 +36,7 @@ public class ProductSeederEvent {
     @EventListener(ApplicationReadyEvent.class)
     public void sync() {
         seedAdmin();
-        esRepo.deleteAll();
+        //esRepo.deleteAll();
 
         var products = dbRepo.findAll();
         List<ProductDocument> productDocuments = new ArrayList<>();
@@ -60,7 +60,7 @@ public class ProductSeederEvent {
             ));
         }
 
-        esRepo.saveAll(productDocuments);
+        //esRepo.saveAll(productDocuments);
 
         System.out.println("Elasticsearch reseteado y sincronizado.");
     }
