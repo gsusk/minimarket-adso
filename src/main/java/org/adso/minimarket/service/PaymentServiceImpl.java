@@ -1,57 +1,49 @@
 package org.adso.minimarket.service;
 
-import com.stripe.Stripe;
-import com.stripe.exception.StripeException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.param.PaymentIntentCreateParams;
-import jakarta.annotation.PostConstruct;
 import org.adso.minimarket.dto.CreatePaymentRequest;
 import org.adso.minimarket.dto.CreatePaymentResponse;
-import org.springframework.beans.factory.annotation.Value;
+import org.adso.minimarket.models.order.Order;
+import org.adso.minimarket.models.payment.Payment;
+import org.adso.minimarket.models.payment.PaymentStatus;
+import org.adso.minimarket.repository.jpa.OrderRepository;
+import org.adso.minimarket.repository.jpa.PaymentRepository;
+import org.adso.minimarket.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    @Value("${application.security.stripe.secret_key}")
-    private String secretKey;
+    private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
 
-    @PostConstruct
-    public void init() {
-        Stripe.apiKey = secretKey;
+    public PaymentServiceImpl(PaymentRepository paymentRepository, OrderRepository orderRepository) {
+        this.paymentRepository = paymentRepository;
+        this.orderRepository = orderRepository;
     }
 
-    public CreatePaymentResponse createPayment(CreatePaymentRequest request) throws StripeException {
-        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                .setAmount(totalToCents(request.getTotal()))
-                .setCurrency("usd")
-                .putMetadata("order_id", request.getId().toString())
-                .setAutomaticPaymentMethods(
-                        PaymentIntentCreateParams.AutomaticPaymentMethods
-                                .builder()
-                                .setEnabled(true)
-                                .build()
-                )
-                .build();
+    @Override
+    public CreatePaymentResponse createPayment(CreatePaymentRequest request) {
+        Order order = orderRepository.findById(request.getId())
+                .orElseThrow(() -> new NotFoundException("Order not found: " + request.getId()));
 
-        PaymentIntent paymentIntent = PaymentIntent.create(params);
+        String paymentReference = "PAY-" + UUID.randomUUID().toString().toUpperCase();
 
-        return convertToPaymentResponse(paymentIntent);
-    }
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setAmount(request.getTotal());
+        payment.setCurrency("usd");
+        payment.setPaymentReference(paymentReference);
+        payment.setStatus(PaymentStatus.COMPLETED);
 
-    private Long totalToCents(BigDecimal amount) {
-        return amount.movePointRight(2).longValueExact();
-    }
+        paymentRepository.save(payment);
 
-    private CreatePaymentResponse convertToPaymentResponse(PaymentIntent paymentIntent) {
         return CreatePaymentResponse.builder()
-                .amount(paymentIntent.getAmount())
-                .status(paymentIntent.getStatus())
-                .paymentIntentId(paymentIntent.getId())
-                .clientSecret(paymentIntent.getClientSecret())
-                .currency(paymentIntent.getCurrency())
+                .paymentReference(paymentReference)
+                .currency(payment.getCurrency())
+                .amount(payment.getAmount())
+                .status(payment.getStatus().name().toLowerCase())
                 .build();
     }
 }
