@@ -1,8 +1,6 @@
-# Minimarket - Documentación del Sistema
+# Minimarket - Documentacion basica del sstema
 
-Bienvenido a la documentación de Minimarket. Este archivo contiene información detallada sobre el funcionamiento del sistema, con especial énfasis en la gestión de productos y ejemplos de uso de la API.
-
-## 1. CRUD Relacional de Productos
+## CRUD Relacional de Productos
 
 La gestión de productos se realiza de forma relacional utilizando JPA y una base de datos MySQL. A continuación se detallan los componentes principales:
 
@@ -22,7 +20,7 @@ La gestión de productos se realiza de forma relacional utilizando JPA y una bas
 
 ---
 
-## 2. Guía de Uso de la API
+## Guia de uso
 
 ### Autenticación
 
@@ -40,7 +38,7 @@ Para realizar acciones privadas, debe obtener un token JWT.
 
 ---
 
-## 3. Motor de Búsqueda (Elasticsearch)
+## Motor de Busqueda (Elasticsearch)
 
 El sistema está diseñado para que Elasticsearch sea **opcional**.
 
