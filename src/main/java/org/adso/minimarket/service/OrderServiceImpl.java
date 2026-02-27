@@ -1,8 +1,11 @@
 package org.adso.minimarket.service;
 
 import org.adso.minimarket.dto.OrderDetails;
+import org.adso.minimarket.dto.OrderSummary;
 import org.adso.minimarket.exception.BadRequestException;
+import org.adso.minimarket.exception.NotFoundException;
 import org.adso.minimarket.exception.OrderInsufficientStockException;
+import org.adso.minimarket.mappers.OrderMapper;
 import org.adso.minimarket.models.cart.Cart;
 import org.adso.minimarket.models.cart.CartItem;
 import org.adso.minimarket.models.order.Order;
@@ -19,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,15 +31,17 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
     private final InventoryService inventoryService;
+    private final OrderMapper orderMapper;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ProductRepository productRepository,
                             CartService cartService,
-                            InventoryService inventoryService) {
+                            InventoryService inventoryService, OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.cartService = cartService;
         this.inventoryService = inventoryService;
+        this.orderMapper = orderMapper;
     }
 
 
@@ -101,5 +107,11 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(total);
         order.setStatus(OrderStatus.PENDING);
         return orderRepository.save(order);
+    }
+
+    public OrderSummary getOrderById(UUID orderId, Long userId) {
+        Order order = orderRepository.findOrderByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        return orderMapper.toOrderSummaryDto(order);
     }
 }
