@@ -38,9 +38,11 @@ Para realizar acciones privadas, debe obtener un token JWT.
 
 ---
 
-## Motor de Busqueda (Elasticsearch)
+## Motor de Busqueda (Elasticsearch) [NO RECOMENDADO]
 
-El sistema está diseñado para que Elasticsearch sea **opcional**.
+El sistema está diseñado para que Elasticsearch sea **opcional**, puess se
+necesita de tener elastic search y actualmente este comentado todas las dependencias en la aplicacion para evitar conflictos. La idea es que este presente
+en futuras entregas.
 
 - Si está habilitado (`app.elasticsearch.enabled=true`), los productos se sincronizan automáticamente para permitir búsquedas avanzadas y filtrado por facetas.
 - Si está deshabilitado, el sistema sigue funcionando perfectamente utilizando la base de datos relacional para las operaciones principales.
