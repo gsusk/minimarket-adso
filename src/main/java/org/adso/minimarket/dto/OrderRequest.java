@@ -1,4 +1,4 @@
-package org.adso.minimarket.dto;
-
-public record OrderRequest() {
-}
+//package org.adso.minimarket.dto;
+//
+//public record OrderRequest() {
+//}
