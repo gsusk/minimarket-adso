@@ -15,6 +15,7 @@ public interface OrderMapper {
     @Mapping(target = "orderId", source = "id")
     @Mapping(target = "userId", expression = "java(order.getUser().getId())")
     @Mapping(target = "status", expression = "java(order.getStatus().name().toLowerCase())")
+    @Mapping(target = "items", source = "orderItems")
     OrderSummary toOrderSummaryDto(Order order);
 
     List<OrderSummary> toOrderSummaryDtoList(List<Order> orders);

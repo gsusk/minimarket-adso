@@ -27,14 +27,83 @@ La gestión de productos se realiza de forma relacional utilizando JPA y una bas
 Para realizar acciones privadas, debe obtener un token JWT.
 
 - **Login**: `POST /auth/login`
+  - **Ejemplo del cuerpo**:
+    ```json
+    {
+      "email": "admin@gmail.com",
+      "password": "123456789"
+    }
+    ```
 - **Credenciales por Defecto**: `admin@gmail.com` / `123456789`
 - **Uso**: Incluya el token en el encabezado `Authorization: Bearer <token>`.
 
 ### Flujo de Compra
 
-1. **Carrito**: Agregue productos mediante `POST /cart/items`.
-2. **Checkout**: Finalice la compra con `POST /checkout/initialize` enviando los datos de envío. El proceso es síncrono y descuenta el stock inmediatamente.
-3. **Pedidos**: Consulte sus compras en `GET /orders`.
+El flujo de compra es un proceso de dos pasos principales:
+
+1. **Carrito**: El usuario añade productos al carrito. Internamente, el sistema mantiene un carrito activo por usuario (o sesión de invitado).
+   - **Añadir item**: `POST /cart/items`
+   - **Ejemplo del cuerpo**:
+     ```json
+     {
+       "productId": 1,
+       "quantity": 2
+     }
+     ```
+
+2. **Finalizar Compra (Checkout)**: Una vez que el carrito tiene productos, el usuario "inicializa" el checkout. Este paso es el que **convierte el carrito en una Orden**, descuenta el stock y vacía el carrito.
+   - **Endpoint**: `POST /checkout/initialize`
+   - **Ejemplo del cuerpo**:
+     ```json
+     {
+       "shippingFullName": "Juan Pérez",
+       "shippingAddressLine": "Calle Falsa 123",
+       "shippingCity": "Miami",
+       "shippingZipCode": "33101",
+       "shippingCountry": "USA"
+     }
+     ```
+
+3. **Consulta de Pedidos**: Tras el checkout, el usuario puede ver su historial de pedidos y el estado de los mismos.
+   - **Listar pedidos**: `GET /orders`
+
+### Uso como Administrador
+
+Para gestionar el catálogo, asegúrese de estar logueado con una cuenta con rol `ADMIN`.
+
+#### Gestión de Productos
+
+- **Crear Producto**: `POST /products`
+- **Actualizar Producto**: `PUT /products/{id}`
+  - **Ejemplo del cuerpo (Crear/Actualizar)**:
+    ```json
+    {
+      "name": "Smartphone XYZ",
+      "description": "Un gran teléfono",
+      "brand": "TechBrand",
+      "price": 599.99,
+      "categoryId": 7,
+      "stock": 50,
+      "specifications": {
+        "storage_gb": 128,
+        "warranty_months": 12
+      },
+      "images": ["https://ejemplo.com/foto.jpg"]
+    }
+    ```
+- **Eliminar Producto**: `DELETE /products/{id}`
+
+#### Gestión de Categorías
+
+- **Crear Categoría**: `POST /admin/categories`
+  - **Ejemplo del cuerpo**:
+    ```json
+    {
+      "name": "Nueva Categoría",
+      "parentId": 1,
+      "attributeDefinitions": []
+    }
+    ```
 
 ---
 
@@ -42,7 +111,7 @@ Para realizar acciones privadas, debe obtener un token JWT.
 
 El sistema está diseñado para que Elasticsearch sea **opcional**, puess se
 necesita de tener elastic search y actualmente este comentado todas las dependencias en la aplicacion para evitar conflictos. La idea es que este presente
-en futuras entregas.
+en futuras entregar donde se integre a docker para facilitar la instalacion.
 
 - Si está habilitado (`app.elasticsearch.enabled=true`), los productos se sincronizan automáticamente para permitir búsquedas avanzadas y filtrado por facetas.
 - Si está deshabilitado, el sistema sigue funcionando perfectamente utilizando la base de datos relacional para las operaciones principales.

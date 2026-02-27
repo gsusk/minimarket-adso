@@ -37,6 +37,7 @@ public class Product {
     @Column(nullable = false)
     private Integer stock;
 
+    @Column(nullable = true)
     private String brand;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -47,11 +48,7 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @OneToMany(
-            mappedBy = "product",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     private List<Image> images = new ArrayList<>();
 
@@ -64,8 +61,8 @@ public class Product {
     @UpdateTimestamp(source = SourceType.DB)
     private LocalDateTime updatedAt;
 
-    public Product(String name, String description, BigDecimal price, Integer stock, Category category, String brand, Map<String,
-            Object> attributes) {
+    public Product(String name, String description, BigDecimal price, Integer stock, Category category, String brand,
+                   Map<String, Object> attributes) {
         this.name = name;
         this.description = description;
         this.price = normalizePrice(price);

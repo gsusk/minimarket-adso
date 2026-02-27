@@ -2,7 +2,7 @@ package org.adso.minimarket.controller.api;
 
 import jakarta.validation.Valid;
 import org.adso.minimarket.config.UserPrincipal;
-import org.adso.minimarket.dto.CreatePaymentRequest;
+import org.adso.minimarket.dto.CheckoutRequest;
 import org.adso.minimarket.dto.CreatePaymentResponse;
 import org.adso.minimarket.service.CheckoutService;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class CheckoutControllerImpl implements CheckoutController {
     @PostMapping("/checkout/initialize")
     public ResponseEntity<CreatePaymentResponse> processCheckout(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @Valid @RequestBody CreatePaymentRequest body) {
+            @Valid @RequestBody CheckoutRequest body) {
 
         return ResponseEntity.ok(checkoutService.processCheckout(userPrincipal.getUser(), body));
     }

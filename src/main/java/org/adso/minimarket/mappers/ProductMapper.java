@@ -15,6 +15,7 @@ public interface ProductMapper {
             expression = "java(product.getPrice().toPlainString())"
     )
     @Mapping(target = "category", source = "category")
+    @Mapping(target = "brand", source = "brand")
     DetailedProduct toDto(Product product);
 
     @AfterMapping

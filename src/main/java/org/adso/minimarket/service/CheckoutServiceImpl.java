@@ -1,5 +1,6 @@
 package org.adso.minimarket.service;
 
+import org.adso.minimarket.dto.CheckoutRequest;
 import org.adso.minimarket.dto.CreatePaymentRequest;
 import org.adso.minimarket.dto.CreatePaymentResponse;
 import org.adso.minimarket.dto.OrderDetails;
@@ -19,7 +20,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     @Override
     @Transactional
-    public CreatePaymentResponse processCheckout(User user, CreatePaymentRequest request) {
+    public CreatePaymentResponse processCheckout(User user, CheckoutRequest request) {
         OrderDetails order = orderService.placeOrder(user);
 
         return paymentService.createPayment(

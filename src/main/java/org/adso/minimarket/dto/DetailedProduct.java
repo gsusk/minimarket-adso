@@ -21,6 +21,7 @@ public class DetailedProduct {
     private String description;
     private String price;
     private CategorySummary category;
+    private String brand;
     private int stock;
     private List<String> images = new ArrayList<>();
     @JsonProperty(value = "listedAt")
