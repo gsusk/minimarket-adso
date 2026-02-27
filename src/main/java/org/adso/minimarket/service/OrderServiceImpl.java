@@ -36,7 +36,8 @@ public class OrderServiceImpl implements OrderService {
     public OrderServiceImpl(OrderRepository orderRepository,
                             ProductRepository productRepository,
                             CartService cartService,
-                            InventoryService inventoryService, OrderMapper orderMapper) {
+                            InventoryService inventoryService,
+                            OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.cartService = cartService;
@@ -44,12 +45,10 @@ public class OrderServiceImpl implements OrderService {
         this.orderMapper = orderMapper;
     }
 
-
     @Override
     @Transactional
     public OrderDetails placeOrder(User user) {
         Order order = createOrder(user);
-
         return new OrderDetails(order.getId(),
                 order.getEmail(),
                 user.getId(),
@@ -58,7 +57,20 @@ public class OrderServiceImpl implements OrderService {
                 order.getCreatedAt());
     }
 
-    public Order createOrder(User user) {
+    @Override
+    public OrderSummary getOrderById(UUID orderId, Long userId) {
+        Order order = orderRepository.findOrderByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        return orderMapper.toOrderSummaryDto(order);
+    }
+
+    @Override
+    public List<OrderSummary> getUserOrders(Long userId) {
+        List<Order> orders = orderRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        return orderMapper.toOrderSummaryDtoList(orders);
+    }
+
+    private Order createOrder(User user) {
         Cart cart = cartService.getCart(user.getId(), null);
         if (cart.getCartItems().isEmpty()) {
             throw new BadRequestException("Invalid order: Cart empty");
@@ -90,6 +102,7 @@ public class OrderServiceImpl implements OrderService {
                     "Order placed: " + order.getId());
 
             product.setStock(product.getStock() - ci.getQuantity());
+
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProduct(product);
@@ -103,15 +116,8 @@ public class OrderServiceImpl implements OrderService {
         }
 
         cart.getCartItems().clear();
-
         order.setTotalAmount(total);
         order.setStatus(OrderStatus.PENDING);
         return orderRepository.save(order);
-    }
-
-    public OrderSummary getOrderById(UUID orderId, Long userId) {
-        Order order = orderRepository.findOrderByIdAndUserId(orderId, userId)
-                .orElseThrow(() -> new NotFoundException("Order not found"));
-        return orderMapper.toOrderSummaryDto(order);
     }
 }

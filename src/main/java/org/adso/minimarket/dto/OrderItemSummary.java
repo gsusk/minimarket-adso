@@ -10,6 +10,7 @@ import java.util.UUID;
 @Setter
 public class OrderItemSummary {
     private UUID id;
+    private String productName;
     private int quantity;
     private BigDecimal price;
     private BigDecimal subTotal;

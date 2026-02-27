@@ -19,7 +19,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     @Override
     @Transactional
-    public CreatePaymentResponse initializeCheckout(User user) {
+    public CreatePaymentResponse processCheckout(User user, CreatePaymentRequest request) {
         OrderDetails order = orderService.placeOrder(user);
 
         return paymentService.createPayment(
@@ -29,6 +29,11 @@ public class CheckoutServiceImpl implements CheckoutService {
                         .total(order.getTotal())
                         .status(order.getStatus())
                         .userId(order.getUserId())
+                        .shippingFullName(request.getShippingFullName())
+                        .shippingAddressLine(request.getShippingAddressLine())
+                        .shippingCity(request.getShippingCity())
+                        .shippingZipCode(request.getShippingZipCode())
+                        .shippingCountry(request.getShippingCountry())
                         .build()
         );
     }

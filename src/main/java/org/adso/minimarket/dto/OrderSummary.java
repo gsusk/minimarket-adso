@@ -14,6 +14,7 @@ public class OrderSummary {
     private UUID orderId;
     private Long userId;
     private String email;
+    private String status;
     private BigDecimal totalAmount;
     private List<OrderItemSummary> items;
     private LocalDateTime createdAt;
