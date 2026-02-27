@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+// Extender el servicio apra el proyecto
+// completo usando los status pendiente si tenemos que sincronizar
+// con servicios como striipe.
 @RestController
 public class CheckoutControllerImpl implements CheckoutController {
     private final CheckoutService checkoutService;
