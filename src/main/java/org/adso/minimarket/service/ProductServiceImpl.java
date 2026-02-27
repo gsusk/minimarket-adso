@@ -100,6 +100,48 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional
+    public void updateProduct(Long id, CreateProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found"));
+
+        Category category = categoryService.getById(request.getCategoryId());
+        attributeValidator.validate(request.getSpecifications(), category.getAllAttributeDefinitions());
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setBrand(request.getBrand());
+        product.setCategory(category);
+        product.setAttributes(request.getSpecifications());
+
+        if (request.getStock() != null && !request.getStock().equals(product.getStock())) {
+            int difference = request.getStock() - product.getStock();
+            product.setStock(request.getStock());
+            inventoryService.logTransaction(
+                    product,
+                    Math.abs(difference),
+                    difference > 0 ? TransactionType.RESTOCK : TransactionType.SALE,
+                    "Manual Update"
+            );
+        }
+
+        if (request.getImages() != null) {
+            product.getImages().clear();
+            for (int i = 0; i < request.getImages().size(); i++) {
+                Image image = new Image();
+                image.setUrl(request.getImages().get(i));
+                image.setProduct(product);
+                image.setPosition(i);
+                product.getImages().add(image);
+            }
+        }
+
+        Product savedProduct = productRepository.save(product);
+        indexProductToElasticsearch(savedProduct, category.getName());
+    }
+
     private void indexProductToElasticsearch(Product product, String categoryName) {
         List<String> imageUrls = product.getImages() != null
                 ? product.getImages().stream().map(Image::getUrl).toList()

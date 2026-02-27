@@ -6,5 +6,6 @@ public class ProductRoutes {
 
     //privadas
     public static final String CREATE_PRODUCT = "/products";
+    public static final String UPDATE_PRODUCT = "/products/{id}";
     public static final String DELETE_PRODUCT = "/products/{id}";
 }

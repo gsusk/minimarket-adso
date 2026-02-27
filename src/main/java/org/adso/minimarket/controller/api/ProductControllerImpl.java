@@ -29,6 +29,14 @@ public class ProductControllerImpl implements ProductController {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping(ProductRoutes.UPDATE_PRODUCT)
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid CreateProductRequest productRequest) {
+        productService.updateProduct(id, productRequest);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping(ProductRoutes.DELETE_PRODUCT)
     public ResponseEntity<?> delete(@PathVariable Long id) {
         productService.deleteProduct(id);
