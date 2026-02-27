@@ -2,10 +2,12 @@ package org.adso.minimarket.config;
 
 import org.adso.minimarket.constant.AuthRoutes;
 import org.adso.minimarket.constant.ProductRoutes;
+import org.adso.minimarket.constant.UserRoutes;
 import org.adso.minimarket.service.AppUserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -69,16 +71,16 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         AuthRoutes.REGISTER,
                                         AuthRoutes.LOGIN,
-                                        AuthRoutes.REFRESH_TOKEN,
-                                        ProductRoutes.GET_PRODUCT
-                                )
-                                .permitAll()
-                                .requestMatchers("/error", "/cart", "/cart/**", "/search")
-                                .permitAll()
-                                .requestMatchers("/admin/**", ProductRoutes.CREATE_PRODUCT)
-                                .hasRole("ADMIN")
-                                .anyRequest()
-                                .authenticated()
+                                        AuthRoutes.REFRESH_TOKEN
+                                ).permitAll()
+                                .requestMatchers(HttpMethod.GET, ProductRoutes.GET_PRODUCT).permitAll()
+                                .requestMatchers("/error", "/cart", "/cart/**", "/search").permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, ProductRoutes.CREATE_PRODUCT).hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, ProductRoutes.UPDATE_PRODUCT).hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, ProductRoutes.DELETE_PRODUCT).hasRole("ADMIN")
+                                .requestMatchers(UserRoutes.GET_USER).authenticated()
+                                .anyRequest().authenticated()
                 ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).build();
     }
 
